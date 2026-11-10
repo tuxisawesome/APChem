@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wiki",
+      "runtimeExecutable": ".venv/bin/mkdocs",
+      "runtimeArgs": ["serve", "-a", "127.0.0.1:8000", "--livereload"],
+      "port": 8000,
+      "env": {"NO_MKDOCS_2_WARNING": "1"}
+    }
+  ]
+}

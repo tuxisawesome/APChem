@@ -1,0 +1,28 @@
+# Downloadable reference files (shown on the home page and the Reference Sheets page).
+# Put the PDF in docs/assets/resources/ and add an entry here.
+#   icon: a Material icon name (https://pictogrammers.com/library/mdi/)
+resources:
+  - title: AP Chemistry Equations Sheet
+    file: ap-chemistry-equations-sheet.pdf
+    icon: function-variant
+    description: The official AP formulas & constants (2 pages).
+
+  - title: Periodic Table
+    file: periodic-table.pdf
+    icon: table-large
+    description: AP periodic table of the elements.
+
+  - title: Standard Reduction Potentials
+    file: standard-reduction-potentials.pdf
+    icon: flash-outline
+    description: E° table for half-reactions at 25 °C.
+
+  - title: Syllabus — Semester A
+    file: syllabus-semester-a-2026-27.pdf
+    icon: calendar-month-outline
+    description: Units 1–7, Aug – Jan.
+
+  - title: Syllabus — Semester B
+    file: syllabus-semester-b-2026-27.pdf
+    icon: calendar-check-outline
+    description: Units 8–11, review schedule & AP exam.

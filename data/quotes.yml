@@ -1,0 +1,83 @@
+# Teacher quotes & classroom sayings shown on the home page (random) and on
+# the Teacher Quotes page. Add a new one by copying an entry.
+#
+#   text:     the quote, exactly as said/written
+#   who:      who said it (shown as "— who")
+#   category: quote    → something Ms. Boppana said
+#             saying   → a classroom catchphrase / emphasis line
+#             mnemonic → a memory trick
+#   source:   where it is in your notes (optional) — nb = notebook id, page = page number
+#   context:  a few words on when/why it came up (optional)
+quotes:
+  - text: "What you serve on your plate is how much you eat."
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "10-2", page: 13}
+    context: While solving RICE tables
+
+  - text: "Don't believe everything you think."
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "10-2", page: 19}
+
+  - text: "Every word I say is of utmost importance."
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "10-2", page: 20}
+
+  - text: "You've got to be proactive."
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "10-2", page: 20}
+
+  - text: "Dimensional analysis is required in the AP Test!"
+    who: From class
+    category: saying
+    source: {nb: "10-1", page: 23}
+
+  - text: "AP Favorite!"
+    who: From class
+    category: saying
+    source: {nb: "10-1", page: 25}
+    context: On peroxides — oxygen is −1
+
+  - text: "This is the definition used on the AP."
+    who: From class
+    category: saying
+    source: {nb: "10-1", page: 27}
+    context: Oxidation = loss of e⁻, reduction = gain of e⁻
+
+  - text: "Solids don't react!"
+    who: From class
+    category: saying
+    source: {nb: "10-2", page: 5}
+    context: Why solids and liquids are left out of K
+
+  - text: "Whenever you have a hydrogen ion it wants to latch onto a lone pair."
+    who: From class
+    category: saying
+    source: {nb: "10-1", page: 22}
+
+  - text: "No Smoking Pot"
+    who: From class
+    category: mnemonic
+    source: {nb: "10-1", page: 13}
+    context: Order of the polyatomic ion charge grid — N, S, P
+
+  - text: "No Cheating, Bullying, Intimidating Students"
+    who: From class
+    category: mnemonic
+    source: {nb: "10-1", page: 19}
+    context: "Solubility Chart I — NO₃⁻, CH₃COO⁻, Br⁻/I⁻/Cl⁻, SO₄²⁻"
+
+  - text: "Smoking Counterproductive Zero"
+    who: From class
+    category: mnemonic
+    source: {nb: "10-1", page: 20}
+    context: "Solubility Chart II — S²⁻, CO₃²⁻, PO₄³⁻, OH⁻"
+
+  - text: "Lose e⁻ oxidize, gain e⁻ reduce."
+    who: From class
+    category: mnemonic
+    source: {nb: "10-2", page: 1}
+    context: Redox

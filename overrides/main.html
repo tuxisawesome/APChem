@@ -1,0 +1,11 @@
+{#-
+  Site-wide template additions (extends Material's base.html).
+  • Puts the wiki data (quotes, greetings, schedule) in the page for assets/js/wiki.js.
+  • Everything else (source chips, settings button, lightbox) is added by the hook / JS.
+-#}
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <script id="wiki-data" type="application/json">{{ config.extra.wiki_public | tojson }}</script>
+{% endblock %}

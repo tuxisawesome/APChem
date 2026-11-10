@@ -1,0 +1,303 @@
+# Course schedule from the 2026–27 syllabi (Semester A & B).
+# Used for: home-page countdowns + "current unit", the unit pages' syllabus
+# outlines, and the Units overview. Dates are YYYY-MM-DD.
+#
+# Each unit:
+#   number, title, slug (folder name under docs/units/), start, end
+#   chapters: [{title, sections: [{n, title, note}]}]   note = syllabus guidance (optional)
+#   exam: {title, date, covers}
+#   reading: list of reading notes (optional)
+course:
+  name: AP Chemistry
+  teacher: Ms. Boppana
+  room: "247"
+  year: 2026–2027
+  ap_exam: {title: AP Chemistry Exam, date: 2027-05-06, time: "12:00"}
+
+units:
+  - number: 1
+    title: Foundations (Part I)
+    short: Foundations I
+    slug: 01-foundations-1
+    start: 2026-08-25
+    end: 2026-09-14
+    reading: ["Read Chapters 1 (incl. Ch 4 §4.3), 2 and 7", "Read §9.6 & §9.7 on the ideal gas law and gas density"]
+    chapters:
+      - title: "Chapter 1 – Matter and Measurement: An Atomic Perspective"
+        sections:
+          - {n: "1.1", title: Exploring the Particulate Nature of Matter}
+          - {n: "1.3", title: Classes and Properties of Matter, note: "Classification & properties of matter, separating mixtures"}
+          - {n: "1.4", title: States of Matter}
+          - {n: "1.5", title: Formulas and Models, note: "Read §4.3 Naming Compounds; know the 7 strong acids and 8 strong bases"}
+          - {n: "1.6", title: Forms of Energy, note: "Review Coulomb's Law; explain acid strength with it"}
+          - {n: "1.7", title: Expressing Experimental Results, note: "Only sig figs & sig-fig calculations are testable; know kilo, deka, deci, centi, milli, micro"}
+          - {n: "1.8", title: Unit Conversion and Dimensional Analysis, note: "Dimensional analysis is how you're expected to do problems in AP Chem"}
+      - title: "Chapter 2 – Atoms, Ions and Molecules"
+        sections:
+          - {n: "2.1", title: The Rutherford Model of Atomic Structure, note: "Thomson's cathode ray / plum pudding, Millikan's oil drop, gold foil; alpha & beta particles"}
+          - {n: "2.2", title: Nuclides and Their Symbols}
+          - {n: "2.3", title: Navigating the Periodic Table, note: "Metals / nonmetals / semimetals; charges for groups 1, 2, 13–17; transition metals have multiple oxidation states"}
+          - {n: "2.4", title: "The Masses of Atoms, Ions, and Molecules", note: "Average atomic mass"}
+          - {n: "2.5", title: Moles and Molar Masses, note: "Use 6.02 × 10²³"}
+          - {n: "2.6", title: Mass Spectrometry, note: "Understand how mass spec works"}
+      - title: "Chapter 7 – Stoichiometry: Mass Relationships and Chemical Reactions"
+        sections:
+          - {n: "7.1", title: Chemical Reactions and the Carbon Cycle, note: "FYI, not testable"}
+          - {n: "7.2", title: Writing Balanced Chemical Equations, note: "Balance equations; balance combustion reactions quickly"}
+          - {n: "7.3", title: Stoichiometric Calculations, note: "Important — use dimensional analysis"}
+          - {n: "7.4", title: Limiting Reactants and Percent Yield, note: "Recurring topic in FRQs and MCQs"}
+          - {n: "7.5", title: Percent Composition and Empirical Formulas}
+          - {n: "7.6", title: Comparing Empirical and Molecular Formulas, note: "Ionic compounds do not have molecular formulas"}
+          - {n: "7.7", title: Combustion Analysis, note: "Huge in AP FRQs"}
+    exam: {title: "Exam #1 – Stoichiometry", date: 2026-09-15, covers: "Chapters 1, 2 and 7"}
+
+  - number: 2
+    title: Foundations (Part II)
+    short: Foundations II
+    slug: 02-foundations-2
+    start: 2026-09-16
+    end: 2026-09-27
+    reading: ["Read Chapter 8"]
+    chapters:
+      - title: "Chapter 8 – Reactions in Aqueous Solutions"
+        sections:
+          - {n: "8.1", title: Solutions and Their Concentrations, note: "Molarity is the concentration unit used in AP Chem"}
+          - {n: "8.2", title: Dilutions, note: "Know how to make a solution & use a volumetric flask"}
+          - {n: "8.3", title: Electrolytes and Nonelectrolytes, note: "Terminology — important for weak acids/bases"}
+          - {n: "8.4", title: "Acid–Base Reactions: Proton Transfer", note: "Net-ionic equations (p. 352 on)"}
+          - {n: "8.5", title: Titrations, note: "Tested in the acid–base unit"}
+          - {n: "8.6", title: Precipitation Reactions, note: "Know which ions don't form precipitates"}
+          - {n: "8.7", title: "Oxidation–Reduction Reactions: Electron Transfer", note: "Balance redox with the half-reaction method — big part of the exam"}
+    exam: {title: "Exam #2 – Reactions", date: 2026-09-28, covers: "Chapter 8"}
+
+  - number: 3
+    title: Chemical Equilibrium
+    short: Equilibrium
+    slug: 03-equilibrium
+    start: 2026-09-29
+    end: 2026-10-08
+    reading: ["Read Chapter 14"]
+    chapters:
+      - title: "Chapter 14 – Chemical Equilibrium: Equal but Opposite Reaction Rates"
+        sections:
+          - {n: "14.1", title: The Dynamics of Chemical Equilibrium}
+          - {n: "14.2", title: Writing Equilibrium Constant Expressions}
+          - {n: "14.3", title: Heterogeneous Equilibria}
+          - {n: "14.4", title: Manipulating Equilibrium Constant Expressions}
+          - {n: "14.5", title: Equilibrium Constants and Reaction Quotients, note: "Q tells you where a reaction is and where it will go"}
+          - {n: "14.6", title: Le Châtelier's Principle}
+          - {n: "14.7", title: Calculations Based on K}
+          - {n: "14.8", title: Equilibrium and Thermodynamics, note: "Read only — thermo parts not tested here"}
+          - {n: "14.9", title: Changing K with Changing Temperature, note: "Exo vs endo decides the shift direction"}
+    exam: {title: "Exam #3 – Equilibrium", date: 2026-10-09, covers: "Chapter 14"}
+
+  - number: 4
+    title: Acid–Base Equilibria
+    short: Acid–Base
+    slug: 04-acid-base
+    start: 2026-10-10
+    end: 2026-11-06
+    reading: ["Read Chapters 15 and 16", "Memorize the strong acids and strong bases"]
+    chapters:
+      - title: "Chapter 15 – Acid–Base Equilibria"
+        sections:
+          - {n: "15.1", title: "Acids and Bases: A Balancing Act"}
+          - {n: "15.2", title: "Ka, Kb, and the Strengths of Acids and Bases"}
+          - {n: "15.3", title: Conjugate Pairs}
+          - {n: "15.4", title: pH and the Autoionization of Water}
+          - {n: "15.5", title: "Ka, Kb, and the Degree of Ionization"}
+          - {n: "15.6", title: Calculating the pH of Acidic and Basic Solutions}
+          - {n: "15.7", title: Polyprotic Acids}
+          - {n: "15.8", title: Acidic and Basic Salts}
+      - title: "Chapter 16 – Additional Aqueous Equilibria"
+        sections:
+          - {n: "16.1", title: "Ocean Acidification: Equilibrium under Stress"}
+          - {n: "16.2", title: The Common-Ion Effect}
+          - {n: "16.3", title: pH Buffers}
+          - {n: "16.4", title: pH Indicators and Acid–Base Titrations}
+          - {n: "16.5", title: Lewis Acids and Bases, note: "FYI, not testable"}
+          - {n: "16.6", title: Formation of Complex Ions, note: "Know that they form; no naming needed"}
+          - {n: "16.7", title: Hydrated Metal Ions as Acids, note: "Metal ions with +2 or greater charge WILL affect pH"}
+    exam: {title: "Exam #4 – Acids and Bases", date: 2026-11-09, covers: "Chapters 15 and 16"}
+
+  - number: 5
+    title: Thermodynamics
+    short: Thermo
+    slug: 05-thermodynamics
+    start: 2026-11-10
+    end: 2026-12-02
+    reading: ["Read Chapters 10 and 11"]
+    chapters:
+      - title: "Chapter 10 – Thermodynamics Part I: Enthalpy and the Transfer of Energy"
+        sections:
+          - {n: "10.1", title: Energy as a Reactant or Product}
+          - {n: "10.2", title: Transferring Energy and Doing Work}
+          - {n: "10.3", title: Enthalpy and Enthalpy Changes}
+          - {n: "10.4", title: Heating Curves and Heat Capacity}
+          - {n: "10.5", title: Enthalpies of Reaction and Calorimetry}
+          - {n: "10.6", title: Hess's Law and Standard Enthalpies of Reaction}
+          - {n: "10.7", title: Enthalpies of Reaction from Enthalpies of Formation and Bond Energies}
+          - {n: "10.8", title: Enthalpy Changes When Substances Dissolve}
+          - {n: "10.9", title: More Applications of Thermochemistry}
+      - title: "Chapter 11 – Thermodynamics Part II: Entropy and Gibbs Energy"
+        sections:
+          - {n: "11.1", title: Why Chemical Reactions Happen}
+          - {n: "11.2", title: Entropy and the Second Law of Thermodynamics}
+          - {n: "11.3", title: Absolute Entropy and Molecular Structure}
+          - {n: "11.4", title: Applications of the Second Law}
+          - {n: "11.5", title: Calculating Entropy Changes}
+          - {n: "11.6", title: Gibbs Energy}
+          - {n: "11.7", title: Dependence of Thermodynamic Favorability on Temperature}
+          - {n: "11.8", title: "Driving the Human Engine: Coupled Reactions"}
+    exam: {title: "Exam #5 – Thermodynamics", date: 2026-12-03, covers: "Chapters 10 and 11"}
+
+  - number: 6
+    title: Electrochemistry
+    short: Electrochem
+    slug: 06-electrochemistry
+    start: 2026-12-04
+    end: 2026-12-18
+    reading: ["Read Chapter 17"]
+    chapters:
+      - title: "Chapter 17 – Electrochemistry"
+        sections:
+          - {n: "17.1", title: "Running on Electrons: Redox Chemistry Revisited"}
+          - {n: "17.2", title: Electrochemical Cells}
+          - {n: "17.3", title: Electrode Potentials}
+          - {n: "17.4", title: Cell Potentials (E_cell)}
+          - {n: "17.5", title: Voltaic Cells at Work}
+          - {n: "17.6", title: The Effect of Concentration on E_cell}
+          - {n: "17.7", title: Relating Battery Capacity to Quantities of Reactants}
+          - {n: "17.8", title: "Corrosion: Unwanted Electrochemical Reactions"}
+          - {n: "17.9", title: Electrolytic Cells and Rechargeable Batteries}
+          - {n: "17.10", title: Fuel Cells}
+    exam: {title: "Exam #6 – Electrochemistry", date: 2026-12-21, covers: "Chapter 17"}
+
+  - number: 7
+    title: Chemical Kinetics & Solubility Equilibria
+    short: Kinetics
+    slug: 07-kinetics
+    start: 2027-01-04
+    end: 2027-01-15
+    reading: ["Read Chapter 13 and §16.8"]
+    chapters:
+      - title: "Chapter 13 – Chemical Kinetics"
+        sections:
+          - {n: "13.1", title: Air Quality}
+          - {n: "13.2", title: Reaction Rates}
+          - {n: "13.3", title: Effect of Concentration on Reaction Rate}
+          - {n: "13.4", title: "Reaction Rates, Temperature, and the Arrhenius Equation"}
+          - {n: "13.5", title: Reaction Mechanisms}
+          - {n: "13.6", title: Catalysts}
+      - title: "Chapter 16 – Solubility Equilibria"
+        sections:
+          - {n: "16.8", title: Solubility Equilibria}
+    exam: {title: "Exam #7 – Kinetics & Solubility", date: 2027-01-19, covers: "Chapter 13 and §16.8"}
+
+  - number: 8
+    title: "Atomic Structure: Periodic Properties"
+    short: Atomic Structure
+    slug: 08-atomic-structure
+    start: 2027-01-26
+    end: 2027-02-15
+    reading: ["Read Chapter 3 and §8.2 (Determining Concentration — Beer–Lambert law)"]
+    chapters:
+      - title: "Chapter 3 – Atomic Structure: Explaining the Properties of Elements"
+        sections:
+          - {n: "3.1", title: The Electromagnetic Spectrum}
+          - {n: "3.2", title: Atomic Spectra}
+          - {n: "3.3", title: "Particles of Light: Quantum Theory"}
+          - {n: "3.4", title: The Hydrogen Spectrum and the Bohr Model}
+          - {n: "3.5", title: Electrons as Waves}
+          - {n: "3.6", title: Quantum Numbers}
+          - {n: "3.7", title: The Sizes and Shapes of Atomic Orbitals}
+          - {n: "3.8", title: The Periodic Table and Filling Orbitals}
+          - {n: "3.9", title: Electron Configurations of Ions}
+          - {n: "3.10", title: The Sizes of Atoms and Ions}
+          - {n: "3.11", title: Ionization Energies and Photoelectron Spectroscopy (PES)}
+          - {n: "3.12", title: Electron Affinities, note: "Not testable — FYI"}
+    exam: {title: "Exam #8 – Atomic Structure", date: 2027-02-16, covers: "Ch 3, §8.2, and Ch 1, 2, 7, 8"}
+
+  - number: 9
+    title: Chemical Bonding & Molecular Geometry
+    short: Bonding
+    slug: 09-bonding
+    start: 2027-02-17
+    end: 2027-02-26
+    reading: ["Read Chapters 4 and 5"]
+    chapters:
+      - title: "Chapter 4 – Chemical Bonding"
+        sections:
+          - {n: "4.1", title: Chemical Bonds and Greenhouse Gases}
+          - {n: "4.2", title: Electronegativity and Bonding}
+          - {n: "4.3", title: Naming Compounds and Writing Formulas}
+          - {n: "4.4", title: Lewis Symbols and Lewis Structures}
+          - {n: "4.5", title: The Lengths and Strengths of Covalent Bonds}
+          - {n: "4.6", title: Resonance}
+          - {n: "4.7", title: "Formal Charge: Choosing among Lewis Structures", note: "Calculate formal charge and use it to pick the best structure"}
+          - {n: "4.8", title: Exceptions to the Octet Rule}
+          - {n: "4.9", title: Vibrating Bonds and the Greenhouse Effect, note: "Not testable — FYI"}
+      - title: "Chapter 5 – Bonding Theories: Molecular Geometry"
+        sections:
+          - {n: "5.1", title: Biological Activity and Molecular Shape}
+          - {n: "5.2", title: VSEPR and Molecular Shape}
+          - {n: "5.3", title: Polar Bonds and Polar Molecules}
+          - {n: "5.4", title: Valence Bond Theory and Hybrid Orbitals, note: "Know sp, sp², sp³"}
+          - {n: "5.5", title: Molecules with Multiple "Central" Atoms}
+          - {n: "5.6", title: Chirality and Molecular Recognition, note: "Not testable — FYI"}
+          - {n: "5.7", title: Molecular Orbital Theory, note: "Not testable — FYI"}
+    exam: {title: "Exam #9 – Bonding", date: 2027-03-01, covers: "Ch 4, 5 and Ch 10, 11"}
+
+  - number: 10
+    title: "Intermolecular Forces, Gases & Solutions"
+    short: IMFs & Gases
+    slug: 10-imf-gases-solutions
+    start: 2027-03-02
+    end: 2027-03-14
+    reading: ["Read Chapters 6, 9 and 12"]
+    chapters:
+      - title: "Chapter 6 – Intermolecular Forces"
+        sections:
+          - {n: "6.1", title: Intramolecular vs Intermolecular Forces}
+          - {n: "6.2", title: London Dispersion Forces}
+          - {n: "6.3", title: Interactions Involving Polar Molecules}
+          - {n: "6.4", title: Trends in Solubility}
+          - {n: "6.5", title: Phase Diagrams, note: "Familiarity only"}
+          - {n: "6.6", title: Some Remarkable Properties of Water}
+      - title: "Chapter 9 – Properties of Gases"
+        sections:
+          - {n: "9.1", title: The Properties of Gases}
+          - {n: "9.2", title: Gas Diffusion and Kinetic Molecular Theory, note: "Know how T, molar mass and velocity relate — no calculations"}
+          - {n: "9.3", title: The Air We Breathe, note: "Understand a manometer"}
+          - {n: "9.4", title: "Relating P, T, and V: The Gas Laws"}
+          - {n: "9.5", title: The Combined Gas Law}
+          - {n: "9.6", title: Ideal Gases and the Ideal Gas Law}
+          - {n: "9.7", title: Densities of Gases}
+          - {n: "9.8", title: Gases in Chemical Reactions}
+          - {n: "9.9", title: Mixtures of Gases, note: "Dalton's Law of Partial Pressures"}
+          - {n: "9.10", title: Real Gases, note: "Largely not testable"}
+      - title: "Chapter 12 – Properties of Solutions"
+        sections:
+          - {n: "12.1", title: Osmosis, note: "Review, not testable"}
+          - {n: "12.2", title: Osmotic Pressure and the van 't Hoff Factor, note: "Review, not testable"}
+          - {n: "12.3", title: Vapor Pressure}
+          - {n: "12.4", title: Solutions of Volatile Substances}
+          - {n: "12.5", title: More Colligative Properties, note: "Review, not testable"}
+          - {n: "12.6", title: Henry's Law and the Solubility of Gases}
+    exam: {title: "Exam #10 – IMFs, Gases & Solutions", date: 2027-03-15, covers: "Ch 6, 9, 12 and Ch 13, 17"}
+
+  - number: 11
+    title: "Mass Spec, PES, Chromatography & IR"
+    short: Analysis
+    slug: 11-analysis
+    start: 2027-03-16
+    end: 2027-03-17
+    reading: ["Read §2.6 (Mass Spec), §3.11 (PES), class notes (Chromatography) and §8.2 (IR analysis, Beer's Law)"]
+    chapters: []
+    exam: {title: "Exam #11 – Analysis Methods", date: 2027-03-18, covers: "§2.6, §3.11, chromatography, §8.2 and Ch 14, 15, 16"}
+
+# Other dates shown on the home page countdown list (optional)
+events:
+  - {title: "AP Practice Test #1", date: 2027-04-19}
+  - {title: "AP Practice Test #2", date: 2027-04-23}
+  - {title: "AP Practice Test #3", date: 2027-04-28}

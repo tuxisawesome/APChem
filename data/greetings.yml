@@ -1,0 +1,39 @@
+# Home-page greetings. One line is picked at random from the bucket that fits
+# the moment. {name} is replaced with your name (set it in Settings).
+# If you have no name set, the ", {name}" part is dropped automatically.
+#
+# Buckets are checked in this order:
+#   exam_today → exam_soon (next exam ≤ 3 days away; {exam} and {days} work) →
+#   late_night (11pm–4am) → weekend → morning (5–11) → afternoon (12–4) → evening (5–10)
+greetings:
+  exam_today:
+    - "Exam day, {name}. You've got this."
+    - "{exam} is today, {name} — deep breath."
+  exam_soon:
+    - "{exam} is in {days}, {name}. Let's review."
+    - "{days} until {exam}, {name}. Time to lock in."
+    - "Big week, {name} — {exam} is in {days}."
+  late_night:
+    - "Studying late, {name}?"
+    - "Burning the midnight oil, {name}?"
+    - "Still up, {name}? Don't forget to sleep."
+    - "Night owl mode, {name}."
+  weekend:
+    - "Weekend grind, {name}?"
+    - "Happy weekend, {name}!"
+    - "Saturday science, {name}?"
+  morning:
+    - "Good morning, {name}!"
+    - "Rise and shine, {name}."
+    - "Morning, {name} — coffee and chemistry?"
+    - "Hello, {name}!"
+  afternoon:
+    - "Good afternoon, {name}!"
+    - "Hello, {name}!"
+    - "Ready to study, {name}?"
+    - "Welcome back, {name}."
+  evening:
+    - "Good evening, {name}!"
+    - "Evening study session, {name}?"
+    - "Hello, {name}!"
+    - "Welcome back, {name}."

@@ -1,0 +1,15 @@
+# Notebook manifest — one entry per scanned notebook.
+# Written by tools/add_notebook.py (you can also edit titles/dates by hand).
+# Page images live in docs/assets/scans/<id>/pNN.webp (thumbs in thumb/).
+# Wiki pages cite these with front matter like:
+#   sources:
+#     - {nb: "10-2", pages: "11-14"}
+notebooks:
+- id: 10-1
+  title: Notebook 10-1
+  pages: 32
+  dates: 8/25/26 – 9/16/26
+- id: 10-2
+  title: Notebook 10-2
+  pages: 33
+  dates: 9/16/26 – 11/10/26

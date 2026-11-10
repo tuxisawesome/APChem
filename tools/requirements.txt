@@ -1,0 +1,4 @@
+# Extra tools for maintaining the wiki (not needed to build the site).
+# tools/add_notebook.py also needs poppler's `pdftoppm` (brew install poppler).
+pillow==13.0.0
+pyyaml==6.0.3
