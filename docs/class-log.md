@@ -1,7 +1,6 @@
 ---
 title: Class Log
 description: Day-by-day log of what we covered, objectives, assessments and homework.
-icon: material/calendar-text-outline
 ---
 
 What happened in class each day, newest first. Each day links to the notes pages and the original

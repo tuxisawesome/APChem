@@ -7,7 +7,7 @@ Authors write a fenced block whose language is the kind, containing YAML:
     parts: [{type: beaker, fill: 0.5}]
     ```
 
-To add a new kind: create hooks/diagrams/<kind>.py with a `render()` function
+To add a new kind: create wiki/diagrams/<kind>.py with a `render()` function
 (see rice.py for the smallest example), then add it to KINDS below. The hook
 registers every KINDS entry as a fence automatically, and the live gallery at
 docs/contributing/diagrams.md should get an example.

@@ -1,7 +1,6 @@
 ---
 title: Reference Sheets
 description: Preview or download the AP equation sheet, periodic table, reduction potentials and syllabi.
-icon: material/file-pdf-box
 ---
 
 The official AP reference packet and the class syllabi. **Preview** opens the PDF right here;

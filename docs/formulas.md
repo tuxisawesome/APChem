@@ -1,7 +1,6 @@
 ---
 title: Formulas
 description: Every formula from my notes, by unit — plus the strong acids/bases and solubility charts.
-icon: material/function-variant
 ---
 
 Everything I need to have memorized or ready to use, in one place. The formula list below is

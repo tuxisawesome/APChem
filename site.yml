@@ -1,129 +1,22 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#  AP Chemistry Notes wiki — MkDocs config
-#  • To add a page: create the .md file, then add it to `nav:` below.
+#  Walter's AP Chem — site configuration (read by the wiki generator in wiki/)
+#  • Build:   python -m wiki build        (add --strict to fail on warnings)
+#  • Preview: python -m wiki serve        → http://127.0.0.1:8000/
+#  • To add a page: create the .md file under docs/, then add it to `nav:` below.
 #  • Full editing guide: AGENTS.md (repo root).
 # ─────────────────────────────────────────────────────────────────────────────
-site_name: AP Chem Notes
+site_name: "Walter's AP Chem"
 site_description: Digitized AP Chemistry notes — Ms. Boppana, 2026–2027
 site_url: https://tuxisawesome.github.io/APChem/
 copyright: AP Chemistry · 2026–2027
 
-theme:
-  name: material
-  custom_dir: overrides
-  language: en
-  logo: assets/img/flask.svg
-  favicon: assets/img/flask.svg
-  font: false   # fonts (Geist) are loaded in extra_css below
-  icon:
-    admonition:
-      note: material/note-text-outline
-  palette:
-    - media: "(prefers-color-scheme)"
-      toggle:
-        icon: material/brightness-auto
-        name: Switch to light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: custom
-      accent: custom
-      toggle:
-        icon: material/weather-night
-        name: Switch to system preference
-  features:
-    - navigation.instant
-    - navigation.instant.progress
-    - navigation.tabs
-    - navigation.indexes
-    - navigation.top
-    - navigation.footer
-    - navigation.tracking
-    - toc.follow
-    - search.suggest
-    - search.highlight
-    - search.share
-    - content.code.copy
-    - content.tooltips
-
-plugins:
-  - search:
-      # split on whitespace/punctuation AND on TeX braces/backslashes, so a search
-      # for "H2SO4" matches formulas written as $\ce{H2SO4}$
-      separator: '[\s\-,:!=\[\]()"/\\{}$^_]+|\.(?!\d)'
-  - tags
-
-hooks:
-  - hooks/chemwiki.py
-
-extra:
-  # Name used in the home-page greeting until you set one in Settings
-  # (Settings saves your name in your browser only). Leave "" for none.
-  default_name: ""
-  generator: false   # hide the "Made with Material for MkDocs" footer line
-
-extra_css:
-  - https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap
-  - https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css
-  - assets/css/wiki.css
-
-extra_javascript:
-  - https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js
-  - https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/mhchem.min.js
-  - https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js
-  - assets/js/wiki.js
-
-markdown_extensions:
-  - abbr
-  - admonition
-  - attr_list
-  - def_list
-  - footnotes
-  - md_in_html
-  - tables
-  - toc:
-      permalink: true
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.betterem
-  - pymdownx.caret
-  - pymdownx.mark
-  - pymdownx.tilde
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:material.extensions.emoji.twemoji
-      emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  - pymdownx.highlight
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.snippets:
-      base_path: [snippets]
-      check_paths: true
-  - pymdownx.superfences:
-      # Diagram fences (rice, graph, energy, apparatus, lewis) are added
-      # automatically by hooks/chemwiki.py — no need to list them here.
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.tasklist:
-      custom_checkbox: true
-
-validation:
-  links:
-    not_found: warn
-    anchors: info
+# Name used in the home-page greeting until you set one in Settings
+# (Settings saves your name in your browser only). Leave "" for none.
+default_name: ""
 
 # ─── Navigation ──────────────────────────────────────────────────────────────
-# Unit folders are numbered so they sort; topic pages go inside them.
+# A group is a mapping with a list. If a group's first entry is an index.md
+# without a title, the group name links to that page.
 nav:
   - Home: index.md
   - Notes:

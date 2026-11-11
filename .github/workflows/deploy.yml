@@ -1,4 +1,4 @@
-# Builds the wiki with MkDocs and publishes it to GitHub Pages on every push to main.
+# Builds the wiki (python -m wiki build) and publishes it to GitHub Pages on every push to main.
 # One-time setup: repo Settings → Pages → Build and deployment → Source: "GitHub Actions".
 name: Deploy wiki
 
@@ -29,9 +29,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - name: Build (strict — fails on broken links, diagram errors, missing formula boxes)
-        run: mkdocs build --strict
-        env:
-          NO_MKDOCS_2_WARNING: "1"
+        run: python -m wiki build --strict
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

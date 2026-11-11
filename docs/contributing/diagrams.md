@@ -231,7 +231,7 @@ labels:
   - {text: "fold → Decode FRQ column", to: p.fold, side: top}
 ```
 
-The full list of anchors for each part is in `hooks/diagrams/apparatus.py`.
+The full list of anchors for each part is in `wiki/diagrams/apparatus.py`.
 
 ## `lewis` — Lewis structures & reaction schemes
 
@@ -357,7 +357,7 @@ Set `strength: false` to hide the "weak → strong" arrows.
 
 ## Adding a new diagram type
 
-1. Create `hooks/diagrams/<kind>.py` with a `render(data: dict) -> str` function (copy `rice.py`
+1. Create `wiki/diagrams/<kind>.py` with a `render(data: dict) -> str` function (copy `rice.py`
    for a small example; use the helpers in `_svg.py`).
-2. Add it to `KINDS` in `hooks/diagrams/__init__.py`. The build picks it up as a fence automatically.
+2. Add it to `KINDS` in `wiki/diagrams/__init__.py`. The build picks it up as a fence automatically.
 3. Add an example to this page.

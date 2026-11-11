@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Page not found · {{ config.site_name }}{% endblock %}
+{% block root %}{{ base }}{% endblock %}
+{% block layout_class %} no-nav{% endblock %}
+{% block main %}
+<article class="article">
+  <header class="article-head">
+    <h1>Page not found</h1>
+    <p class="lede">That page doesn't exist (or it moved). Try searching, or head back to the main page.</p>
+  </header>
+  <div class="prose">
+    <p><a class="btn btn-primary" href="{{ base }}">Go to the main page</a> <button type="button" class="btn" data-open-search>Search the wiki</button></p>
+  </div>
+</article>
+{% endblock %}

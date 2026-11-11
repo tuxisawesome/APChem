@@ -1,11 +1,12 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   AP Chem wiki — browser features
-   • KaTeX rendering (mhchem)            • settings button in the header
-   • study-time tracker (localStorage)   • home page: greeting, quotes, stats, countdowns
-   • PDF preview modal                   • notebook-scan lightbox
-   • Formulas page filter                • Settings page
-   Data comes from <script id="wiki-data"> (built from data/*.yml by the hook).
-   Everything personal is stored ONLY in this browser (localStorage, "apchem.*").
+   Walter's AP Chem — browser features (no framework, no build step)
+   • theme (auto / light / dark)          • search (search-index.json)
+   • mobile nav drawer                    • Contents highlighting
+   • link previews on hover               • KaTeX + mhchem rendering
+   • study-time tracker                   • home: greeting, quotes, stats, countdowns, 3D NH₃
+   • PDF preview + notebook-scan lightbox • Formulas filter · Settings page
+   Data comes from <script id="wiki-data"> (built from data/*.yml by wiki/).
+   Everything personal is stored ONLY in this browser (localStorage "apchem.*").
    ────────────────────────────────────────────────────────────────────────── */
 (function () {
   "use strict";
@@ -15,6 +16,7 @@
   // ── basics ────────────────────────────────────────────────────────────────
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const html = document.documentElement;
   const store = {
     get(key, fallback) {
       try { const v = localStorage.getItem("apchem." + key); return v === null ? fallback : JSON.parse(v); }
@@ -25,8 +27,7 @@
   };
   let DATA = {};
   try { DATA = JSON.parse($("#wiki-data").textContent); } catch (e) { DATA = {}; }
-  let ROOT = new URL("./", location.href).href;
-  try { ROOT = new URL(JSON.parse($("#__config").textContent).base + "/", location.href).href; } catch (e) { /* keep */ }
+  const ROOT = new URL(($('meta[name="wiki-root"]') || {}).content || "./", location.href).href;
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const DAY = 86400000;
   const pad = (n) => String(n).padStart(2, "0");
@@ -40,29 +41,292 @@
   const prefs = () => Object.assign({ tracker: true, quoteCats: ["quote", "saying"] }, store.get("prefs", {}));
   const getName = () => (store.get("name", null) ?? DATA.default_name ?? "").trim();
   const now = () => (window.__apchemNow ? new Date(window.__apchemNow) : new Date()); // __apchemNow: testing hook
+  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ICON = {
+    close: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+    search: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>',
+  };
+
+  // ── theme: auto → light → dark ───────────────────────────────────────────
+  const THEMES = ["auto", "light", "dark"];
+  const darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
+  const themePref = () => { const p = store.get("theme", "auto"); return THEMES.includes(p) ? p : "auto"; };
+  function applyTheme(pref) {
+    const dark = pref === "dark" || (pref === "auto" && darkMQ.matches);
+    html.setAttribute("data-theme", dark ? "dark" : "light");
+    html.setAttribute("data-theme-pref", pref);
+    const label = { auto: "Theme: automatic (matches your device)", light: "Theme: light", dark: "Theme: dark" }[pref];
+    $$(".theme-toggle").forEach((b) => { b.title = label + " — click to change"; b.setAttribute("aria-label", label + ". Click to change."); });
+    $$("[data-set-theme]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.setTheme === pref)));
+  }
+  function setTheme(pref) { store.set("theme", pref); applyTheme(pref); }
+  const onSchemeChange = () => { if (themePref() === "auto") applyTheme("auto"); };
+  if (darkMQ.addEventListener) darkMQ.addEventListener("change", onSchemeChange); else if (darkMQ.addListener) darkMQ.addListener(onSchemeChange);
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".theme-toggle")) { const p = themePref(); setTheme(THEMES[(THEMES.indexOf(p) + 1) % THEMES.length]); }
+    const s = e.target.closest("[data-set-theme]");
+    if (s) setTheme(s.dataset.setTheme);
+  });
+
+  // ── nav drawer (small screens) ───────────────────────────────────────────
+  function setNav(open) {
+    document.body.classList.toggle("nav-open", open);
+    const t = $(".nav-toggle"); if (t) t.setAttribute("aria-expanded", String(open));
+    const s = $(".nav-scrim"); if (s) s.hidden = !open;
+    if (open) { const a = $(".site-nav [aria-current]") || $(".site-nav a"); if (a) a.focus({ preventScroll: true }); }
+  }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".nav-toggle")) setNav(!document.body.classList.contains("nav-open"));
+    else if (e.target.closest("[data-close-nav]")) setNav(false);
+  });
+  function revealActiveNav() {
+    const sb = $(".site-nav"), a = $(".site-nav [aria-current]");
+    if (!sb || !a) return;
+    const r = a.getBoundingClientRect(), s = sb.getBoundingClientRect();
+    if (r.top < s.top + 40 || r.bottom > s.bottom - 40) sb.scrollTop += r.top - s.top - sb.clientHeight / 3;
+  }
 
   // ── KaTeX ────────────────────────────────────────────────────────────────
   function renderMath(root) {
-    if (!window.renderMathInElement) return;
+    if (!root || !window.renderMathInElement) return;
     window.renderMathInElement(root, {
       delimiters: [{ left: "\\(", right: "\\)", display: false }, { left: "\\[", right: "\\]", display: true }],
-      throwOnError: false, strict: false,
+      throwOnError: false, strict: false, ignoredClasses: ["sm-results", "link-preview"],
     });
   }
 
-  // ── header settings button ───────────────────────────────────────────────
-  function addSettingsButton() {
-    if ($(".wiki-settings-btn")) return;
-    const inner = $(".md-header__inner");
-    const before = $(".md-header__option") || $("label.md-header__button[for='__search']");
-    if (!inner || !before) return;
-    const a = document.createElement("a");
-    a.className = "md-header__button md-icon wiki-settings-btn";
-    a.href = ROOT + "settings/";
-    a.title = "Settings";
-    a.setAttribute("aria-label", "Settings");
-    a.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.63c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.31-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64L4.57 11c-.04.34-.07.67-.07 1s.03.65.07.97l-2.11 1.66c-.19.15-.25.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64z"/></svg>';
-    inner.insertBefore(a, before);
+  // ── Contents: highlight the section you're reading ───────────────────────
+  function initScrollSpy() {
+    const links = $$(".toc-list a[href^='#']");
+    if (!links.length) return;
+    const byId = new Map();
+    links.forEach((a) => { const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!byId.has(id)) byId.set(id, []); byId.get(id).push(a); });
+    const heads = Array.from(byId.keys()).map((id) => document.getElementById(id)).filter(Boolean);
+    const aside = $(".toc");
+    let current = null, queued = false;
+    function update() {
+      queued = false;
+      const line = parseFloat(getComputedStyle(html).scrollPaddingTop) || 80;
+      let cur = null;
+      for (const h of heads) { if (h.getBoundingClientRect().top - line <= 4) cur = h; else break; }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4 && heads.length) cur = heads[heads.length - 1];
+      if (cur === current) return;
+      current = cur;
+      links.forEach((a) => a.classList.remove("is-active"));
+      if (!cur) return;
+      (byId.get(cur.id) || []).forEach((a) => {
+        a.classList.add("is-active");
+        if (aside && aside.contains(a) && aside.offsetParent) {
+          const r = a.getBoundingClientRect(), s = aside.getBoundingClientRect();
+          if (r.top < s.top + 30 || r.bottom > s.bottom - 30) aside.scrollTop += r.top - s.top - aside.clientHeight / 2;
+        }
+      });
+    }
+    const queue = () => { if (!queued) { queued = true; requestAnimationFrame(update); } };
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    update();
+  }
+  // following a #link into a collapsed box opens it
+  function openTarget() {
+    if (!location.hash) return;
+    let el = null;
+    try { el = document.getElementById(decodeURIComponent(location.hash.slice(1))); } catch (e) { return; }
+    for (let p = el && el.parentElement; p; p = p.parentElement) if (p.tagName === "DETAILS") p.open = true;
+    if (el && el.closest("details:not([open])") === null) el.scrollIntoView();
+  }
+  window.addEventListener("hashchange", openTarget);
+
+  // ── search ───────────────────────────────────────────────────────────────
+  const norm = (s) => String(s || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  let indexPromise = null;
+  function loadIndex() {
+    if (!indexPromise) {
+      indexPromise = fetch(ROOT + "search-index.json").then((r) => r.json()).then((j) => j.pages.map((p) => ({
+        ...p, _t: norm(p.t), _d: norm(p.d), _k: norm((p.k || []).join(" ")), _s: norm(p.s),
+        h: p.h.map(([id, head, text]) => ({ id, head, text, _h: norm(head), _x: norm(text) })),
+      }))).catch(() => { indexPromise = null; return []; });
+    }
+    return indexPromise;
+  }
+  function countIn(hay, t, cap) { let n = 0, i = hay.indexOf(t); while (i !== -1 && n < cap) { n++; i = hay.indexOf(t, i + t.length); } return n; }
+  function searchPages(pages, q) {
+    const terms = norm(q).split(/[\s,]+/).filter(Boolean);
+    if (!terms.length) return [];
+    const phrase = terms.join(" ");
+    const out = [];
+    for (const p of pages) {
+      let score = 0, ok = true;
+      for (const t of terms) {
+        let s = 0;
+        if (p._t.includes(t)) s += new RegExp("(^|[^a-z0-9])" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(p._t) ? 14 : 9;
+        if (p._k.includes(t)) s += 5;
+        if (p._d.includes(t)) s += 4;
+        if (p._s.includes(t)) s += 1;
+        let body = 0;
+        for (const h of p.h) { if (h._h.includes(t)) s += 4; body += Math.min(3, countIn(h._x, t, 3)) * 0.6; }
+        s += Math.min(5, body); // lots of passing mentions shouldn't beat a page that's about it
+        if (!s) { ok = false; break; }
+        score += s;
+      }
+      if (!ok) continue;
+      if (p._t.includes(phrase)) score += 20;
+      if (p.u.startsWith("units/")) score += 2; // notes pages first
+      const hits = p.h.filter((h) => h.id).map((h) => {
+        let s = 0, all = true;
+        for (const t of terms) { const a = h._h.includes(t) ? 6 : 0, b = countIn(h._x, t, 5); if (!a && !b) all = false; s += a + Math.min(5, b); }
+        if (h._h.includes(phrase) || h._x.includes(phrase)) s += 6;
+        return { h, s: all ? s : s * 0.3 };
+      }).filter((x) => x.s >= 2).sort((a, b) => b.s - a.s).slice(0, 3);
+      out.push({ p, score, hits });
+    }
+    return out.sort((a, b) => b.score - a.score).slice(0, 14);
+  }
+  function snippet(text, terms, len = 170) {
+    if (!text) return "";
+    const n = norm(text);
+    let at = -1;
+    for (const t of terms) { const i = n.indexOf(t); if (i !== -1 && (at === -1 || i < at)) at = i; }
+    const start = at > 60 ? text.lastIndexOf(" ", at - 50) + 1 : 0;
+    let s = text.slice(start, start + len);
+    if (start + len < text.length) s = s.replace(/\s+\S*$/, "") + "…";
+    return (start > 0 ? "…" : "") + s;
+  }
+  function highlight(text, terms) {
+    let h = esc(text);
+    const parts = terms.filter((t) => t.length > 0).map((t) => esc(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length);
+    if (!parts.length) return h;
+    try { h = h.replace(new RegExp("(" + parts.join("|") + ")", "gi"), "<mark>$1</mark>"); } catch (e) { /* keep plain */ }
+    return h;
+  }
+  let searchEl = null, lastFocus = null;
+  function openSearch(initial) {
+    if (searchEl) { $(".sm-input", searchEl).focus(); return; }
+    lastFocus = document.activeElement;
+    setNav(false);
+    searchEl = document.createElement("div");
+    searchEl.className = "search-modal";
+    searchEl.innerHTML = `<div class="sm-backdrop" data-close-search></div>
+      <div class="sm-box" role="dialog" aria-modal="true" aria-label="Search the wiki">
+        <div class="sm-head">${ICON.search}<input class="sm-input" type="search" placeholder="Search all notes…" autocomplete="off" spellcheck="false" aria-label="Search" aria-controls="sm-results">
+          <button type="button" class="sm-close" data-close-search>Esc</button></div>
+        <div class="sm-results" id="sm-results" role="listbox"></div>
+        <div class="sm-foot"><span><kbd>↑</kbd><kbd>↓</kbd> choose</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span></div>
+      </div>`;
+    document.body.appendChild(searchEl);
+    html.classList.add("wm-open");
+    const input = $(".sm-input", searchEl), results = $(".sm-results", searchEl);
+    let sel = 0;
+    const items = () => $$(".sm-item", results);
+    function select(i) {
+      const list = items(); if (!list.length) return;
+      sel = (i + list.length) % list.length;
+      list.forEach((el, k) => { el.classList.toggle("is-selected", k === sel); el.setAttribute("aria-selected", String(k === sel)); });
+      list[sel].scrollIntoView({ block: "nearest" });
+    }
+    function empty() {
+      const tries = ["RICE", "H2SO4", "buffer", "Kp", "calorimetry", "oxidation number"];
+      results.innerHTML = `<div class="sm-empty">Search every page, heading and formula.<br>Try ${tries.map((t) => `<a href="#" data-try="${esc(t)}">${esc(t)}</a>`).join(", ")}.</div>`;
+    }
+    async function run() {
+      const q = input.value.trim();
+      if (!q) { empty(); return; }
+      const pages = await loadIndex();
+      if (q !== input.value.trim()) return; // typed more meanwhile
+      const terms = norm(q).split(/[\s,]+/).filter(Boolean);
+      const found = searchPages(pages, q);
+      if (!found.length) { results.innerHTML = `<div class="sm-empty">No results for <b>${esc(q)}</b>.</div>`; return; }
+      results.innerHTML = found.map(({ p, hits }) => {
+        const url = ROOT + p.u;
+        const intro = p.h.find((h) => !h.id);
+        const snip = p.d || snippet(intro ? intro.text : "", terms);
+        return `<div class="sm-group"><a class="sm-item sm-page" role="option" href="${esc(url)}">` +
+          (p.s ? `<span class="sm-crumb">${esc(p.s)}</span>` : "") +
+          `<span class="sm-title">${highlight(p.t, terms)}</span>` + (snip ? `<span class="sm-snip">${highlight(snip, terms)}</span>` : "") + "</a>" +
+          hits.map(({ h }) => `<a class="sm-item sm-hit" role="option" href="${esc(url + "#" + h.id)}"><span class="sm-h">${highlight(h.head, terms)}</span>` +
+            `<span class="sm-snip">${highlight(snippet(h.text, terms), terms)}</span></a>`).join("") + "</div>";
+      }).join("");
+      select(0);
+    }
+    input.addEventListener("input", run);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowDown") { e.preventDefault(); select(sel + 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); select(sel - 1); }
+      else if (e.key === "Enter") { const it = items()[sel]; if (it) { e.preventDefault(); it.click(); } }
+    });
+    results.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-try]");
+      if (t) { e.preventDefault(); input.value = t.dataset.try; run(); input.focus(); return; }
+      if (e.target.closest(".sm-item")) closeSearch(false);
+    });
+    results.addEventListener("mousemove", (e) => { const it = e.target.closest(".sm-item"); if (it) { const k = items().indexOf(it); if (k !== sel) select(k); } });
+    searchEl.addEventListener("click", (e) => { if (e.target.closest("[data-close-search]")) closeSearch(true); });
+    if (initial) input.value = initial;
+    run();
+    input.focus();
+    loadIndex();
+  }
+  function closeSearch(restore) {
+    if (!searchEl) return;
+    searchEl.remove(); searchEl = null;
+    if (!modal) html.classList.remove("wm-open");
+    if (restore && lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-open-search]")) { e.preventDefault(); openSearch(); } });
+  document.addEventListener("keydown", (e) => {
+    const typing = e.target.closest && e.target.closest("input, textarea, select, [contenteditable]");
+    if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) { e.preventDefault(); searchEl ? closeSearch(true) : openSearch(); return; }
+    if (e.key === "/" && !typing && !searchEl && !modal) { e.preventDefault(); openSearch(); return; }
+    if (e.key === "Escape") {
+      if (searchEl) closeSearch(true);
+      else if (document.body.classList.contains("nav-open")) { setNav(false); const t = $(".nav-toggle"); if (t) t.focus(); }
+    }
+  });
+
+  // ── link previews: hover a link to another wiki page ─────────────────────
+  function initPreviews() {
+    if (window.matchMedia("(hover: none)").matches) return;
+    let timer = null, card = null, cur = null;
+    const rootPath = new URL(ROOT).pathname;
+    function hide() { clearTimeout(timer); cur = null; if (card) card.classList.remove("is-on"); }
+    async function show(a) {
+      const u = new URL(a.href, location.href);
+      if (u.origin !== location.origin || !u.pathname.startsWith(rootPath)) return;
+      const path = decodeURI(u.pathname.slice(rootPath.length)).replace(/index\.html$/, "");
+      const pages = await loadIndex();
+      if (cur !== a) return;
+      const p = pages.find((x) => x.u === path);
+      if (!p) return;
+      const id = decodeURIComponent(u.hash.slice(1));
+      const sec = id ? p.h.find((h) => h.id === id) : null;
+      if (id && !sec && u.pathname === location.pathname) return;
+      const intro = p.h.find((h) => !h.id);
+      const firstText = intro && intro.text ? intro.text : ((p.h[1] || {}).text || "");
+      const title = sec ? sec.head : p.t;
+      const crumb = sec ? p.t : p.s;
+      const text = sec ? sec.text : (p.d || firstText);
+      if (!card) { card = document.createElement("div"); card.className = "link-preview"; card.setAttribute("role", "tooltip"); document.body.appendChild(card); }
+      card.innerHTML = (crumb ? `<div class="lp-crumb">${esc(crumb)}</div>` : "") + `<div class="lp-title">${esc(title)}</div>` +
+        (text ? `<p class="lp-text">${esc(text.length > 420 ? text.slice(0, 420).replace(/\s+\S*$/, "") + "…" : text)}</p>` : "");
+      const r = a.getBoundingClientRect();
+      const w = card.offsetWidth, h = card.offsetHeight;
+      const left = Math.max(12, Math.min(r.left, window.innerWidth - w - 12));
+      const below = r.bottom + 10 + h < window.innerHeight;
+      card.style.left = left + window.scrollX + "px";
+      card.style.top = (below ? r.bottom + 10 : r.top - h - 10) + window.scrollY + "px";
+      void card.offsetWidth; // start the fade from the hidden state
+      card.classList.add("is-on");
+    }
+    document.addEventListener("pointerover", (e) => {
+      const a = e.target.closest && e.target.closest(".main a.wiki-link, .main .prose a[href]:not(.headerlink):not(.card):not(.btn)");
+      if (!a || a === cur || e.pointerType === "touch") return;
+      if (a.closest(".toc-mobile, .az-index, .crumbs")) return;
+      hide(); cur = a;
+      timer = setTimeout(() => show(a), 420);
+    });
+    document.addEventListener("pointerout", (e) => { if (cur && e.target.closest && e.target.closest("a") === cur && !cur.contains(e.relatedTarget)) hide(); });
+    window.addEventListener("scroll", hide, { passive: true });
+    document.addEventListener("click", hide);
   }
 
   // ── study tracker ────────────────────────────────────────────────────────
@@ -82,7 +346,6 @@
     if ($("#study-card")) renderStudy();
   }
   setInterval(tick, TICK * 1000);
-
   function studySummary() {
     const days = studyData().days;
     const today = startOfDay(now());
@@ -100,6 +363,7 @@
     return { today: get(today), week, total, streak, last14 };
   }
   function renderStudy() {
+    if (!$("#st-today")) return;
     const s = studySummary();
     $("#st-today").textContent = fmtDur(s.today);
     $("#st-week").textContent = fmtDur(s.week);
@@ -109,8 +373,7 @@
     const bw = 14, gap = 5, h = 46;
     const bars = s.last14.map((x, i) => {
       const bh = Math.max(2, (x.s / max) * h);
-      const isToday = i === 13;
-      return `<rect x="${i * (bw + gap)}" y="${h - bh}" width="${bw}" height="${bh}" rx="3" class="${isToday ? "spark-today" : "spark-bar"}"><title>${fmtDate(x.d)}: ${fmtDur(x.s)}</title></rect>`;
+      return `<rect x="${i * (bw + gap)}" y="${h - bh}" width="${bw}" height="${bh}" rx="3" class="${i === 13 ? "spark-today" : "spark-bar"}"><title>${fmtDate(x.d)}: ${fmtDur(x.s)}</title></rect>`;
     }).join("");
     const defs = '<defs><linearGradient id="spark-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d946ef"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>';
     $("#st-spark").innerHTML = `<svg viewBox="0 0 ${14 * (bw + gap) - gap} ${h}" preserveAspectRatio="none">${defs}${bars}</svg><div class="spark-axis"><span>2 wks ago</span><span>today</span></div>`;
@@ -137,7 +400,8 @@
   const inDays = (date, t) => { const n = daysBetween(t, date); return n === 0 ? "today" : n === 1 ? "tomorrow" : `in ${n} days`; };
 
   // ── home page ────────────────────────────────────────────────────────────
-  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const shortExam = (title) => String(title).replace(/\s+–.*$/, ""); // "Exam #5 – Thermodynamics" → "Exam #5"
   function greeting() {
     const G = DATA.greetings || {};
     const t = now();
@@ -155,32 +419,23 @@
     let line = pick(G[bucket] || ["Hello, {name}!"]);
     const name = getName();
     const examName = next ? (next.ap ? "The AP exam" : shortExam(next.title)) : "your exam";
-    line = line.replace(/\{exam\}/g, examName);
-    line = line.replace(/\{days\}/g, plural(dleft, "day"));
+    line = line.replace(/\{exam\}/g, examName).replace(/\{days\}/g, plural(dleft, "day"));
     line = line.charAt(0).toUpperCase() + line.slice(1);
     if (name) line = line.replace(/\{name\}/g, name);
     else line = line.replace(/\s*,\s*\{name\}/g, "").replace(/\{name\}\s*[,—-]?\s*/g, "").replace(/\s{2,}/g, " ");
     return line.replace(/\s+([?.!])/g, "$1").trim();
   }
-  function shortExam(title) {
-    // "Exam #5 – Thermodynamics" → "Exam #5"
-    return String(title).replace(/\s+–.*$/, "");
-  }
   function renderGreeting() {
     const el = $("#home-greeting");
     if (!el) return;
-    const raw = greeting();
-    el.textContent = raw;
+    el.textContent = greeting();
     const t = now();
     const cu = currentUnit(t);
     const parts = [t.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })];
     if (cu) parts.push(cu.state === "now" ? `Unit ${cu.unit.number}: ${cu.unit.title}` : `Next up: Unit ${cu.unit.number} (${cu.unit.title})`);
     $("#home-sub").textContent = parts.join(" · ");
     const cur = $("#home-current-unit");
-    if (cur && cu) {
-      cur.href = ROOT + "units/" + cu.unit.slug + "/";
-      $("span", cur).textContent = `Unit ${cu.unit.number}`;
-    }
+    if (cur && cu) { cur.href = ROOT + "units/" + cu.unit.slug + "/"; $("span", cur).textContent = `Unit ${cu.unit.number}`; }
     const prompt = $("#name-prompt");
     if (prompt) {
       prompt.hidden = !!getName() || store.get("namePromptDismissed", false);
@@ -194,22 +449,42 @@
       };
     }
   }
-  let lastQuote = -1;
-  function renderQuote() {
-    const box = $("#quote-card");
-    if (!box) return;
+  // quote of the day: the same one all day (home page + Quotes page), from the kinds chosen in Settings
+  function quotePool() {
     const cats = prefs().quoteCats;
     const qs = (DATA.quotes || []).filter((q) => cats.includes(q.category || "quote"));
-    const list = qs.length ? qs : DATA.quotes || [];
-    if (!list.length) { box.hidden = true; return; }
-    let i = Math.floor(Math.random() * list.length);
-    if (list.length > 1 && i === lastQuote) i = (i + 1) % list.length;
-    lastQuote = i;
-    const q = list[i];
+    return qs.length ? qs : DATA.quotes || [];
+  }
+  function quoteOfDay() {
+    const pool = quotePool();
+    if (!pool.length) return null;
+    let h = 0;
+    for (const c of dayKey(now())) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    return pool[h % pool.length];
+  }
+  function randomQuote(pool, current) {
+    if (!pool.length) return null;
+    let q = pick(pool);
+    if (pool.length > 1 && current && q.id === current.id) q = pool[(pool.indexOf(q) + 1) % pool.length];
+    return q;
+  }
+  let homeQuote = null;
+  function renderQuote(random) {
+    const box = $("#quote-card");
+    if (!box) return;
+    const q = random ? randomQuote(quotePool(), homeQuote) : quoteOfDay();
+    if (!q) { box.hidden = true; return; }
+    homeQuote = q;
     const txt = $("#quote-text");
     txt.classList.remove("qc-in"); void txt.offsetWidth; txt.classList.add("qc-in");
     txt.textContent = q.text;
     $("#quote-who").textContent = "— " + (q.who || "Ms. Boppana") + (q.context ? ` · ${q.context}` : "");
+    const isToday = q === quoteOfDay();
+    const kicker = $("#quote-kicker");
+    if (kicker) kicker.textContent = isToday ? "Quote of the day" : "Random quote";
+    // "All quotes" opens the Quotes page showing this same quote at the top
+    const all = $("#quote-all");
+    if (all) all.href = ROOT + "quotes/" + (isToday ? "" : "?q=" + encodeURIComponent(q.id));
   }
   function renderCountdowns() {
     const card = $("#countdown-card");
@@ -241,24 +516,22 @@
   function initHome() {
     if (!$("#home-greeting")) return;
     renderGreeting();
-    renderQuote();
+    renderQuote(false);
     renderCountdowns();
     renderStudy();
     const nb = $("#quote-next");
-    if (nb) nb.onclick = renderQuote;
-    const s = $("[data-open-search]");
-    if (s) s.onclick = () => { const t = $("label[for='__search']") ; const box = $("#__search"); if (box) { box.checked = true; box.dispatchEvent(new Event("change")); } setTimeout(() => { const q = $(".md-search__input"); if (q) q.focus(); }, 50); };
+    if (nb) nb.onclick = () => renderQuote(true);
   }
 
   // ── modal (PDF preview + scans lightbox) ─────────────────────────────────
-  let modal;
-  function openModal(html, cls) {
+  let modal = null;
+  function openModal(inner, cls) {
     closeModal();
     modal = document.createElement("div");
     modal.className = "wiki-modal " + (cls || "");
-    modal.innerHTML = `<div class="wm-backdrop" data-close></div><div class="wm-box" role="dialog" aria-modal="true">${html}</div>`;
+    modal.innerHTML = `<div class="wm-backdrop" data-close></div><div class="wm-box" role="dialog" aria-modal="true">${inner}</div>`;
     document.body.appendChild(modal);
-    document.documentElement.classList.add("wm-open");
+    html.classList.add("wm-open");
     modal.addEventListener("click", (e) => { if (e.target.closest("[data-close]")) closeModal(); });
     const f = $(".wm-close", modal); if (f) f.focus();
     return modal;
@@ -266,42 +539,39 @@
   function closeModal() {
     if (!modal) return;
     modal.remove(); modal = null;
-    document.documentElement.classList.remove("wm-open");
+    if (!searchEl) html.classList.remove("wm-open");
   }
   document.addEventListener("keydown", (e) => {
     if (!modal) return;
     if (e.key === "Escape") closeModal();
-    if (modal.classList.contains("wm-lightbox")) {
+    else if (modal.classList.contains("wm-lightbox")) {
       if (e.key === "ArrowRight") { const b = $(".lb-next", modal); if (b) b.click(); }
       if (e.key === "ArrowLeft") { const b = $(".lb-prev", modal); if (b) b.click(); }
     }
   });
-  const ICON_CLOSE = '<svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-
   function openPdf(href, title) {
     const abs = new URL(href, location.href).href;
     openModal(
       `<header class="wm-head"><b>${esc(title)}</b><span class="wm-actions">
-         <a class="md-button" href="${abs}" target="_blank" rel="noopener">Open in new tab</a>
-         <a class="md-button md-button--primary" href="${abs}" download>Download</a>
-         <button class="wm-close" data-close aria-label="Close">${ICON_CLOSE}</button></span></header>
-       <iframe class="wm-pdf" src="${abs}#view=FitH" title="${esc(title)}"></iframe>`, "wm-pdfview");
+         <a class="btn" href="${esc(abs)}" target="_blank" rel="noopener">Open in new tab</a>
+         <a class="btn btn-primary" href="${esc(abs)}" download>Download</a>
+         <button type="button" class="wm-close" data-close aria-label="Close">${ICON.close}</button></span></header>
+       <iframe class="wm-pdf" src="${esc(abs)}#view=FitH" title="${esc(title)}"></iframe>`, "wm-pdfview");
   }
-
   function openLightbox(nb, pages, base, startIdx, title) {
     const nbName = title || `Notebook ${nb}`;
     let i = startIdx || 0;
     const m = openModal(`<header class="wm-head"><b class="lb-title"></b><span class="wm-actions">
-        <a class="md-button lb-all" href="${ROOT}scans/${encodeURIComponent(nb)}/">All pages</a>
-        <a class="md-button lb-full" target="_blank" rel="noopener">Full size</a>
-        <button class="wm-close" data-close aria-label="Close">${ICON_CLOSE}</button></span></header>
-      <div class="lb-stage"><button class="lb-nav lb-prev" aria-label="Previous page">‹</button>
-        <img class="lb-img" alt=""><button class="lb-nav lb-next" aria-label="Next page">›</button></div>
+        <a class="btn lb-all" href="${ROOT}scans/${encodeURIComponent(nb)}/">All pages</a>
+        <a class="btn lb-full" target="_blank" rel="noopener">Full size</a>
+        <button type="button" class="wm-close" data-close aria-label="Close">${ICON.close}</button></span></header>
+      <div class="lb-stage"><button type="button" class="lb-nav lb-prev" aria-label="Previous page">‹</button>
+        <img class="lb-img" alt=""><button type="button" class="lb-nav lb-next" aria-label="Next page">›</button></div>
       <div class="lb-strip"></div>`, "wm-lightbox");
     const baseURL = new URL(base, location.href).href;
     const src = (p) => `${baseURL}${nb}/p${pad(p)}.webp`;
     const strip = $(".lb-strip", m);
-    strip.innerHTML = pages.map((p, k) => `<button data-k="${k}"><img src="${baseURL}${nb}/thumb/p${pad(p)}.webp" alt="p. ${p}" loading="lazy"><span>${p}</span></button>`).join("");
+    strip.innerHTML = pages.map((p, k) => `<button type="button" data-k="${k}"><img src="${baseURL}${nb}/thumb/p${pad(p)}.webp" alt="p. ${p}" loading="lazy"><span>${p}</span></button>`).join("");
     function show() {
       const p = pages[i];
       $(".lb-img", m).src = src(p);
@@ -320,7 +590,6 @@
     strip.onclick = (e) => { const b = e.target.closest("button[data-k]"); if (b) { i = +b.dataset.k; show(); } };
     show();
   }
-
   document.addEventListener("click", (e) => {
     const pdf = e.target.closest(".rc-preview");
     if (pdf) { e.preventDefault(); openPdf(pdf.dataset.pdf, pdf.dataset.title || "Preview"); return; }
@@ -336,26 +605,84 @@
   function initFormulaFilter() {
     const input = $(".formula-filter");
     if (!input) return;
-    const norm = (s) => s.toLowerCase().replace(/[₀-₉]/g, (c) => String(c.charCodeAt(0) - 0x2080)).replace(/\s+/g, " ");
+    const n = (s) => norm(s).replace(/\s+/g, " ");
     input.oninput = () => {
-      const q = norm(input.value.trim());
+      const q = n(input.value.trim());
       $$(".formula-group").forEach((g) => {
         let any = false;
-        $$(".admonition.formula, details.formula", g).forEach((f) => {
-          const hit = !q || norm(f.textContent).includes(q) || norm($("h3", g)?.textContent || "").includes(q);
+        const title = n(($("h3", g) || {}).textContent || "");
+        $$(".admonition.formula", g).forEach((f) => {
+          const hit = !q || n(f.textContent).includes(q) || title.includes(q);
           f.hidden = !hit; any = any || hit;
         });
         g.hidden = !any;
       });
-      $$(".md-content h2").forEach((h) => {
+      $$(".prose h2[id^='unit-']").forEach((h) => {
         let el = h.nextElementSibling, any = false;
         while (el && el.tagName !== "H2") { if (el.classList.contains("formula-group") && !el.hidden) any = true; el = el.nextElementSibling; }
-        if (h.id && h.id.startsWith("unit-")) h.hidden = !any;
+        h.hidden = !any;
       });
     };
   }
 
+  // ── Teacher Quotes page: quote of the day, filters, search ───────────────
+  function initQuotesPage() {
+    const spot = $("#quote-spotlight");
+    if (!spot) return;
+    const quotes = DATA.quotes || [];
+    const cards = $$(".qcard"), groups = $$(".quote-group"), chips = $$(".qt-chip"), search = $("#qt-search");
+    let filter = "all", shown = null;
+    function showQuote(q) {
+      if (!q) return;
+      shown = q;
+      const txt = $("#qs-text");
+      txt.classList.remove("qc-in"); void txt.offsetWidth; txt.classList.add("qc-in");
+      txt.textContent = q.text;
+      $("#qs-who").innerHTML = "— " + esc(q.who || "Ms. Boppana") + (q.context ? `<small>${esc(q.context)}</small>` : "");
+      $("#qs-kicker").textContent = q === quoteOfDay() ? "Quote of the day" : "Random quote";
+      $("#qs-find").href = "#" + q.id;
+    }
+    // same quote as the home page: today's, or the one the home page's "All quotes" link passed along
+    const wanted = new URLSearchParams(location.search).get("q");
+    showQuote(quotes.find((q) => q.id === wanted) || quoteOfDay());
+    $("#qs-shuffle").onclick = () => showQuote(randomQuote(quotes, shown));
+    function apply() {
+      const q = norm(search ? search.value.trim() : "");
+      let any = false;
+      cards.forEach((c) => {
+        const hit = (filter === "all" || c.dataset.qcat === filter) && (!q || norm(c.textContent).includes(q));
+        c.hidden = !hit; any = any || hit;
+      });
+      groups.forEach((g) => {
+        const vis = $$(".qcard", g).some((c) => !c.hidden);
+        g.hidden = !vis;
+        const head = g.previousElementSibling;
+        if (head && head.tagName === "H2") head.hidden = !vis;
+      });
+      $("#qt-empty").hidden = any;
+    }
+    chips.forEach((b) => { b.onclick = () => {
+      filter = b.dataset.qfilter;
+      chips.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      apply();
+    }; });
+    if (search) search.addEventListener("input", apply);
+    // "Find it below": make sure the card is showing, then highlight it
+    $("#qs-find").addEventListener("click", () => {
+      const id = $("#qs-find").getAttribute("href").slice(1);
+      const card = document.getElementById(id);
+      if (!card) return;
+      if (card.hidden) {
+        filter = "all"; if (search) search.value = "";
+        chips.forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.qfilter === "all")));
+        apply();
+      }
+      card.classList.remove("is-flash"); void card.offsetWidth; card.classList.add("is-flash");
+    });
+  }
+
   // ── Settings page ────────────────────────────────────────────────────────
+  function flash(sel, msg) { const el = $(sel); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 2500); }
   function initSettings() {
     const root = $("#wiki-settings");
     if (!root) return;
@@ -364,29 +691,30 @@
     root.innerHTML = `
       <section class="set-card"><h3>Your name</h3>
         <p>Used in the home-page greeting. Saved only in this browser.</p>
-        <form id="set-name" class="set-row"><input type="text" id="set-name-input" maxlength="40" placeholder="Your name" value="${esc(getName())}">
-          <button class="md-button md-button--primary" type="submit">Save</button>
-          <button class="md-button" type="button" id="set-name-clear">Clear</button></form>
+        <form id="set-name" class="set-row"><input type="text" id="set-name-input" maxlength="40" placeholder="Your name" value="${esc(getName())}" aria-label="Your name">
+          <button class="btn btn-primary" type="submit">Save</button>
+          <button class="btn" type="button" id="set-name-clear">Clear</button></form>
         <p class="set-ok" id="set-name-ok" hidden>Saved ✓</p></section>
       <section class="set-card"><h3>Theme</h3>
-        <p>Use the <b>sun / moon</b> button in the top bar to switch between <b>automatic</b> (matches your device), <b>light</b> and <b>dark</b>.</p>
-        <div class="set-row"><button class="md-button" type="button" data-theme="0">Automatic</button><button class="md-button" type="button" data-theme="1">Light</button><button class="md-button" type="button" data-theme="2">Dark</button></div></section>
-      <section class="set-card"><h3>Home-page quotes</h3><p>Which kinds of quotes can show up on the home page?</p>
+        <p><b>Automatic</b> follows your device's light/dark setting. The sun/moon button in the top bar switches too.</p>
+        <div class="set-row"><button class="btn" type="button" data-set-theme="auto">Automatic</button><button class="btn" type="button" data-set-theme="light">Light</button><button class="btn" type="button" data-set-theme="dark">Dark</button></div></section>
+      <section class="set-card"><h3>Quote of the day</h3><p>Which kinds of quotes can be the quote of the day (and the random quotes) on the home page?</p>
         ${cats.map(([k, l]) => `<label class="set-check"><input type="checkbox" data-cat="${k}" ${p.quoteCats.includes(k) ? "checked" : ""}> ${l}</label>`).join("")}
         <p class="set-hint">Add more quotes in <code>data/quotes.yml</code>.</p></section>
       <section class="set-card"><h3>Study-time tracker</h3>
-        <p>Counts time while a wiki page is open and you're active (pauses after 3 idle minutes or when the tab is hidden). Stored only in this browser.</p>
+        <p>Counts time while a wiki page is open and you're active (it pauses after 3 idle minutes or when the tab is hidden). Stored only in this browser.</p>
         <label class="set-check"><input type="checkbox" id="set-tracker" ${p.tracker ? "checked" : ""}> Track my study time</label>
-        <div class="set-row"><button class="md-button" type="button" id="set-export">Export data</button>
-          <label class="md-button set-import">Import data<input type="file" accept="application/json" id="set-import" hidden></label>
-          <button class="md-button set-danger" type="button" id="set-reset">Reset study time</button></div>
+        <div class="set-row"><button class="btn" type="button" id="set-export">Export data</button>
+          <label class="btn set-import">Import data<input type="file" accept="application/json" id="set-import" hidden></label>
+          <button class="btn danger" type="button" id="set-reset">Reset study time</button></div>
         <p class="set-ok" id="set-study-ok" hidden></p></section>`;
+    applyTheme(themePref());
     $("#set-name").onsubmit = (e) => { e.preventDefault(); store.set("name", $("#set-name-input").value.trim()); store.set("namePromptDismissed", true); flash("#set-name-ok", "Saved ✓"); };
     $("#set-name-clear").onclick = () => { store.del("name"); store.del("namePromptDismissed"); $("#set-name-input").value = ""; flash("#set-name-ok", "Cleared"); };
-    $$("[data-cat]", root).forEach((c) => c.onchange = () => {
+    $$("[data-cat]", root).forEach((c) => { c.onchange = () => {
       const sel = $$("[data-cat]", root).filter((x) => x.checked).map((x) => x.dataset.cat);
       store.set("prefs", Object.assign(prefs(), { quoteCats: sel.length ? sel : ["quote"] }));
-    });
+    }; });
     $("#set-tracker").onchange = (e) => store.set("prefs", Object.assign(prefs(), { tracker: e.target.checked }));
     $("#set-export").onclick = () => {
       const blob = new Blob([JSON.stringify({ study: studyData(), prefs: prefs(), name: getName() }, null, 2)], { type: "application/json" });
@@ -407,16 +735,9 @@
       }).catch(() => flash("#set-study-ok", "That file couldn't be read."));
     };
     $("#set-reset").onclick = () => { if (confirm("Reset all tracked study time in this browser? This can't be undone.")) { store.del("study"); flash("#set-study-ok", "Study time reset."); } };
-    $$("[data-theme]", root).forEach((b) => b.onclick = () => {
-      const inputs = $$("input[name='__palette']");
-      const target = inputs[+b.dataset.theme];
-      if (target) { target.checked = true; target.dispatchEvent(new Event("change", { bubbles: true })); }
-    });
   }
-  function flash(sel, msg) { const el = $(sel); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 2500); }
 
   // ── 3D tilt + sheen on [data-tilt] cards ─────────────────────────────────
-  const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   function initTilt() {
     if (reduceMotion() || window.matchMedia("(hover: none)").matches) return;
     $$("[data-tilt]").forEach((el) => {
@@ -443,12 +764,12 @@
     });
   }
 
-  // ── 3D molecule (home hero): glossy spheres, drag to spin ────────────────
+  // ── 3D molecule (home hero): ammonia, glossy spheres, drag to spin ───────
   function initMolecule() {
     const host = $("#hero-molecule");
     if (!host || host.dataset.ready) return;
     host.dataset.ready = "1";
-    // ammonia, NH3 — trigonal pyramidal (N–H 1.01 Å, scaled ×1.6), plus N's lone pair ("LP")
+    // NH3 — trigonal pyramidal (N–H 1.01 Å, scaled ×1.6), plus N's lone pair ("LP")
     const K = 1.6;
     const atoms = [
       ["N", 0, 0.30, 0],
@@ -456,8 +777,8 @@
       ["LP", 0, 1.02, 0],
     ].map(([e, x, y, z]) => [e, x * K, y * K, z * K]);
     const bonds = [[0, 1, 1], [0, 2, 1], [0, 3, 1]];
-    const cx = 0, cy = atoms.slice(0, 4).reduce((s, a) => s + a[2], 0) / 4 + 0.25;
-    atoms.forEach((a) => { a[1] -= cx; a[2] -= cy; });
+    const cy = atoms.slice(0, 4).reduce((s, a) => s + a[2], 0) / 4 + 0.25;
+    atoms.forEach((a) => { a[2] -= cy; });
     const RAD = { N: 0.74, H: 0.46, LP: 0.62 };
     const NS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(NS, "svg");
@@ -496,10 +817,7 @@
         return { el, x: x1 * s, y: -y2 * s, z: z2, s };
       });
       const items = [];
-      bonds.forEach(([a, b, order]) => {
-        const A = P[a], B = P[b];
-        items.push({ z: (A.z + B.z) / 2 - 0.05, html: bondSvg(A, B, order) });
-      });
+      bonds.forEach(([a, b, order]) => { const A = P[a], B = P[b]; items.push({ z: (A.z + B.z) / 2 - 0.05, html: bondSvg(A, B, order) }); });
       P.forEach((p) => {
         const r = RAD[p.el] * p.s;
         if (p.el === "LP") { // lone pair: a soft glowing cloud with two electrons
@@ -551,38 +869,21 @@
     requestAnimationFrame(frame);
   }
 
-  // ── sidebars: fit the glass panels to the visible window (scroll inside) ─
-  const MQ_PRIMARY = window.matchMedia("(min-width: 76.25em)");
-  const MQ_SECONDARY = window.matchMedia("(min-width: 60em)");
-  function fitSidebars() {
-    [[".md-sidebar--primary", MQ_PRIMARY], [".md-sidebar--secondary", MQ_SECONDARY]].forEach(([sel, mq]) => {
-      const sw = document.querySelector(sel + " .md-sidebar__scrollwrap");
-      if (!sw) return;
-      if (!mq.matches) { sw.style.maxHeight = ""; return; }
-      const top = sw.getBoundingClientRect().top;
-      const h = window.innerHeight - Math.max(top, 0) - 16;
-      sw.style.maxHeight = Math.max(160, Math.round(h)) + "px";
-    });
-  }
-  let fitQueued = false;
-  const queueFit = () => { if (!fitQueued) { fitQueued = true; requestAnimationFrame(() => { fitQueued = false; fitSidebars(); }); } };
-  window.addEventListener("scroll", queueFit, { passive: true });
-  window.addEventListener("resize", queueFit);
-
-  // ── per-page init (runs on every page view, incl. instant navigation) ────
-  function onPage() {
-    addSettingsButton();
-    queueFit();
-    setTimeout(fitSidebars, 300); // after fonts/math settle
-    renderMath(document.querySelector(".md-content") || document.body);
+  // ── start ────────────────────────────────────────────────────────────────
+  function init() {
+    applyTheme(themePref());
+    renderMath($(".main"));
+    revealActiveNav();
+    openTarget();
+    initScrollSpy();
+    initPreviews();
     initMolecule();
     initTilt();
     initHome();
     initFormulaFilter();
+    initQuotesPage();
     initSettings();
   }
-  if (window.document$ && typeof window.document$.subscribe === "function") window.document$.subscribe(onPage);
-  else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", onPage);
-  else onPage();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   window.__apchemRefreshHome = initHome; // handy for testing
 })();

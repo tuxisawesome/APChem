@@ -1,6 +1,6 @@
 ---
 title: Tags
-description: Browse notes by tag.
+description: Browse notes by topic tag.
 ---
 
-<!-- material/tags -->
+<!-- wiki:tags -->

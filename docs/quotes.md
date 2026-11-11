@@ -1,10 +1,9 @@
 ---
 title: Teacher Quotes
-description: Things Ms. Boppana said, classroom sayings and mnemonics from my notes.
-icon: material/format-quote-open
+description: Things Ms. Boppana said, sayings from class and the memory tricks from my notes.
 ---
 
-Quotes and sayings I wrote down in class. A random one shows up on the home page every visit.
-To add one, add an entry to `data/quotes.yml`.
+The quotes, sayings and mnemonics I wrote down in class. Filter by kind or search, and click a
+notebook chip to see the page where I wrote it. The quote of the day also shows on the home page.
 
 <!-- wiki:quotes -->

@@ -1,0 +1,80 @@
+{#- A wiki article: breadcrumbs, title + lead, infobox, content, related/backlinks/categories, prev/next, contents. -#}
+{% extends "base.html" %}
+{% block body_class %}page-article{% endblock %}
+{% block layout_class %}{% if toc_html %} has-toc{% endif %}{% endblock %}
+{% block main %}
+<article class="article">
+  {% if crumbs %}
+  <nav class="crumbs" aria-label="Breadcrumbs">
+    {% for t, u in crumbs %}{% if not loop.first %}<span class="crumb-sep" aria-hidden="true">›</span>{% endif %}{% if u %}<a href="{{ u }}">{{ t }}</a>{% else %}<span>{{ t }}</span>{% endif %}{% endfor %}
+  </nav>
+  {% endif %}
+
+  <header class="article-head">
+    <h1>{{ page.title }}</h1>
+    {% if description %}<p class="lede">{{ description }}</p>{% endif %}
+  </header>
+
+  {% if infobox %}
+  <aside class="infobox" aria-label="About this page">
+    <div class="ib-head">{% if infobox.title_url %}<a href="{{ infobox.title_url }}">{{ infobox.title }}</a>{% else %}{{ infobox.title }}{% endif %}</div>
+    {% if infobox.chips %}
+    <div class="ib-row ib-sources">
+      <div class="ib-label">From the notes</div>
+      <div class="ib-value">
+        {% for c in infobox.chips %}
+        <button type="button" class="source-chip" data-nb="{{ c.nb }}" data-pages="{{ c.pages }}" data-base="{{ c.base }}" data-title="{{ c.title }}" title="View the original pages">{{ icon('notebook-outline') }}<span>{{ c.label }}</span></button>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% for k, v in infobox.rows %}
+    <div class="ib-row"><div class="ib-label">{{ k }}</div><div class="ib-value">{{ v }}</div></div>
+    {% endfor %}
+    {% if infobox.tags %}
+    <div class="ib-row"><div class="ib-label">Topics</div><div class="ib-value ib-tags">{% for t, u in infobox.tags %}<a class="tag-chip" href="{{ u }}">{{ t }}</a>{% endfor %}</div></div>
+    {% endif %}
+  </aside>
+  {% endif %}
+
+  <div class="prose">
+    {% if toc_html %}<details class="toc-mobile"><summary>Contents</summary>{{ toc_html }}</details>{% endif %}
+    {{ content }}
+  </div>
+
+  <footer class="article-foot">
+    {% if related %}
+    <section class="af-block">
+      <h2 class="af-title">{{ icon('folder-outline') }} More in this section</h2>
+      <ul class="af-related">
+        {% for t, u, d in related %}<li><a class="wiki-link" href="{{ u }}">{{ t }}</a>{% if d %}<span>{{ d }}</span>{% endif %}</li>{% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+    {% if backlinks %}
+    <section class="af-block">
+      <h2 class="af-title">{{ icon('link-variant') }} What links here</h2>
+      <p class="af-backlinks">{% for t, u in backlinks %}<a class="wiki-link" href="{{ u }}">{{ t }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
+    </section>
+    {% endif %}
+    {% if prev or next %}
+    <nav class="prevnext" aria-label="Previous and next page">
+      {% if prev %}<a class="pn pn-prev" href="{{ prev[1] }}"><small>{{ icon('arrow-left') }} Previous</small><span>{{ prev[0] }}</span></a>{% else %}<span></span>{% endif %}
+      {% if next %}<a class="pn pn-next" href="{{ next[1] }}"><small>Next {{ icon('arrow-right') }}</small><span>{{ next[0] }}</span></a>{% endif %}
+    </nav>
+    {% endif %}
+    {% if page.updated %}<p class="af-updated">Last edited {{ page.updated|nice_date }}</p>{% endif %}
+  </footer>
+</article>
+{% endblock %}
+{% block aside %}
+{% if toc_html %}
+<aside class="toc" aria-label="Contents">
+  <div class="toc-inner">
+    <p class="toc-title">Contents</p>
+    <a class="toc-top" href="#">{{ page.title }}</a>
+    {{ toc_html }}
+  </div>
+</aside>
+{% endif %}
+{% endblock %}

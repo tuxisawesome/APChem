@@ -1,17 +1,16 @@
 {#-
-  Home page template (used by docs/index.md via `template: home.html`).
-  Live parts (greeting, quote, study time, countdowns) are filled in by assets/js/wiki.js.
-  Build-time numbers come from config.extra.wiki_stats (computed in hooks/chemwiki.py).
+  Main page (docs/index.md has `template: home.html`).
+  Live parts (greeting, quote, study time, countdowns, 3D molecule) are filled in by assets/js/wiki.js.
+  Build-time numbers come from `stats` (computed in wiki/core.py → Site.stats).
 -#}
-{% extends "main.html" %}
-
-{% block content %}
-{% set wiki = config.extra.wiki %}
-{% set stats = config.extra.wiki_stats or {} %}
+{% extends "base.html" %}
+{% block body_class %}page-home{% endblock %}
+{% block layout_class %} is-home{% endblock %}
+{% block main %}
 {% set course = wiki.schedule.course or {} %}
 <div class="home">
 
-  <section class="hero">
+  <section class="hero" aria-labelledby="home-greeting">
     <div class="hero-text">
       <p class="hero-kicker">{{ course.name or "AP Chemistry" }} · {{ course.teacher }} · {{ course.year }}</p>
       <h1 class="hero-greeting" id="home-greeting">Hello!</h1>
@@ -21,17 +20,17 @@
         <label for="name-prompt-input">What should I call you?</label>
         <div class="np-row">
           <input id="name-prompt-input" type="text" maxlength="40" autocomplete="given-name" placeholder="Your name">
-          <button type="submit" class="md-button md-button--primary">Save</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
 
       <div class="hero-actions">
         <button type="button" class="hero-search" data-open-search>
-          {% include ".icons/material/magnify.svg" %}<span>Search all notes…</span><kbd>/</kbd>
+          {{ icon('magnify') }}<span>Search all notes…</span><kbd>/</kbd>
         </button>
-        <a class="md-button md-button--primary" href="{{ 'formulas/' | url }}">{% include ".icons/material/function-variant.svg" %} Formulas</a>
-        <a class="md-button" href="{{ 'memorize/' | url }}">{% include ".icons/material/brain.svg" %} Memorize</a>
-        <a class="md-button" id="home-current-unit" href="{{ 'units/' | url }}">{% include ".icons/material/book-open-page-variant-outline.svg" %} <span>All units</span></a>
+        <a class="btn btn-primary" href="{{ rel('formulas/') }}">{{ icon('function-variant') }} Formulas</a>
+        <a class="btn" href="{{ rel('memorize/') }}">{{ icon('brain') }} Memorize</a>
+        <a class="btn" id="home-current-unit" href="{{ rel('units/') }}">{{ icon('book-open-page-variant-outline') }} <span>All units</span></a>
       </div>
     </div>
     <div class="hero-art">
@@ -43,20 +42,21 @@
 
   <section class="quote-card" id="quote-card" aria-live="polite" data-tilt>
     <div class="qc-mark" aria-hidden="true">“</div>
+    <div class="qc-kicker" id="quote-kicker">Quote of the day</div>
     <blockquote class="qc-text" id="quote-text">{{ (wiki.quotes[0].text if wiki.quotes else "") }}</blockquote>
     <div class="qc-foot">
       <cite id="quote-who">— {{ (wiki.quotes[0].who if wiki.quotes else "") }}</cite>
       <div class="qc-actions">
-        <a href="{{ 'quotes/' | url }}" class="qc-all">All quotes</a>
-        <button type="button" class="qc-next" id="quote-next" title="Another quote">{% include ".icons/material/refresh.svg" %} Another</button>
+        <a href="{{ rel('quotes/') }}" class="qc-all" id="quote-all">All quotes {{ icon('arrow-right') }}</a>
+        <button type="button" class="qc-next" id="quote-next" title="Another quote">{{ icon('refresh') }} Another</button>
       </div>
     </div>
   </section>
 
-  <h2 class="home-h2">{% include ".icons/material/chart-box-outline.svg" %} Study stats</h2>
+  <h2 class="home-h2">{{ icon('chart-box-outline') }} Study stats</h2>
   <section class="stat-grid">
     <article class="stat-card" id="study-card" data-tilt>
-      <header>{% include ".icons/material/timer-outline.svg" %} Study time <span class="sc-hint">tracked while this site is open</span></header>
+      <header>{{ icon('timer-outline') }} Study time <span class="sc-hint">tracked while this site is open</span></header>
       <div class="sc-big"><span id="st-today">0m</span><small>today</small></div>
       <div class="sc-row">
         <div><b id="st-week">0m</b><small>this week</small></div>
@@ -67,14 +67,14 @@
     </article>
 
     <article class="stat-card" id="countdown-card" data-tilt>
-      <header>{% include ".icons/material/calendar-clock-outline.svg" %} Countdowns</header>
+      <header>{{ icon('calendar-clock-outline') }} Countdowns</header>
       <div class="cd-unit" id="cd-unit"></div>
       <div class="cd-progress"><div class="cd-bar" id="cd-bar"></div></div>
       <ul class="cd-list" id="cd-list"></ul>
     </article>
 
     <article class="stat-card" id="notes-card" data-tilt>
-      <header>{% include ".icons/material/notebook-outline.svg" %} My notes</header>
+      <header>{{ icon('notebook-outline') }} My notes</header>
       <div class="sc-big"><span>{{ stats.topic_pages or 0 }}</span><small>topic pages</small></div>
       <div class="sc-grid">
         <div><b>{{ "{:,}".format(stats.words or 0) }}</b><small>words</small></div>
@@ -84,21 +84,21 @@
         <div><b>{{ stats.notebook_pages or 0 }}</b><small>notebook pages</small></div>
         <div><b>{{ stats.units_covered or 0 }}/{{ stats.units_total or 11 }}</b><small>units covered</small></div>
       </div>
-      <footer>~{{ stats.reading_minutes or 1 }} min to read everything · updated {{ stats.last_updated }}</footer>
+      <footer>~{{ stats.reading_minutes or 1 }} min to read everything{% if stats.last_updated %} · updated {{ stats.last_updated|nice_date }}{% endif %}</footer>
     </article>
   </section>
 
-  <h2 class="home-h2">{% include ".icons/material/file-pdf-box.svg" %} Reference sheets</h2>
+  <h2 class="home-h2">{{ icon('file-pdf-box') }} Reference sheets</h2>
   <section class="resource-grid">
     {% for r in wiki.resources %}
-    {% set href = ('assets/resources/' ~ r.file) | url %}
+    {% set href = rel('assets/resources/' ~ r.file) %}
     <div class="resource-card" data-tilt>
-      <div class="rc-icon">{% include ".icons/material/" ~ (r.icon or "file-pdf-box") ~ ".svg" %}</div>
+      <div class="rc-icon">{{ icon(r.icon or 'file-pdf-box') or icon('file-pdf-box') }}</div>
       <div class="rc-title">{{ r.title }}</div>
       <div class="rc-desc">{{ r.description }}</div>
       <div class="rc-actions">
-        <button type="button" class="md-button rc-preview" data-pdf="{{ href }}" data-title="{{ r.title }}">{% include ".icons/material/eye-outline.svg" %} Preview</button>
-        <a class="md-button md-button--primary" href="{{ href }}" download>{% include ".icons/material/download.svg" %} Download</a>
+        <button type="button" class="btn rc-preview" data-pdf="{{ href }}" data-title="{{ r.title }}">{{ icon('eye-outline') }} Preview</button>
+        <a class="btn btn-primary" href="{{ href }}" download>{{ icon('download') }} Download</a>
       </div>
     </div>
     {% endfor %}
@@ -106,11 +106,11 @@
 
   <div class="home-cols">
     <section>
-      <h2 class="home-h2">{% include ".icons/material/view-dashboard-outline.svg" %} Units</h2>
+      <h2 class="home-h2">{{ icon('view-dashboard-outline') }} Units</h2>
       <div class="unit-list">
         {% for u in wiki.schedule.units %}
         {% set n = (stats.unit_pages or {}).get(u.number|string, 0) %}
-        <a class="unit-row" data-start="{{ u.start }}" data-end="{{ (u.exam or {}).date or u.end }}" href="{{ ('units/' ~ u.slug ~ '/') | url }}">
+        <a class="unit-row" data-start="{{ u.start }}" data-end="{{ (u.exam or {}).date or u.end }}" href="{{ rel('units/' ~ u.slug ~ '/') }}">
           <span class="ur-num">{{ u.number }}</span>
           <span class="ur-title">{{ u.title }}</span>
           <span class="ur-meta">{% if n %}{{ n }} page{{ "s" if n != 1 }}{% else %}—{% endif %}</span>
@@ -119,10 +119,10 @@
       </div>
     </section>
     <section>
-      <h2 class="home-h2">{% include ".icons/material/history.svg" %} Latest notes</h2>
+      <h2 class="home-h2">{{ icon('history') }} Latest notes</h2>
       <div class="recent-list">
         {% for r in stats.recent or [] %}
-        <a class="recent-row" href="{{ r.url | url }}">
+        <a class="recent-row" href="{{ rel(r.url) }}">
           <span class="rr-title">{{ r.title }}</span>
           <span class="rr-meta">Unit {{ r.unit }}{% if r.date_label %} · {{ r.date_label }}{% endif %}</span>
         </a>
@@ -133,8 +133,8 @@
     </section>
   </div>
 
-  {% if page.content %}
-  <div class="md-typeset home-extra">{{ page.content }}</div>
+  {% if content %}
+  <div class="prose home-extra">{{ content }}</div>
   {% endif %}
 </div>
 {% endblock %}

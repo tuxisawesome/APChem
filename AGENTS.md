@@ -1,7 +1,7 @@
 # AGENTS.md — how to work on this wiki
 
-This repo is a **personal AP Chemistry notes wiki** (MkDocs + Material, hosted on GitHub Pages at
-https://tuxisawesome.github.io/APChem/). The notes are digitized from handwritten notebooks.
+This repo is a **personal AP Chemistry notes wiki**, built by its own small static-site generator
+(`wiki/`, Python) and hosted on GitHub Pages at https://tuxisawesome.github.io/APChem/. The notes are digitized from handwritten notebooks.
 This file tells AI assistants (and humans) everything needed to edit it safely.
 
 ## Golden rules
@@ -15,16 +15,17 @@ This file tells AI assistants (and humans) everything needed to edit it safely.
    from these automatically. A topic page without any must declare `formulas: none`.
 4. **Shared reference lists live in `snippets/`** (strong acids/bases, solubility charts, ion grid,
    -ous/-ic names) and are included with `--8<-- "file.md"`. Edit them there, once.
-5. **Always run `mkdocs build --strict` before finishing.** It fails on: missing front matter,
-   bad notebook page references, broken links, diagram errors, pages missing formula boxes.
+5. **Always run `.venv/bin/python -m wiki build --strict` before finishing.** It fails on: missing
+   front matter, bad notebook page references, broken links/anchors, diagram errors, pages missing
+   formula boxes, pages missing from the nav.
 6. Commit/push only when asked.
 
 ## Quick start
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/mkdocs serve          # → http://127.0.0.1:8000/APChem/
-.venv/bin/mkdocs build --strict # the same check CI runs
+.venv/bin/python -m wiki serve           # → http://127.0.0.1:8000/ (rebuilds + reloads on save)
+.venv/bin/python -m wiki build --strict   # the same check CI runs (output: site/)
 ```
 
 Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
@@ -33,7 +34,7 @@ Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
 
 | Path | What |
 |---|---|
-| `mkdocs.yml` | Site config + **`nav:`** (every page must be listed here) |
+| `site.yml` | Site name/URL + **`nav:`** (every page must be listed here) |
 | `docs/units/NN-slug/` | One folder per syllabus unit: `index.md` + topic pages |
 | `docs/formulas.md` | Formulas page (auto-filled by `<!-- wiki:formulas -->`) |
 | `docs/memorize.md`, `study-skills.md`, `class-log.md`, `quotes.md`, `reference.md` | Toolkit pages |
@@ -45,9 +46,11 @@ Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
 | `data/resources.yml` | Reference PDFs (files in `docs/assets/resources/`) |
 | `data/notebooks.yml` | Scanned notebooks (written by `tools/add_notebook.py`) |
 | `snippets/` | Shared Markdown included in several pages |
-| `hooks/chemwiki.py` | Build hook: data loading, markers, formula collection, validation, stats |
-| `hooks/diagrams/` | Diagram kit (YAML code block → SVG). One module per kind |
-| `overrides/` | Theme templates: `home.html` (home page), `main.html` |
+| `wiki/core.py` | The generator: pages, nav, Markdown, links, validation, stats, search index |
+| `wiki/markers.py` | `<!-- wiki:… -->` markers (formulas, quotes, units, scans, tags…) |
+| `wiki/templating.py`, `wiki/templates/` | Page layout (Jinja): `base.html`, `page.html` (article), `home.html`, `404.html` |
+| `wiki/diagrams/` | Diagram kit (YAML code block → SVG). One module per kind |
+| `wiki/icons/` | SVG icons used by templates (`icon('name')`) |
 | `docs/assets/css/wiki.css`, `docs/assets/js/wiki.js` | Styling and browser features |
 | `tools/templates/` | Starting points for new topic/unit pages |
 
@@ -58,10 +61,10 @@ Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
 2. Fill the front matter: `title`, `unit` (must match folder number), `description`,
    `sources` (`{nb: "10-3", pages: "4-6"}`), `dates`, optional `tags`.
 3. Write the notes following the conventions below. Put formulas in `!!! formula` boxes.
-4. Add the page to `nav:` in `mkdocs.yml` under its unit.
+4. Add the page to `nav:` in `site.yml` under its unit.
 5. Add the day's objectives/homework/assessments to `docs/class-log.md` and any teacher quotes to
    `data/quotes.yml`.
-6. `mkdocs build --strict`.
+6. `.venv/bin/python -m wiki build --strict`.
 
 ### Add scanned notebook pages
 All notes so far are in **one physical book, "Notebook 1"** (id `"1"`, pages in date order).
@@ -135,7 +138,7 @@ Units and sections come from `data/schedule.yml`; unit index pages just contain 
 
 Kinds: `rice`, `graph`, `energy`, `apparatus`, `lewis`, `phscale` (plus `mermaid` flowcharts).
 Full syntax with live examples: `docs/contributing/diagrams.md`; each module's docstring in
-`hooks/diagrams/` lists every option and anchor. Text in diagrams auto-subscripts formulas
+`wiki/diagrams/` lists every option and anchor. Text in diagrams auto-subscripts formulas
 (`H2O`, `NH4+`), and supports `^{}` / `_{}`.
 
 Minimal examples:
@@ -156,26 +159,40 @@ labels:
 ```
 ````
 
-To add a new kind: new module in `hooks/diagrams/` with `render(data) -> str`, register in
-`hooks/diagrams/__init__.py → KINDS`, add an example to `docs/contributing/diagrams.md`.
+To add a new kind: new module in `wiki/diagrams/` with `render(data) -> str`, register in
+`wiki/diagrams/__init__.py → KINDS`, add an example to `docs/contributing/diagrams.md`.
 
-## Page markers (expanded by the hook)
+## Page markers (expanded by the generator)
 
 Put on their own line: `<!-- wiki:formulas -->`, `<!-- wiki:quotes -->`, `<!-- wiki:units -->`,
 `<!-- wiki:unit-header unit=N -->`, `<!-- wiki:unit-pages unit=N -->`,
 `<!-- wiki:syllabus unit=N -->`, `<!-- wiki:resources -->`, `<!-- wiki:notebooks -->`,
-`<!-- wiki:scans nb=ID -->`.
+`<!-- wiki:scans nb=ID -->`, `<!-- wiki:tags -->`. To add one: a function in `wiki/markers.py`
+(`fn(site, page, args) -> Markdown`), registered in `MARKERS`.
+
+## Page layout (wiki/templates/page.html)
+
+Every page is laid out like an encyclopedia article, built from its front matter and the nav:
+breadcrumbs → title + `description` as the lead → an **infobox** (unit, source chips that open the
+notebook scans, class dates, unit exam, formula count, last edited from git, `tags`) → the notes →
+"More in this section", "What links here" (backlinks), previous/next. The right column is a
+numbered **Contents** list of the page's `##`/`###` headings. So: keep `description` to one or two
+plain sentences, give every page clear `##` headings, and link related pages with normal Markdown
+links (`[RICE Tables](../03-equilibrium/rice-tables.md)`); links are checked at build time.
 
 ## Browser features (docs/assets/js/wiki.js)
 
-Greeting (`data/greetings.yml`, name in localStorage via Settings), random quote, study-time
-tracker (localStorage `apchem.study`), countdowns (from `data/schedule.yml`), PDF preview modal
-(`.rc-preview[data-pdf]`), scan lightbox (`.source-chip` / `.scan-open` with `data-nb`,
-`data-pages`, `data-base`), Formulas filter, Settings page (`#wiki-settings`). Personal data
-never leaves the browser.
+Theme toggle (auto/light/dark, localStorage `apchem.theme`), search over `search-index.json`
+(`/` or Ctrl/⌘ K), hover previews for links to other pages, Contents highlighting, mobile nav
+drawer, greeting (`data/greetings.yml`, name in localStorage via Settings), random quote,
+study-time tracker (localStorage `apchem.study`), countdowns (from `data/schedule.yml`), PDF preview
+modal (`.rc-preview[data-pdf]`), scan lightbox (`.source-chip` / `.scan-open` with `data-nb`,
+`data-pages`, `data-base`), Formulas filter, Settings page (`#wiki-settings`), 3D NH₃ on the home
+page. Personal data never leaves the browser.
 
 ## Notes on the stack
 
-Material for MkDocs is in maintenance mode (end of life May 2027); its successor
-**Zensical** reads the same `mkdocs.yml`. Hooks and custom fences may need porting if you migrate.
-Versions are pinned in `requirements.txt`.
+No theme framework: Python-Markdown + pymdown-extensions (math, details, snippets, custom fences),
+Jinja2 templates and PyYAML, pinned in `requirements.txt`. KaTeX (with mhchem) and Mermaid load
+from jsDelivr in the browser. All links in the output are relative, so the site works at
+`/APChem/` on GitHub Pages and at `/` locally.

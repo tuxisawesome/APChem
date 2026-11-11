@@ -20,7 +20,7 @@ What it does:
      which the wiki uses for source chips, the scans gallery and the stats.
 
 For a brand-new notebook, also create docs/scans/<id>.md (copy docs/scans/1.md and change
-the id) and add it to the `nav:` in mkdocs.yml under "Notebook Scans".
+the id) and add it to the `nav:` in site.yml under "Notebook Scans".
 """
 from __future__ import annotations
 

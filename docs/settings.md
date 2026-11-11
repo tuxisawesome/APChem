@@ -1,7 +1,6 @@
 ---
 title: Settings
 description: Your name, theme, quotes and study-time tracker.
-icon: material/cog-outline
 hide: [toc]
 ---
 

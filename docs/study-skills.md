@@ -1,7 +1,6 @@
 ---
 title: Study Skills
 description: How to process an FRQ, what quizzes look like, and habits from class.
-icon: material/lightbulb-on-outline
 sources:
   - {nb: "1", pages: "23, 49, 67, 77-78"}
 ---

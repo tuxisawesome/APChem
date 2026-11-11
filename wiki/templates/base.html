@@ -1,0 +1,85 @@
+{#- Page shell shared by every page: header, sidebar nav, main area, footer, scripts. -#}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ page.title }} · {{ config.site_name }}{% endblock %}</title>
+  <meta name="description" content="{{ description or config.site_description }}">
+  <link rel="icon" href="{% block root %}{{ rel('') }}{% endblock %}assets/img/flask.svg">
+  <script>
+    /* theme before paint (no flash): pref = auto | light | dark */
+    (function () {
+      var pref = "auto";
+      try { pref = JSON.parse(localStorage.getItem("apchem.theme")) || "auto"; } catch (e) {}
+      var dark = pref === "dark" || (pref === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme-pref", pref);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+  <link rel="stylesheet" href="{{ self.root() }}assets/css/wiki.css">
+  <script id="wiki-data" type="application/json">{{ public_json }}</script>
+  <meta name="wiki-root" content="{{ self.root() }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button type="button" class="icon-btn nav-toggle" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">{{ icon('menu') }}</button>
+      <a class="brand" href="{{ self.root() }}">
+        <img src="{{ self.root() }}assets/img/flask.svg" alt="" width="30" height="30">
+        <span>{{ config.site_name }}</span>
+      </a>
+      <button type="button" class="search-trigger" data-open-search aria-label="Search the wiki">
+        {{ icon('magnify') }}<span>Search notes…</span><kbd>/</kbd>
+      </button>
+      <div class="top-actions">
+        <a class="icon-btn" href="{{ self.root() }}formulas/" title="Formulas" aria-label="Formulas">{{ icon('function-variant') }}</a>
+        <button type="button" class="icon-btn theme-toggle" title="Theme: automatic" aria-label="Change theme">
+          <span class="ti ti-auto">{{ icon('brightness-auto') }}</span><span class="ti ti-light">{{ icon('weather-sunny') }}</span><span class="ti ti-dark">{{ icon('weather-night') }}</span>
+        </button>
+        <a class="icon-btn" href="{{ self.root() }}settings/" title="Settings" aria-label="Settings">{{ icon('cog-outline') }}</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout{% block layout_class %}{% endblock %}">
+    <nav class="site-nav" id="site-nav" aria-label="Wiki navigation">
+      <div class="site-nav-inner">{{ nav_html }}</div>
+    </nav>
+    <div class="nav-scrim" data-close-nav hidden></div>
+    <main id="content" class="main">{% block main %}{% endblock %}</main>
+    {% block aside %}{% endblock %}
+  </div>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span>{{ config.copyright }}</span>
+      <span class="sf-links"><a href="{{ self.root() }}">Home</a> · <a href="{{ self.root() }}formulas/">Formulas</a> · <a href="{{ self.root() }}scans/">Notebook scans</a> · <a href="{{ self.root() }}contributing/">Editing the wiki</a></span>
+    </div>
+  </footer>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/mhchem.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+  <script defer src="{{ self.root() }}assets/js/wiki.js"></script>
+  {% if has_mermaid %}
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default", fontFamily: "Geist, system-ui, sans-serif" });
+  </script>
+  {% endif %}
+  {% if dev %}
+  <script>
+    /* dev server live reload */
+    (function () { var v = null; setInterval(function () { fetch("/__version", { cache: "no-store" }).then(function (r) { return r.text(); })
+      .then(function (t) { if (v === null) v = t; else if (t !== v) location.reload(); }).catch(function () {}); }, 900); })();
+  </script>
+  {% endif %}
+</body>
+</html>

@@ -24,13 +24,13 @@ The AI will split the scans into page images, write the pages using my notebook'
 
 | I want to… | Edit |
 |---|---|
-| Change or add notes | `docs/units/<unit>/<page>.md` (+ `nav:` in `mkdocs.yml` for new pages) |
+| Change or add notes | `docs/units/<unit>/<page>.md` (+ `nav:` in `site.yml` for new pages) |
 | Add a teacher quote | `data/quotes.yml` |
 | Change greetings | `data/greetings.yml` |
 | Fix a unit/exam date | `data/schedule.yml` |
 | Add a reference PDF | put it in `docs/assets/resources/` and add it to `data/resources.yml` |
 | Add a scanned notebook | `python tools/add_notebook.py "Notebook.pdf" --id 10-3` |
-| Change the look | `docs/assets/css/wiki.css` |
+| Change the look | `docs/assets/css/wiki.css` (styles), `wiki/templates/` (page layout) |
 
 ## Writing pages by hand
 
@@ -38,10 +38,18 @@ The AI will split the scans into page images, write the pages using my notebook'
 2. Fill in the front matter (title, unit, which notebook pages it came from).
 3. Write the notes — see the [Style Guide](style-guide.md) for ☆ lines, formula boxes, columns, and
    the [Diagram Reference](diagrams.md) for beakers, graphs, RICE tables and Lewis structures.
-4. Add the page to `nav:` in `mkdocs.yml`.
-5. Preview with `mkdocs serve`, and check with `mkdocs build --strict` (it catches mistakes like a
-   page without formula boxes or a typo in a diagram).
+4. Add the page to `nav:` in `site.yml`.
+5. Preview with `python -m wiki serve`, and check with `python -m wiki build --strict` (it catches
+   mistakes like a page without formula boxes, a broken link or a typo in a diagram).
 
 ## Publishing
 
 Pushing to the `main` branch rebuilds and publishes the site automatically (about a minute).
+
+## How the site is built
+
+The wiki has its own small generator in the `wiki/` folder (plain Python, no theme framework):
+it reads `site.yml`, the Markdown pages in `docs/` and the data files in `data/`, and writes the
+finished site to `site/`. Each page gets breadcrumbs, an infobox with its notebook pages, a
+Contents list, links to related pages and "What links here", and a search index.
+
