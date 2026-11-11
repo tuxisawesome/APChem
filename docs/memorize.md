@@ -3,8 +3,7 @@ title: Memorize
 description: The charts and lists to know by heart — none of these are on the AP reference sheet.
 icon: material/brain
 sources:
-  - {nb: "10-1", pages: "32"}
-  - {nb: "10-2", pages: "1"}
+  - {nb: "1", pages: "32-33"}
 dates: ["9/16/26"]
 ---
 

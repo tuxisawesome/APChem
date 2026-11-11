@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import yaml
 
-from . import apparatus, energy, graph, lewis, rice
+from . import apparatus, energy, graph, lewis, phscale, rice
 from ._svg import DiagramError, esc
 
 KINDS = {
@@ -25,6 +25,7 @@ KINDS = {
     "energy": energy.render,
     "apparatus": apparatus.render,
     "lewis": lewis.render,
+    "phscale": phscale.render,
 }
 
 

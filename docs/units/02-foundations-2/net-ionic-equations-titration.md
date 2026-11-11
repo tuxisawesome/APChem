@@ -3,8 +3,7 @@ title: Net Ionic Equations & Titration
 unit: 2
 description: Reactive vs. spectator ions, writing net ionic equations (acid + base and a precipitation), and the titration setup with its mole ratio.
 sources:
-  - {nb: "10-1", pages: "18"}
-  - {nb: "10-1", pages: "22"}
+  - {nb: "1", pages: "18, 22"}
 dates: ["9/2/26", "9/8/26"]
 tags: [net ionic equations, spectator ions, titration, precipitation]
 ---

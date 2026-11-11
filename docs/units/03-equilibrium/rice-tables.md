@@ -3,7 +3,7 @@ title: RICE Tables
 unit: 3
 description: When to use a RICE table and how to set one up, solve it, and use it to find Kc (PCl5 example).
 sources:
-  - {nb: "10-2", pages: "11-14"}
+  - {nb: "1", pages: "43-46"}
 dates: ["9/23/26", "9/24/26"]
 tags: [equilibrium, RICE, Kc]
 ---

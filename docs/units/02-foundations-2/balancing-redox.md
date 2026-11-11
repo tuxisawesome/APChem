@@ -3,8 +3,7 @@ title: Balancing Redox Reactions
 unit: 2
 description: Balancing redox reactions with half reactions in acidic (and neutral) medium, the extra (OH)⁻ step for basic medium, and finding n = mol e⁻.
 sources:
-  - {nb: "10-1", pages: "28-31"}
-  - {nb: "10-2", pages: "1"}
+  - {nb: "1", pages: "28-31, 33"}
 dates: ["9/11/26", "9/14/26", "9/16/26"]
 tags: [redox, half reactions, balancing, acidic medium, basic medium]
 ---

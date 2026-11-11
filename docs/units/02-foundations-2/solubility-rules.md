@@ -3,8 +3,7 @@ title: Solubility Rules
 unit: 2
 description: The two solubility charts to memorize (soluble / insoluble with exceptions and their mnemonics), heavy metals, and the Latin -ous / -ic ion names.
 sources:
-  - {nb: "10-1", pages: "19-20"}
-  - {nb: "10-1", pages: "32"}
+  - {nb: "1", pages: "19-20, 32"}
 dates: ["9/8/26", "9/16/26"]
 tags: [solubility, solubility rules, net ionic equations, mnemonics, naming]
 formulas: none

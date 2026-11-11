@@ -3,8 +3,7 @@ title: Study Skills
 description: How to process an FRQ, what quizzes look like, and habits from class.
 icon: material/lightbulb-on-outline
 sources:
-  - {nb: "10-2", pages: "17"}
-  - {nb: "10-1", pages: "23"}
+  - {nb: "1", pages: "23, 49, 67, 77-78"}
 ---
 
 Tips and routines from class that apply to every unit.
@@ -35,6 +34,13 @@ Two things that come up in almost every equilibrium FRQ:
 - **Mole fraction** $= \dfrac{\text{mol of component}}{\text{total moles}}$
 - $K_p = K_c(RT)^{\Delta n}$ — see [Manipulating K](units/03-equilibrium/manipulating-k.md)
 
+## What costs points
+
+--8<-- "grading-rules.md"
+
+"Throwing one sentence on a FRQ will not be graded." Show the full structure every time — see
+[Calculating pH](units/04-acid-base/calculating-ph.md) for what that looks like. {.star}
+
 ## Always use dimensional analysis
 
 **Dimensional analysis is required on the AP test!** Show every conversion factor with its units so
@@ -52,6 +58,19 @@ the units cancel to the answer. {.star}
 - **Assignments are on the tracking document** — follow it every day.
 - **Review every day**, not just before tests.
 - **Be proactive** — ask for help early (office hours: first 20 minutes of lunch, Room 247).
+
+## Lab report format
+
+Any time there is a lab, write it up using this format:
+
+1. **Purpose**
+2. **Chemicals used**
+3. **Safety in the lab** — attire and chemicals
+4. **Procedure** — use "we", past tense
+5. **Calculations**
+6. **Conclusions**
+7. **Pre-lab questions** — on separate paper
+8. **Post-lab questions** — on separate paper
 
 ## Mnemonics
 

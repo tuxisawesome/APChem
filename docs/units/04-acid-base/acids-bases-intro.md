@@ -3,7 +3,7 @@ title: Acids and Bases
 unit: 4
 description: Review of acids and bases from Honors Chemistry — the hydronium ion vs. the hydrogen ion, and the strong acids and bases to memorize.
 sources:
-  - {nb: "10-2", pages: "21"}
+  - {nb: "1", pages: "53"}
 dates: ["10/7/26"]
 tags: [acids, bases, hydronium, hydrogen ion]
 ---

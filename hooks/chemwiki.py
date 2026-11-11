@@ -18,7 +18,7 @@ Markers you can put in any page (each on its own line):
   <!-- wiki:syllabus unit=3 -->       syllabus outline (from data/schedule.yml)
   <!-- wiki:resources -->             PDF cards with Preview / Download
   <!-- wiki:notebooks -->             list of scanned notebooks
-  <!-- wiki:scans nb=10-2 -->         thumbnail gallery of one notebook
+  <!-- wiki:scans nb=1 -->            thumbnail gallery of one notebook
 
 Validation (warnings → `mkdocs build --strict` fails):
   • unit topic pages need front matter: title, unit (matching the folder), sources
@@ -147,6 +147,14 @@ def url_from(page, target_url: str) -> str:
 
 def esc(s) -> str:
     return html.escape(str(s), quote=True)
+
+
+def nb_title(nb) -> str:
+    """Display title of a notebook id from data/notebooks.yml ("Notebook 1")."""
+    for n in STATE["wiki"]["notebooks"]:
+        if str(n["id"]) == str(nb):
+            return str(n.get("title") or f"Notebook {nb}")
+    return f"Notebook {nb}"
 
 
 def unit_by_number(n):
@@ -331,7 +339,7 @@ def _validate(page, markdown):
     nbs = {str(n["id"]): int(n.get("pages", 0)) for n in STATE["wiki"]["notebooks"]}
     for s in meta.get("sources") or []:
         if not isinstance(s, dict) or "nb" not in s or "pages" not in s:
-            log.warning(f"{src}: each source should look like {{nb: \"10-2\", pages: \"11-14\"}}")
+            log.warning(f"{src}: each source should look like {{nb: \"1\", pages: \"43-46\"}}")
             continue
         nb = str(s["nb"])
         if nb not in nbs:
@@ -419,8 +427,8 @@ def _source_chips(page) -> str:
             continue
         chips.append(
             f'<button type="button" class="source-chip" data-nb="{esc(s["nb"])}" data-pages="{",".join(map(str, pages))}"'
-            f' data-base="{esc(base)}" title="View the original notebook pages">'
-            f'<span class="sc-icon" aria-hidden="true"></span>Notebook {esc(s["nb"])} · {fmt_pages(pages)}</button>')
+            f' data-base="{esc(base)}" data-title="{esc(nb_title(s["nb"]))}" title="View the original notebook pages">'
+            f'<span class="sc-icon" aria-hidden="true"></span>{esc(nb_title(s["nb"]))} · {fmt_pages(pages)}</button>')
     dates = meta.get("dates") or []
     dates_html = ""
     if dates:
@@ -607,8 +615,10 @@ def m_quotes(page, args):
             src = q.get("source") or {}
             where = ""
             if src.get("nb") and src.get("page"):
-                scan = rel(f"scans/{src['nb']}.md", page)
-                where = f" · [Notebook {src['nb']} p. {src['page']}]({scan}#p{int(src['page']):02d})"
+                # raw HTML link (the quote footer is raw HTML, so Markdown links aren't processed)
+                scan_url = url_from(page, STATE["file_urls"].get(f"scans/{src['nb']}.md", "scans/"))
+                where = (f' · <a href="{esc(scan_url)}#p{int(src["page"]):02d}">'
+                         f'{esc(nb_title(src["nb"]))} p. {int(src["page"])}</a>')
             ctx = f"<br><small>{esc(q['context'])}</small>" if q.get("context") else ""
             out.append(f'<blockquote class="teacher-quote" markdown>\n<p class="tq-text">“{esc(q["text"])}”</p>\n'
                        f'<p class="tq-who">— {esc(q.get("who", "Ms. Boppana"))}{where}{ctx}</p>\n</blockquote>\n')
@@ -666,7 +676,7 @@ def m_unit_pages(page, args):
     out = ['<div class="grid cards topic-cards" markdown>\n']
     for src, meta in pages:
         desc = meta.get("description", "")
-        srcs = ", ".join(f"{s.get('nb')} {fmt_pages(parse_pages(s.get('pages', '')))}"
+        srcs = ", ".join(f"{nb_title(s.get('nb'))} {fmt_pages(parse_pages(s.get('pages', '')))}"
                          for s in (meta.get("sources") or []) if isinstance(s, dict))
         out.append(f'-   **[{meta.get("title", src)}]({rel(src, page)})**\n\n    ---\n\n    {desc}\n\n'
                    f'    <small>:material-notebook-outline: {esc(srcs)}</small>\n')
@@ -747,8 +757,8 @@ def m_scans(page, args):
             f'{esc(STATE["page_meta"].get(src, {}).get("title", src))}</a>' for src in used)
         tiles.append(
             f'<figure class="scan-tile" id="p{p:02d}">'
-            f'<button type="button" class="scan-open" data-nb="{esc(nb)}" data-pages="{p}" data-base="{esc(url_from(page, "assets/scans/"))}">'
-            f'<img src="{base}thumb/p{p:02d}.webp" alt="Notebook {esc(nb)} page {p}" loading="lazy"></button>'
+            f'<button type="button" class="scan-open" data-nb="{esc(nb)}" data-title="{esc(nb_title(nb))}" data-pages="{p}" data-base="{esc(url_from(page, "assets/scans/"))}">'
+            f'<img src="{base}thumb/p{p:02d}.webp" alt="{esc(nb_title(nb))} page {p}" loading="lazy"></button>'
             f'<figcaption><span class="st-num">p. {p}</span>{links}</figcaption></figure>')
     return f'<div class="scan-grid">{"".join(tiles)}</div>\n'
 

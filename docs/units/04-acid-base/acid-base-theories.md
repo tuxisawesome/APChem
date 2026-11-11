@@ -3,7 +3,7 @@ title: Acid–Base Theories
 unit: 4
 description: The three acid–base theories — 1. Arrhenius, 2. Lowry–Brønsted (with conjugate acid–base pairs) and 3. Lewis (electron pairs).
 sources:
-  - {nb: "10-2", pages: "22-26"}
+  - {nb: "1", pages: "54-58"}
 dates: ["10/7/26"]
 tags: [acids, bases, Arrhenius, Lowry–Brønsted, conjugate pairs, Lewis]
 ---

@@ -3,7 +3,7 @@ title: Reaction Quotient
 unit: 3
 description: The reaction quotient Q (calculated at time 0) and how comparing Q to K predicts whether the forward or reverse reaction is favored.
 sources:
-  - {nb: "10-2", pages: "8-11"}
+  - {nb: "1", pages: "40-43"}
 dates: ["9/23/26"]
 tags: [equilibrium, Q, reaction quotient]
 ---

@@ -288,7 +288,8 @@
        <iframe class="wm-pdf" src="${abs}#view=FitH" title="${esc(title)}"></iframe>`, "wm-pdfview");
   }
 
-  function openLightbox(nb, pages, base, startIdx) {
+  function openLightbox(nb, pages, base, startIdx, title) {
+    const nbName = title || `Notebook ${nb}`;
     let i = startIdx || 0;
     const m = openModal(`<header class="wm-head"><b class="lb-title"></b><span class="wm-actions">
         <a class="md-button lb-all" href="${ROOT}scans/${encodeURIComponent(nb)}/">All pages</a>
@@ -304,8 +305,8 @@
     function show() {
       const p = pages[i];
       $(".lb-img", m).src = src(p);
-      $(".lb-img", m).alt = `Notebook ${nb}, page ${p}`;
-      $(".lb-title", m).textContent = `Notebook ${nb} · page ${p}` + (pages.length > 1 ? `  (${i + 1} of ${pages.length})` : "");
+      $(".lb-img", m).alt = `${nbName}, page ${p}`;
+      $(".lb-title", m).textContent = `${nbName} · page ${p}` + (pages.length > 1 ? `  (${i + 1} of ${pages.length})` : "");
       $(".lb-full", m).href = src(p);
       $(".lb-all", m).href = `${ROOT}scans/${encodeURIComponent(nb)}/#p${pad(p)}`;
       $(".lb-prev", m).disabled = i === 0;
@@ -327,7 +328,7 @@
     if (chip) {
       e.preventDefault();
       const pages = String(chip.dataset.pages || "1").split(",").map(Number).filter(Boolean);
-      openLightbox(chip.dataset.nb, pages, chip.dataset.base || ROOT + "assets/scans/", 0);
+      openLightbox(chip.dataset.nb, pages, chip.dataset.base || ROOT + "assets/scans/", 0, chip.dataset.title);
     }
   });
 

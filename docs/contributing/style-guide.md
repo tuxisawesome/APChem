@@ -19,7 +19,7 @@ title: RICE Tables                      # page title (don't add a "# Heading" â€
 unit: 3                                 # must match the folder number
 description: One sentence for cards and search.
 sources:                                # which notebook pages this came from (opens the scans)
-  - {nb: "10-2", pages: "11-14"}
+  - {nb: "1", pages: "43-46"}
 dates: ["9/23/26", "9/24/26"]           # class dates, as written in the notebook
 tags: [equilibrium, RICE]               # optional
 ---

@@ -3,7 +3,7 @@ title: Chemical Equilibrium
 unit: 3
 description: What chemical equilibrium is (rate of forward rxn = rate of reverse rxn), the graphs that show it, and how to write Kc and Kp expressions.
 sources:
-  - {nb: "10-2", pages: "2-5"}
+  - {nb: "1", pages: "34-37"}
 dates: ["9/22/26"]
 tags: [equilibrium, Kc, Kp, activity]
 ---

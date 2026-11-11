@@ -3,7 +3,7 @@ title: Combustion Analysis
 unit: 1
 description: Deriving the empirical and molecular formula of a carbon compound from the grams of CO₂ and H₂O made when it burns.
 sources:
-  - {nb: "10-1", pages: "11-12"}
+  - {nb: "1", pages: "11-12"}
 dates: ["8/28/26"]
 tags: [combustion analysis, empirical formula, molecular formula]
 ---

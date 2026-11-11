@@ -155,6 +155,9 @@ nav:
           - units/04-acid-base/acids-bases-intro.md
           - units/04-acid-base/acid-base-theories.md
           - units/04-acid-base/amphoteric-polyprotic.md
+          - units/04-acid-base/ph-ka-kb.md
+          - units/04-acid-base/calculating-ph.md
+          - units/04-acid-base/buffers.md
       - "Unit 5 · Thermodynamics":
           - units/05-thermodynamics/index.md
           - units/05-thermodynamics/thermochemistry-basics.md
@@ -174,8 +177,7 @@ nav:
       - Teacher Quotes: quotes.md
       - Notebook Scans:
           - scans/index.md
-          - scans/10-1.md
-          - scans/10-2.md
+          - scans/1.md
       - Tags: tags.md
   - Settings & Help:
       - Settings: settings.md

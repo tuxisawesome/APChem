@@ -63,12 +63,17 @@ Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
    `data/quotes.yml`.
 6. `mkdocs build --strict`.
 
-### Add a new scanned notebook
+### Add scanned notebook pages
+All notes so far are in **one physical book, "Notebook 1"** (id `"1"`, pages in date order).
+New scans of the same book are **appended** so existing page numbers never change:
 ```bash
 .venv/bin/pip install -r tools/requirements.txt   # Pillow; also needs `brew install poppler`
-.venv/bin/python tools/add_notebook.py "path/to/Notebook 10-3.pdf" --id 10-3 --dates "11/11/26 – 12/1/26"
+.venv/bin/python tools/add_notebook.py "path/to/new pages.pdf" --id 1 --append --dates "8/25/26 – 12/1/26"
 ```
-Then create `docs/scans/10-3.md` (copy `docs/scans/10-2.md`, change the id) and add it to `nav:`.
+The new pages get the next numbers (84, 85, …); cite them as `{nb: "1", pages: "84-90"}`.
+Only for a genuinely **new physical notebook**: run without `--append` and with a new id/title
+(`--id 2 --title "Notebook 2"`), then create `docs/scans/2.md` (copy `docs/scans/1.md`, change
+the id) and add it to `nav:`.
 
 ### Add a quote / greeting / exam date / resource
 Edit the YAML file in `data/` — the formats are described at the top of each file.
@@ -114,7 +119,7 @@ Units and sections come from `data/schedule.yml`; unit index pages just contain 
 
 ## Diagrams (fenced YAML → SVG)
 
-Kinds: `rice`, `graph`, `energy`, `apparatus`, `lewis` (plus `mermaid` flowcharts).
+Kinds: `rice`, `graph`, `energy`, `apparatus`, `lewis`, `phscale` (plus `mermaid` flowcharts).
 Full syntax with live examples: `docs/contributing/diagrams.md`; each module's docstring in
 `hooks/diagrams/` lists every option and anchor. Text in diagrams auto-subscripts formulas
 (`H2O`, `NH4+`), and supports `^{}` / `_{}`.

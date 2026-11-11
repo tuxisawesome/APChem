@@ -3,7 +3,7 @@ title: Thermochemistry
 unit: 5
 description: Heat in reactions — measuring heat through temperature change (Δt), energy units, water facts and specific heat, system vs. surroundings, and endothermic vs. exothermic.
 sources:
-  - {nb: "10-2", pages: "29-30"}
+  - {nb: "1", pages: "79-80"}
 dates: ["11/10/26"]
 tags: [thermochemistry, heat, specific heat, endothermic, exothermic, system, surroundings]
 ---

@@ -3,13 +3,10 @@
 # Page images live in docs/assets/scans/<id>/pNN.webp (thumbs in thumb/).
 # Wiki pages cite these with front matter like:
 #   sources:
-#     - {nb: "10-2", pages: "11-14"}
+#     - {nb: "1", pages: "43-46"}
+# To add more pages to a notebook:  python tools/add_notebook.py NEW.pdf --id 1 --append
 notebooks:
-- id: 10-1
-  title: Notebook 10-1
-  pages: 32
-  dates: 8/25/26 – 9/16/26
-- id: 10-2
-  title: Notebook 10-2
-  pages: 33
-  dates: 9/16/26 – 11/10/26
+- id: "1"
+  title: Notebook 1
+  pages: 83
+  dates: 8/25/26 – 11/10/26

@@ -22,7 +22,7 @@ items:                                   # one row; use `rows: [[...], [...]]` f
       bonds: [[B, Ha], [B, Hb], [B, Hc]]
     brace: "Accepts e⁻ pair: Acid"
   - text: "H+"                           # plain formula item (chem markup)
-arrows:                                  # curved arrows: from/to = item, item.ATOM, item.ATOM.lone.n
+arrows:                                  # curved arrows: from/to = item (= item.top), item.bottom, item.ATOM, item.ATOM.lone.n
   - {from: nh3.N.lone.n, to: bh3.B, label: Docks, bend: -40}
 braces:                                  # a brace spanning several items
   - {from: hcl, to: naoh, text: Main acid/base}
@@ -282,16 +282,21 @@ def render(data: dict, **_) -> str:
             if it.get("id"):
                 placed[str(it["id"])] = {"kind": kind, "obj": obj, "ox": ox, "oy": oy, "bb": ib}
             # under-label or brace
+            under = BBox().merge(ib)
             if it.get("brace"):
                 svg, bbb = _brace(ib.x0, ib.x1, ib.y1 + 6, it["brace"])
                 out.append(svg)
                 row_bb.merge(bbb)
+                under.merge(bbb)
             elif it.get("label"):
                 lines = str(it["label"]).split("\n")
                 for k, ln in enumerate(lines):
                     ty = ib.y1 + 18 + k * 15
                     out.append(rich(ln, ib.cx, ty, 13, "middle", "dg-text dg-muted-text"))
                     row_bb.add_text(ln, ib.cx, ty, 13, "middle")
+                    under.add_text(ln, ib.cx, ty, 13, "middle")
+            if it.get("id"):
+                placed[str(it["id"])]["under"] = under  # item + its label/brace (for .bottom arrows)
         full.merge(row_bb)
         row_y = row_bb.y1 + 34
 
@@ -300,8 +305,11 @@ def render(data: dict, **_) -> str:
         if parts[0] not in placed:
             raise DiagramError(f"lewis: {where}: unknown id {parts[0]!r} (ids: {', '.join(placed) or 'none — add id: to items'})")
         p = placed[parts[0]]
-        if len(parts) == 1:
+        if len(parts) == 1 or parts[1] in ("top", "bottom"):
             b = p["bb"]
+            if len(parts) > 1 and parts[1] == "bottom":
+                u = p.get("under", b)
+                return b.cx, u.y1 + 3, 0
             return b.cx, b.y0 - 2, 0
         if p["kind"] != "mol":
             raise DiagramError(f"lewis: {where}: {parts[0]!r} is not a molecule")

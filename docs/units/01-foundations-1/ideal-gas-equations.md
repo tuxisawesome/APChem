@@ -3,7 +3,7 @@ title: Ideal Gas Equations
 unit: 1
 description: The three forms of the ideal gas equation, R and the unit conversions, and Dalton's law of partial pressures for a gas collected over water.
 sources:
-  - {nb: "10-1", pages: "5-6"}
+  - {nb: "1", pages: "5-6"}
 dates: ["8/26/26"]
 tags: [gases, ideal gas law, Dalton's law]
 ---

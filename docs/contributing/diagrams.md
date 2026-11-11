@@ -321,6 +321,26 @@ Double/triple bonds: `[C, O, 2]`. A coordinate bond drawn as an arrow: `[N, B, d
 Several rows: use `rows: [[...items...], [...items...]]`. Braces across items:
 `braces: [{from: id1, to: id2, text: "Main acid/base"}]`.
 
+## `phscale` — the pH scale
+
+````markdown
+```phscale
+markers:
+  - {pH: 2, label: "pH 2"}
+  - {pH: 12, label: "pH 12"}
+caption: Pins mark example pH values.
+```
+````
+
+```phscale
+markers:
+  - {pH: 2, label: "pH 2"}
+  - {pH: 12, label: "pH 12"}
+caption: Pins mark example pH values.
+```
+
+Set `strength: false` to hide the "weak → strong" arrows.
+
 ## Other visuals (no code block needed)
 
 - **Math & equations:** `$\ce{N2 + 3H2 <=> 2NH3}$` → $\ce{N2 + 3H2 <=> 2NH3}$;

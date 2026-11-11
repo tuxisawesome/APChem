@@ -3,7 +3,7 @@ title: Calorimetry
 unit: 5
 description: How heat (q) is measured — coffee-cup vs. bomb calorimeters, heat capacity C vs. specific heat c, and the equations for the heat of a reaction (dissolution and combustion).
 sources:
-  - {nb: "10-2", pages: "31-33"}
+  - {nb: "1", pages: "81-83"}
 dates: ["11/10/26"]
 tags: [calorimetry, calorimeter, heat capacity, specific heat, q, dissolution, combustion]
 ---

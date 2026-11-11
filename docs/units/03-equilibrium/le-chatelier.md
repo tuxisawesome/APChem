@@ -3,8 +3,7 @@ title: Le Chatelier
 unit: 3
 description: Le Chatelier's principle and how changes in concentration, pressure and temperature shift an equilibrium.
 sources:
-  - {nb: "10-2", pages: "8"}
-  - {nb: "10-2", pages: "14-16"}
+  - {nb: "1", pages: "40, 46-48"}
 dates: ["9/23/26", "9/24/26"]
 tags: [equilibrium, Le Chatelier, stress]
 ---

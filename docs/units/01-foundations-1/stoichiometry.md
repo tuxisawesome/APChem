@@ -3,7 +3,7 @@ title: Stoichiometry
 unit: 1
 description: The stoichiometry steps, from mole ratio to limiting/excess reagent, theoretical yield and % yield, worked through with NaOH + CaCl₂.
 sources:
-  - {nb: "10-1", pages: "1-4"}
+  - {nb: "1", pages: "1-4"}
 dates: ["8/25/26"]
 tags: [stoichiometry, limiting reagent, percent yield]
 ---

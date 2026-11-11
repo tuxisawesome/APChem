@@ -3,7 +3,7 @@ title: Topic Title
 unit: 5
 description: One sentence about what this page covers (shown on cards and in search).
 sources:
-  - {nb: "10-2", pages: "29-30"}
+  - {nb: "1", pages: "79-80"}
 dates: ["11/10/26"]
 tags: [thermochemistry]
 # formulas: none        ← uncomment ONLY if this page truly has no equations/constants

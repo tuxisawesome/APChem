@@ -3,7 +3,7 @@ title: Empirical & Molecular Formulas
 unit: 1
 description: Empirical vs. molecular formula, n = molecular mass ÷ empirical mass, the g → mol → mol ratio table with rounding rules, and the unknown P & F compound example.
 sources:
-  - {nb: "10-1", pages: "5-10"}
+  - {nb: "1", pages: "5-10"}
 dates: ["8/26/26", "8/27/26"]
 tags: [empirical formula, molecular formula, ideal gas law]
 ---

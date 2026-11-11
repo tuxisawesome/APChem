@@ -3,8 +3,7 @@ title: Manipulating K
 unit: 3
 description: Kc or Kp equations for different conditions — reversing a reaction, multiplying it by n, converting between Kp and Kc, and adding elementary steps.
 sources:
-  - {nb: "10-2", pages: "6-7"}
-  - {nb: "10-2", pages: "17"}
+  - {nb: "1", pages: "38-39, 49"}
 dates: ["9/22/26", "9/25/26"]
 tags: [equilibrium, Kc, Kp, Hess's law, mole fraction]
 ---

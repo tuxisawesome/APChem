@@ -1,10 +1,10 @@
 ---
 title: Amphoteric, Amphiprotic & Polyprotic Acids
 unit: 4
-description: Compounds that behave like both an acid and a base (amphoteric vs. amphiprotic), which H in an oxyacid is the acidic H⁺, and monoprotic / diprotic / triprotic acids.
+description: Compounds that behave like both an acid and a base (amphoteric vs. amphiprotic), which H in an oxyacid is the acidic H⁺, and monoprotic / diprotic / triprotic acids (with the overall K of H₃PO₄).
 sources:
-  - {nb: "10-2", pages: "27-28"}
-dates: ["10/7/26"]
+  - {nb: "1", pages: "59-61"}
+dates: ["10/7/26", "10/8/26"]
 tags: [amphoteric, amphiprotic, oxyacids, polyprotic acids, sulfuric acid]
 ---
 
@@ -114,4 +114,28 @@ at a time.
 In these steps, $\ce{H2SO4}$ is a **strong acid**, but $\ce{HSO4-}$ is a **weak acid**.
 
 **Triprotic acid**
-:   Works the same way, with three protons and three steps.
+:   Three protons, three steps. Phosphoric acid, $\ce{H3PO4}$, is the classic example.
+
+!!! formula "Triprotic acid steps (H₃PO₄)"
+    1. $\ce{H3PO4 <=> H2PO4- + H+}$
+    2. $\ce{H2PO4- <=> HPO4^2- + H+}$
+    3. $\ce{HPO4^2- <=> PO4^3- + H+}$
+
+$\ce{H3PO4}$ is a **weak acid**, so every step always uses the double arrow ($\rightleftharpoons$). {.star}
+
+### Adding the steps (Hess's law application)
+
+Adding the three ionization steps gives the overall reaction. Just like
+[adding reactions](../03-equilibrium/manipulating-k.md) in equilibrium, the $K$ values
+**multiply**.
+
+| Step | Reaction | $K$ |
+|---|---|---|
+| 1 | $\ce{H3PO4 <=> H2PO4- + H+}$ | $K_1$ |
+| 2 | $\ce{H2PO4- <=> HPO4^2- + H+}$ | $K_2$ |
+| 3 | $\ce{HPO4^2- <=> PO4^3- + H+}$ | $K_3$ |
+| **Sum** | $\ce{H3PO4 <=> PO4^3- + 3H+}$ | $K = K_1 K_2 K_3$ |
+
+!!! formula "Overall K of a polyprotic acid"
+    $$K = K_1 \cdot K_2 \cdot K_3$$
+    The intermediates ($\ce{H2PO4-}$, $\ce{HPO4^2-}$) cancel when the steps are added.
