@@ -1,7 +1,7 @@
 ---
 title: Strong & Weak Acids, Neutralization
 unit: 2
-description: Strong vs. weak acids (one direction → vs. two directions ⇌), molarity, neutralization with the acid-spill example, and the reaction types key.
+description: Strong vs. weak acids (one direction → vs. two directions ⇌), molarity with acetic acid examples, neutralization with the acid-spill example, and the reaction types key.
 sources:
   - {nb: "1", pages: "15-17"}
 dates: ["9/2/26"]
@@ -60,6 +60,30 @@ solution.
 !!! formula "Molarity"
     $$\text{Molar}\ (M) = \frac{\text{mol}}{\text{L sln}}$$
     For example, $18M = \dfrac{18\ \text{mol}}{1\ \text{L}}$.
+
+    Rearranged: $\text{mol} = M\cdot \text{L}$ and $\text{L} = \dfrac{\text{mol}}{M}$.
+
+Molarity problems usually chain together two conversions: grams ↔ moles (with the molar mass) and
+moles ↔ liters (with the molarity). Always change mL to L first.
+
+!!! example "Example: molarity of an acetic acid solution"
+    **Problem:** 22 g of acetic acid, $\ce{CH3COOH}$ (mol mass = 60 g/mol), is dissolved to make
+    250 mL of solution. What is the molarity?
+
+    $$\text{mol}\ \ce{CH3COOH} = \frac{22\ \cancel{\text{g}}}{60\ \cancel{\text{g}}/\text{mol}} = 0.367\ \text{mol}$$
+
+    $$M = \frac{\text{mol}}{\text{L}} = \frac{0.367\ \text{mol}}{0.250\ \text{L}} = \boxed{1.47\ M}$$
+
+!!! example "Example: grams of solute from molarity"
+    **Problem:** How many grams of acetic acid ($60.05\ \text{g/mol}$) are in 30.0 mL of a
+    2.5 M solution?
+
+    $$\text{mol} = M\cdot\text{L} = 2.5\ \frac{\text{mol}}{\cancel{\text{L}}}\cdot 0.0300\ \cancel{\text{L}} = 0.075\ \text{mol}$$
+
+    $$\text{g} = \text{mol}\cdot(\text{mol mass}) = 0.075\ \cancel{\text{mol}}\cdot 60.05\ \frac{\text{g}}{\cancel{\text{mol}}} = \boxed{4.50\ \text{g}}$$
+
+Acetic acid is a **weak acid** (it's not on the strong acid list), so like HF its solutions only
+partly ionize, in two directions (⇌).
 
 ## Neutralization
 

@@ -1,7 +1,7 @@
 ---
 title: Naming Ions & Oxyacids
 unit: 1
-description: The "No Smoking Pot" polyatomic ion grid, special polyatomic ions, -ous/-ic names, turning a polyatomic ion into an oxyacid, and the strong acids and bases.
+description: The “No Smoking Pot” polyatomic ion grid, special polyatomic ions, -ous/-ic names, turning a polyatomic ion into an oxyacid, and the strong acids and bases.
 sources:
   - {nb: "1", pages: "13-14, 32-33"}
 dates: ["8/31/26", "9/16/26"]

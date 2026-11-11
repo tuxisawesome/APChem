@@ -1,7 +1,7 @@
 ---
 title: Nitrogen Bases & Ammonia
 unit: 2
-description: Why nitrogen-containing bases (ammonia and the amines) grab H⁺ with their lone pair — ammonia hydrolysis, and acetate ion → acetic acid.
+description: Why nitrogen-containing bases (ammonia and the amines) grab H⁺ with their lone pair — ammonia vs. amine, ammonia hydrolysis, amine + strong acid, and acetate ion → acetic acid.
 sources:
   - {nb: "1", pages: "20-22, 33"}
 dates: ["9/8/26", "9/16/26"]
@@ -33,10 +33,59 @@ items:
 </div>
 </div>
 
+The three unpaired electrons make the three bonds (to H or to carbon groups). Those bonds are
+**not reacting**; the lone pair is the part that **reacts**.
+
+!!! teacher "Ms. Boppana"
+    "Freaking lone pair!" The lone pair on nitrogen is what reacts, every time.
+
+```lewis
+items:
+  - molecule:
+      atoms:
+        N: {at: [0, 0], lone: [n], circle: [n]}
+        H1: {at: [-1, 0]}
+        H2: {at: [1, 0]}
+        H3: {at: [0, 1]}
+      bonds: [[N, H1], [N, H2], [N, H3]]
+    label: "ammonia, NH3"
+  - {text: "vs"}
+  - molecule:
+      atoms:
+        N: {at: [0, 0], lone: [n], circle: [n]}
+        Q1: {el: "?", at: [-1, 0]}
+        Q2: {el: "?", at: [1, 0]}
+        Q3: {el: "?", at: [0, 1]}
+      bonds: [[N, Q1], [N, Q2], [N, Q3]]
+    label: "amine\n(? = H or a carbon group)"
+caption: "The circled lone pair is reacting; the bonds to H (or ?) are not reacting."
+```
+
 ## Amines
 
 **Amines** are made from ammonia by replacing H atoms with methyl groups ($\ce{CH3}$). Nitrogen
 still makes three bonds, and its lone pair is untouched.
+
+The names are easy to mix up, so count the m's:
+
+<div class="mnemonic" markdown>
+
+| Key | Name | What it is |
+|---|---|---|
+| a**mm**onia / a**mm**ine | ammonia (= ammine) | $\ce{NH3}$ itself |
+| a**m**ine | amine | $\ce{NH3}$ with one or more H replaced by a carbon group |
+
+</div>
+
+Each "?" spot on nitrogen can be an H or a carbon group. The common carbon groups are:
+
+| Group | Formula | Amine with one group |
+|---|---|---|
+| **methyl** | $\ce{CH3}$ | methylamine, $\ce{CH3NH2}$ |
+| **ethyl** | $\ce{C2H5}$ | ethylamine, $\ce{C2H5NH2}$ |
+| **propyl** | $\ce{C3H7}$ | propylamine, $\ce{C3H7NH2}$ |
+
+The methyl amines (one, two or three $\ce{CH3}$ groups):
 
 | Name | Formula | Made from $\ce{NH3}$ by |
 |---|---|---|
@@ -139,6 +188,9 @@ caption: The H⁺ latches onto nitrogen's lone pair, forming the ammonium ion.
 !!! formula "Ammonia hydrolysis (molecular eqn)"
     $$\ce{NH3 + HOH -> NH4OH}$$
 
+    $\ce{NH4OH}$ is **ammonium hydroxide**. It is soluble (ammonium compounds always are), so in
+    the net ionic eqn it is written as the ions $\ce{NH4+}$ and $\ce{OH-}$.
+
 !!! formula "Ammonia hydrolysis (net ionic eqn)"
     $$\underbrace{\ce{NH3}}_{\text{Molecular}} + \underbrace{\ce{HOH}}_{\text{liquid}} \rightarrow \ce{NH4+ + OH-}$$
 
@@ -148,6 +200,75 @@ together because it is the liquid.
 If it produces $\ce{OH-}$ it is basic. If it produces $\ce{H+}$ it is acidic. {.star}
 
 There is more to come in [Acids & Bases](../04-acid-base/index.md).
+
+## Amine + strong acid
+
+An amine reacts with a strong acid the same way ammonia reacts with water: the $\ce{H+}$ latches
+onto nitrogen's lone pair. With a strong acid there is a lot more $\ce{H+}$ to grab.
+
+!!! example "Example: methylamine + hydrochloric acid"
+    $$\ce{CH3NH2 + HCl ->}$$
+
+    | Reactant | What it is | In the ionic equation |
+    |---|---|---|
+    | $\ce{CH3NH2}$ (methylamine) | Weak base, **not an ionic compound** | Stays together |
+    | $\ce{HCl}$ (hydrochloric acid) | **Strong acid**, soluble | Splits into ions: $\ce{H+ + Cl-}$ |
+
+    ```lewis
+    items:
+      - id: ma
+        molecule:
+          atoms:
+            Me: {el: CH3, at: [-1.4, 0]}
+            N: {at: [0, 0], lone: [n]}
+            H1: {at: [1, 0]}
+            H2: {at: [0, 1]}
+          bonds: [[Me, N], [N, H1], [N, H2]]
+        label: "methylamine"
+      - op: "+"
+      - id: hp
+        molecule:
+          atoms:
+            H: {at: [0, 0], charge: "+"}
+      - op: "+"
+      - {text: "Cl^-"}
+      - op: "->"
+      - molecule:
+          bracket: true
+          charge: "+"
+          atoms:
+            Me: {el: CH3, at: [-1.4, 0]}
+            N: {at: [0, 0]}
+            H1: {at: [1, 0]}
+            H2: {at: [0, 1]}
+            H3: {at: [0, -1]}
+          bonds: [[Me, N], [N, H1], [N, H2], [N, H3]]
+        label: "methylammonium"
+      - op: "+"
+      - {text: "Cl^-", label: "spectator ion"}
+    arrows:
+      - {from: ma.N.lone.n, to: hp.H, bend: -45}
+    caption: The H⁺ from HCl latches onto the lone pair on nitrogen.
+    ```
+
+    $\ce{Cl-}$ is a spectator ion, so cross it out:
+
+    $$\ce{CH3NH2 + H+} + \cancel{\ce{Cl-}} \rightarrow \ce{(CH3NH3)+} + \cancel{\ce{Cl-}}$$
+
+!!! formula "Methylamine + strong acid (net ionic eqn)"
+    $$\boxed{\ce{CH3NH2 + H+ -> (CH3NH3)+}}$$
+
+    The product is the **methylammonium** ion.
+
+Every nitrogen base does the same thing: base + $\ce{H+}$ makes its "-ammonium" ion.
+
+!!! formula "Nitrogen base + H⁺ → ammonium ion"
+    | Base | + $\ce{H+}$ → | Ion name |
+    |---|---|---|
+    | $\ce{NH3}$ | $\ce{(NH4)+}$ | ammonium |
+    | $\ce{CH3NH2}$ | $\ce{(CH3NH3)+}$ | methylammonium |
+    | $\ce{(CH3)2NH}$ | $\ce{((CH3)2NH2)+}$ | dimethylammonium |
+    | $\ce{(CH3)3N}$ | $\ce{((CH3)3NH)+}$ | trimethylammonium |
 
 ## Acetate ion & acetic acid
 

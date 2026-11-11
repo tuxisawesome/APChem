@@ -1,7 +1,7 @@
 ---
 title: Balancing Redox Reactions
 unit: 2
-description: Balancing redox reactions with half reactions in acidic (and neutral) medium, the extra (OH)⁻ step for basic medium, and finding n = mol e⁻.
+description: Balancing redox reactions with half reactions in acidic (and neutral) medium (MnO₄⁻ + Fe²⁺ and H₂O₂ + Fe²⁺ examples), the extra (OH)⁻ step for basic medium, and finding n = mol e⁻.
 sources:
   - {nb: "1", pages: "28-31, 33"}
 dates: ["9/11/26", "9/14/26", "9/16/26"]
@@ -75,6 +75,47 @@ $$\ce{5Fe^2+} + \cancel{\ce{5e-}} + \ce{8H+ + MnO4-} \rightarrow \ce{5Fe^3+} + \
     7. Add both equations and reduce ratios if applicable.
 
     Box the final eqn w/ n = moles e⁻.
+
+Check the answer: both the **atoms** and the total **charge** must be the same on each side. In
+the example above, the charge is $5(+2) + 8(+1) + (-1) = +17$ on the left and
+$5(+3) + (+2) = +17$ on the right. {.star}
+
+## Example: H₂O₂ + Fe²⁺ in acidic medium
+
+When the problem gives a full molecular equation, first label the oxidation numbers to see what is
+oxidized and what is reduced.
+
+$$\ce{H2}\overset{-1}{\ce{O2}} + \overset{+2}{\ce{Fe}}\ce{Cl2} \rightarrow \overset{+3}{\ce{Fe}}\ce{Cl3} + \ce{H2}\overset{-2}{\ce{O}}$$
+
+| Element | Change | What happened | ∴ |
+|---|---|---|---|
+| Fe | +2 → +3 | Loses e⁻: **oxidized** | $\ce{Fe^2+}$ is the reducing agent |
+| O | −1 → −2 (peroxide → water) | Gains e⁻: **reduced** | $\ce{H2O2}$ is the oxidizing agent |
+
+$\ce{Cl-}$ is a spectator ion, so the net ionic equation to balance is:
+
+$$\ce{H2O2 + Fe^2+ -> Fe^3+ + H2O}$$
+
+| Step | Oxidation Half Cell reaction | Reduction Half Cell reaction |
+|---|---|---|
+| 1 | $\ce{Fe^2+ -> Fe^3+}$ | $\ce{H2O2 -> H2O}$ |
+| 2 | $\ce{Fe^2+ -> Fe^3+}$ | $\ce{H2O2 -> H2O}$ |
+| 3 | $\ce{Fe^2+ -> Fe^3+}$ | $\ce{H2O2 -> 2H2O}$ |
+| 4 | $\ce{Fe^2+ -> Fe^3+}$ | $\ce{2H+ + H2O2 -> 2H2O}$ |
+| 5 | $\ce{Fe^2+ -> Fe^3+ + e-}$ | $\ce{2e- + 2H+ + H2O2 -> 2H2O}$ |
+| 6 | $\ce{2Fe^2+ -> 2Fe^3+ + 2e-}$ | $\ce{2e- + 2H+ + H2O2 -> 2H2O}$ |
+| | | **n = 2 mol e⁻** |
+
+**Step 7 – Add both equations.** The 2e⁻ on each side cancel:
+
+$$\ce{2Fe^2+} + \cancel{\ce{2e-}} + \ce{2H+ + H2O2} \rightarrow \ce{2Fe^3+} + \cancel{\ce{2e-}} + \ce{2H2O}$$
+
+**Step 8 – Net equation**, boxed with n:
+
+!!! formula "Redox: H₂O₂ + Fe²⁺ (acidic medium)"
+    $$\boxed{\ce{2Fe^2+ + 2H+ + H2O2 -> 2Fe^3+ + 2H2O}} \qquad n = 2\ \text{mol}\ e^-$$
+
+Charge check: $2(+2) + 2(+1) = +6$ on the left and $2(+3) = +6$ on the right.
 
 ## Basic medium
 

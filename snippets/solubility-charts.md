@@ -15,11 +15,13 @@ Compounds with these ions **are soluble**, except when paired with an ion in the
 
 </div>
 
-All ionic compounds with these polyatomic ions are soluble.
+All ionic compounds with these polyatomic ions are soluble, for example $\ce{Ca(NO3)2}$ and
+$\ce{Al(NO3)3}$. A halide with an exception ion is not: $\ce{AgCl}$ is insoluble.
 
 ### Chart II — Insoluble chart
 
-Compounds with these ions **are insoluble**, except when paired with an ion in the *Except* column.
+Compounds with these ions **are insoluble**, except when paired with an ion in the *Except* column
+(the exceptions are **soluble**).
 
 <div class="mnemonic" markdown>
 

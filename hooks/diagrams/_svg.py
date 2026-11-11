@@ -153,7 +153,9 @@ def rich(text, x: float, y: float, size: float = FONT, anchor: str = "start",
         offset = target
         fs = f' font-size="{size * 0.72:.1f}"' if mode != "n" else ""
         dy_attr = f' dy="{dy:.1f}"' if abs(dy) > 0.01 else ""
-        parts.append(f"<tspan{dy_attr}{fs}>{esc(s)}</tspan>")
+        # non-breaking spaces: a whitespace-only tspan gets collapsed by the browser and its
+        # dy (the baseline reset after a sub/superscript) would be lost
+        parts.append(f"<tspan{dy_attr}{fs}>{esc(s).replace(' ', chr(160))}</tspan>")
     w = f' font-weight="{weight}"' if weight else ""
     return (f'<text x="{x:.1f}" y="{y:.1f}" font-size="{size:.1f}" text-anchor="{anchor}"'
             f' class="{cls}"{w}{extra}>{"".join(parts)}</text>')
@@ -278,8 +280,17 @@ def svg_wrap(body: str, bbox: BBox, pad: float = 12, label: str = "", max_width:
             f"{body}</svg>")
 
 
+def chem_html(text) -> str:
+    """Caption text as HTML with the same chem markup as diagram labels (H2O → H₂O, NH4^+ …)."""
+    out = []
+    for s, mode in segments(str(text)):
+        e = esc(s)
+        out.append(f"<sub>{e}</sub>" if mode == "sub" else f"<sup>{e}</sup>" if mode == "sup" else e)
+    return "".join(out)
+
+
 def figure(inner: str, kind: str, caption: str | None = None, extra_class: str = "") -> str:
-    cap = f'<figcaption>{esc(caption)}</figcaption>' if caption else ""
+    cap = f'<figcaption>{chem_html(caption)}</figcaption>' if caption else ""
     cls = f"diagram diagram-{kind} {extra_class}".strip()
     return f'<figure class="{cls}">{inner}{cap}</figure>'
 

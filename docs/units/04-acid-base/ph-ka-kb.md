@@ -1,7 +1,7 @@
 ---
 title: pH, Kw, Ka & Kb
 unit: 4
-description: Autoionization of water (Kw), the pH scale, pH/pOH, weak vs. strong (single vs. double arrow), and how Ka, Kb, pKa and pKb measure acid and base strength.
+description: Autoionization of water (Kw), the pH scale, pH/pOH, weak vs. strong (single vs. double arrow), and how Ka, Kb, pKa and pKb measure acid and base strength — with a table ranking common weak acids.
 sources:
   - {nb: "1", pages: "62-66"}
 dates: ["10/8/26", "10/9/26"]
@@ -145,6 +145,23 @@ If $K_a$ is smaller, $\text{p}K_a$ will be larger.
 !!! formula memorize "pKa + pKb"
     $$\text{p}K_a + \text{p}K_b = 14$$
     **14 is the magic number.**
+
+### Comparing weak acids
+
+$K_a$ is also called the **acid dissociation constant**: it measures the **extent of
+dissociation** — how much of the acid splits into $\ce{H+}$ and its anion. Ranking acids by $K_a$
+ranks them by strength.
+
+| Weak acid | $K_a$ | $\text{p}K_a$ |
+|---|---|---|
+| $\ce{HClO2}$ | $1.2\cdot10^{-2}$ | 1.92 |
+| $\ce{HF}$ | $7.2\cdot10^{-4}$ | 3.14 |
+| $\ce{HClO}$ | $3.5\cdot10^{-8}$ | 7.46 |
+| $\ce{HCN}$ | $6.2\cdot10^{-10}$ | 9.21 |
+
+$$\text{Strength } (K_a):\quad \ce{HClO2} > \ce{HF} > \ce{HClO} > \ce{HCN}$$
+
+The strongest acid has the **largest** $K_a$ and the **smallest** $\text{p}K_a$. {.star}
 
 ### Reminder: strong acids and bases
 

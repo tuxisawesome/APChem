@@ -319,7 +319,12 @@ items:
 
 Double/triple bonds: `[C, O, 2]`. A coordinate bond drawn as an arrow: `[N, B, dative]`.
 Several rows: use `rows: [[...items...], [...items...]]`. Braces across items:
-`braces: [{from: id1, to: id2, text: "Main acid/base"}]`.
+`braces: [{from: id1, to: id2, text: "Main acid/base"}]`. Arrows can start or end under an item
+(below its label) with `id.bottom`, e.g. `{from: hcl.bottom, to: nacl.bottom, bend: 44}`.
+
+!!! warning "YAML gotcha"
+    Words like `yes`, `no`, `on`, `off` are read as true/false in YAML — don't use them as ids
+    (or put them in quotes: `id: "no"`).
 
 ## `phscale` — the pH scale
 

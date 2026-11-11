@@ -158,6 +158,7 @@ nav:
           - units/04-acid-base/ph-ka-kb.md
           - units/04-acid-base/calculating-ph.md
           - units/04-acid-base/buffers.md
+          - units/04-acid-base/titrations.md
       - "Unit 5 · Thermodynamics":
           - units/05-thermodynamics/index.md
           - units/05-thermodynamics/thermochemistry-basics.md

@@ -1,7 +1,7 @@
 ---
 title: Chemical Equilibrium
 unit: 3
-description: What chemical equilibrium is (rate of forward rxn = rate of reverse rxn), the graphs that show it, and how to write Kc and Kp expressions.
+description: What chemical equilibrium is (rate of forward rxn = rate of reverse rxn), the graphs that show it, how to write Kc and Kp expressions, and what the size of K tells you.
 sources:
   - {nb: "1", pages: "34-37"}
 dates: ["9/22/26"]
@@ -17,7 +17,7 @@ tags: [equilibrium, Kc, Kp, activity]
 A reversible reaction runs in both directions at once. The example used in class is dinitrogen
 tetroxide breaking apart into nitrogen dioxide (and NO₂ joining back into N₂O₄):
 
-$$\ce{N2O4 <=> 2NO2}$$
+$$\ce{N2O4(g) <=> 2NO2(g)}$$
 
 The double arrow is really two half-arrows:
 
@@ -33,12 +33,31 @@ equal to the rate of the reverse reaction.
 !!! formula "Condition for equilibrium"
     $$\text{Rate of forward rxn} = \text{Rate of reverse rxn}$$
 
+Equilibrium is **dynamic**: both reactions keep going the whole time. The amounts stop changing
+only because $\ce{NO2}$ is being made exactly as fast as it is being used up.
+
 Misconception: at equilibrium, concentration of products $\neq$ concentration of reactants — the concentrations are NOT equal.
 {.star}
 
+<div class="tchart" markdown>
+<div markdown>
+**True at equilibrium**
+
+- Rate of forward rxn $=$ rate of reverse rxn
+- The concentrations stay **constant** (they stop changing)
+- Both reactions are still happening
+</div>
+<div markdown>
+**NOT true (misconceptions)**
+
+- Concentration of reactants $[R]$ $=$ concentration of products $[P]$
+- The reaction has stopped
+</div>
+</div>
+
 ## Graphs that show equilibrium
 
-These two sketches show the same reaction ($\ce{N2O4 <=> 2NO2}$) reaching equilibrium. In both
+These two sketches show the same reaction ($\ce{N2O4(g) <=> 2NO2(g)}$) reaching equilibrium. In both
 graphs, $[\ ]$ means **concentration**.
 
 <div class="cols" markdown>
@@ -76,7 +95,7 @@ caption: Rate vs. t
 
 - In the **concentration graph**, $[\ce{N2O4}]$ starts high and $[\ce{NO2}]$ starts at zero. Both
   level off, but at different heights: at equilibrium the concentrations stop changing, they do
-  not become equal.
+  not become equal ($[\ ]_P \neq [\ ]_R$).
 - In the **rate graph**, the forward rate falls and the reverse rate rises until they meet. Where
   the curves join, the rates are equal, and that is equilibrium.
 
@@ -108,6 +127,14 @@ $K_p$.
 
 $K_c$ or $K_p$ is constant for a given temperature for a given reaction.
 {.star}
+
+Two facts to remember about every $K_c$ and $K_p$:
+
+- $K_c$ and $K_p$ have **NO units**. Every term in them is an activity, which is a ratio with the
+  units divided out.
+- $K_c$ and $K_p$ for a given reaction change **ONLY when the temperature changes**. Changing a
+  concentration, the pressure or the volume makes the reaction shift (see
+  [Le Chatelier](le-chatelier.md)), but it comes back to the same K.
 
 ## How to calculate Kc or Kp
 
@@ -144,3 +171,47 @@ Solids don't react!
 
 Everything that applies to $K_p$ applies to $K_c$.
 {.star}
+
+### Practice writing K expressions
+
+The same three rules work for every reaction: products over reactants, coefficients become
+powers, and solids and liquids are left out.
+
+!!! example "Example: a coefficient becomes a power"
+    $$\ce{N2O4(g) <=> 2NO2(g)}$$
+
+    The coefficient 2 on $\ce{NO2}$ becomes a power of 2:
+
+    $$K_c = \frac{[\ce{NO2}]^2}{[\ce{N2O4}]} \qquad K_p = \frac{(P_{\ce{NO2}})^2}{(P_{\ce{N2O4}})}$$
+
+!!! example "Example: a solid that breaks down into a gas"
+    $$\ce{CaCO3(s) <=> CaO(s) + CO2(g)}$$
+
+    Both solids have activity $= 1$, so only the gas is left:
+
+    $$K_c = \frac{1\cdot[\ce{CO2}]}{1} = [\ce{CO2}] \qquad K_p = P_{\ce{CO2}}$$
+
+!!! example "Example: an aqueous reaction with liquid water"
+    $$\ce{NH3(aq) + H2O(l) <=> NH4+(aq) + OH-(aq)}$$
+
+    $\ce{H2O(l)}$ is a pure liquid, so it is left out. There are no gases, so only $K_c$ is
+    written:
+
+    $$K_c = \frac{[\ce{NH4+}]\cdot[\ce{OH-}]}{[\ce{NH3}]}$$
+
+Only **gases** go into $K_p$; dissolved $(aq)$ species go into $K_c$ as concentrations.
+{.star}
+
+## What the size of K tells you
+
+K is products over reactants, so its size shows which side the equilibrium mixture favors.
+
+| Size of K | The fraction is… | At equilibrium there are mostly… |
+|---|---|---|
+| $K \gg 1$ (for example $3.1\cdot10^{14}$) | Numerator heavy | **Products** (products favored) |
+| $K \approx 1$ | About balanced | Similar amounts of reactants and products |
+| $K \ll 1$ (for example $2.145\cdot10^{-5}$) | Denominator heavy | **Reactants** (reactants favored) |
+
+The two example values come from these notes: $3.1\cdot10^{14}$ is the $K_p$ found by
+[adding elementary steps](manipulating-k.md), and $2.145\cdot10^{-5}$ is the $K_c$ of the
+[PCl₅ RICE table](rice-tables.md).

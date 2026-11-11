@@ -130,6 +130,31 @@ To derive an oxidation number, set the sum of all oxidation numbers equal to the
     \end{aligned}
     $$
 
+!!! example "Example: Which compound has the highest oxidation number for S?"
+    Use #H = +1, #K = +1 and #O = −2, and set each sum equal to zero (Rule #3).
+
+    | Compound | Sum of oxidation numbers | #S |
+    |---|---|:-:|
+    | $\ce{H2S}$ | $2(+1) + \#\text{S} = 0$ | −2 |
+    | $\ce{SO2}$ | $\#\text{S} + 2(-2) = 0$ | +4 |
+    | $\ce{K2SO4}$ | $2(+1) + \#\text{S} + 4(-2) = 0$ | **+6** |
+    | $\ce{H2SO3}$ | $2(+1) + \#\text{S} + 3(-2) = 0$ | +4 |
+
+    $\therefore$ $\ce{K2SO4}$ has the highest oxidation number for S (+6). That is the most S can
+    have, because sulfur (Group 6A) has only 6 valence electrons to give away.
+
+!!! example "Example: Find the oxidation number of O in H₂O₂"
+    $$
+    \begin{aligned}
+    2\cdot\#\text{H} + 2\cdot\#\text{O} &= 0\\
+    2(+1) + 2\cdot\#\text{O} &= 0\\
+    \#\text{O} &= -1
+    \end{aligned}
+    $$
+
+    $\ce{H2O2}$ is hydrogen **peroxide**, so O is −1, not −2. It is used in the
+    [H₂O₂ + Fe²⁺ redox example](balancing-redox.md#example-h2o2-fe2-in-acidic-medium).
+
 ## Oxidation vs. reduction
 
 Oxidation and reduction are opposites. They can be described by hydrogen, by oxygen, or by
