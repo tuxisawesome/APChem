@@ -14,32 +14,26 @@ Tips and routines from class that apply to every unit.
 Free-response questions are easier when you **decode** them before calculating. Set up a scrap
 sheet first, then work through three steps.
 
-<div class="cols sidebar" markdown>
-<div markdown>
-
-1. **Fold your scrap paper** into a narrow column on the left — this is the *decode column*.
+1. **Fold your scrap paper** so the **right side** makes a narrow column, and write
+   **"Decode FRQ"** at the top of the creased column — this is the *decode column*.
 2. **Check that the equation is balanced.** Balance it first if it isn't.
 3. **Decode the question:** write every known value (with units) in the column before solving.
+   Do the work on the open part of the page to the left.
+
+```apparatus
+parts:
+  - {type: scrap-paper, id: p, width: 220, height: 230}
+labels:
+  - {text: "fold (crease)", to: p.fold, side: top}
+  - {text: "knowns + units", to: p.column, side: right, arrow: true}
+  - {text: "work area", to: p.paper, side: left, arrow: true}
+caption: Fold the right side into a column and write "Decode FRQ" at the top
+```
 
 Two things that come up in almost every equilibrium FRQ:
 
 - **Mole fraction** $= \dfrac{\text{mol of component}}{\text{total moles}}$
 - $K_p = K_c(RT)^{\Delta n}$ — see [Manipulating K](units/03-equilibrium/manipulating-k.md)
-
-</div>
-<div markdown>
-
-```apparatus
-parts:
-  - {type: scrap-paper, id: p}
-labels:
-  - {text: "decode column", to: p.column, side: left, arrow: true}
-  - {text: fold, to: p.fold, side: top}
-caption: Fold the scrap paper into a column
-```
-
-</div>
-</div>
 
 ## Always use dimensional analysis
 

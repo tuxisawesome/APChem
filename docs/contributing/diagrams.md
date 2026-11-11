@@ -228,7 +228,7 @@ parts:
 labels:
   - {text: "NaCl(aq)", to: b.wall, side: top}
   - {text: "calibration mark", to: v.mark, side: top}
-  - {text: "fold → decode column", to: p.fold, side: top}
+  - {text: "fold → Decode FRQ column", to: p.fold, side: top}
 ```
 
 The full list of anchors for each part is in `hooks/diagrams/apparatus.py`.

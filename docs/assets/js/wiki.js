@@ -550,9 +550,29 @@
     requestAnimationFrame(frame);
   }
 
+  // ── sidebars: fit the glass panels to the visible window (scroll inside) ─
+  const MQ_PRIMARY = window.matchMedia("(min-width: 76.25em)");
+  const MQ_SECONDARY = window.matchMedia("(min-width: 60em)");
+  function fitSidebars() {
+    [[".md-sidebar--primary", MQ_PRIMARY], [".md-sidebar--secondary", MQ_SECONDARY]].forEach(([sel, mq]) => {
+      const sw = document.querySelector(sel + " .md-sidebar__scrollwrap");
+      if (!sw) return;
+      if (!mq.matches) { sw.style.maxHeight = ""; return; }
+      const top = sw.getBoundingClientRect().top;
+      const h = window.innerHeight - Math.max(top, 0) - 16;
+      sw.style.maxHeight = Math.max(160, Math.round(h)) + "px";
+    });
+  }
+  let fitQueued = false;
+  const queueFit = () => { if (!fitQueued) { fitQueued = true; requestAnimationFrame(() => { fitQueued = false; fitSidebars(); }); } };
+  window.addEventListener("scroll", queueFit, { passive: true });
+  window.addEventListener("resize", queueFit);
+
   // ── per-page init (runs on every page view, incl. instant navigation) ────
   function onPage() {
     addSettingsButton();
+    queueFit();
+    setTimeout(fitSidebars, 300); // after fonts/math settle
     renderMath(document.querySelector(".md-content") || document.body);
     initMolecule();
     initTilt();

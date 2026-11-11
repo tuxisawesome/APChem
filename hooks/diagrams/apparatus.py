@@ -28,7 +28,7 @@ PARTS and their label anchors (use `<id>.<anchor>`):
   coffee-cup        cup, inner_cup, insulation, lid, thermometer, stirrer, liquid
   bomb-calorimeter  insulation, water, bomb, sample, wires, thermometer, stirrer, lid
   gas-collection    generator, reaction, tube, bubbles, cylinder, gas, water, trough
-  scrap-paper       paper, column, fold
+  scrap-paper       paper, column, fold, title   (side: right|left, title: "Decode FRQ")
 Parts are laid out left→right; add `at: [x, y]` (px) to place one yourself.
 """
 from __future__ import annotations
@@ -366,16 +366,39 @@ def gas_collection(o):
 
 
 def scrap_paper(o):
-    w, h = float(o.get("width", 120)), float(o.get("height", 165))
+    """Scrap paper folded into a narrow "decode column" (FRQ technique).
+    Options: side (right - the default, how we fold it - or left), column (fraction of the
+    width, default .36), title (written at the top of the column, default "Decode FRQ";
+    use "" for none). Anchors: paper, column, fold, title."""
+    w, h = float(o.get("width", 170)), float(o.get("height", 200))
     L, R = -w / 2, w / 2
-    col = float(o.get("column", 0.28)) * w
+    col = float(o.get("column", 0.36)) * w
+    side = str(o.get("side", "right"))
+    if side not in ("left", "right"):
+        raise DiagramError("apparatus: scrap-paper side must be `left` or `right`")
+    title = str(o.get("title", "Decode FRQ"))
+    cx0, cx1 = (R - col, R) if side == "right" else (L, L + col)
+    fold_x = cx0 if side == "right" else cx1
+    mx0, mx1 = (L + 10, cx0 - 8) if side == "right" else (cx1 + 8, R - 10)
     out = [f'<rect x="{L:.1f}" y="{-h:.1f}" width="{w:.1f}" height="{h:.1f}" rx="3" class="dg-paper" stroke-width="1.8"/>',
-           f'<rect x="{L:.1f}" y="{-h:.1f}" width="{col:.1f}" height="{h:.1f}" class="dg-accent-wash"/>',
-           line(L + col, -h + 4, L + col, -4, "dg-accent", 1.8, "6 5")]
-    for k in range(1, 9):
-        y = -h + k * h / 9
-        out.append(line(L + col + 8, y, R - 10, y, "dg-muted", 0.8))
-    A = {"paper": (R, -h * 0.5), "column": (L + col / 2, -h * 0.5), "fold": (L + col, -h * 0.85)}
+           f'<rect x="{cx0:.1f}" y="{-h:.1f}" width="{col:.1f}" height="{h:.1f}" class="dg-accent-wash"/>',
+           line(fold_x, -h + 4, fold_x, -4, "dg-accent", 1.8, "6 5")]
+    top = -h + 10
+    if title:
+        size = min(12.0, (col - 10) / max(1.0, text_width(title, 1)))
+        out.append(rich(title, (cx0 + cx1) / 2, -h + 8 + size, size, "middle", "dg-text dg-accent-text", weight="700"))
+        out.append(line(cx0 + 6, -h + 14 + size, cx1 - 6, -h + 14 + size, "dg-accent", 1.1))
+        top = -h + 14 + size
+    # writing lines: work area on the open side, short "knowns" lines in the column
+    for k in range(1, 10):
+        y = -h + k * h / 10
+        out.append(line(mx0, y, mx1, y, "dg-muted", 0.8))
+        if y > top + 8:
+            frac = 0.55 + 0.35 * ((k * 37) % 7) / 6
+            out.append(line(cx0 + 8, y, cx0 + 8 + (col - 16) * frac, y, "dg-accent", 0.9))
+    open_x = L if side == "right" else R
+    A = {"paper": (open_x, -h * 0.5), "column": ((cx0 + cx1) / 2, -h * 0.5),
+         "fold": (fold_x, -h * 0.82), "title": ((cx0 + cx1) / 2, -h + 6)}
     return "".join(out), A, BBox().add_rect(L, -h, R, 0)
 
 
