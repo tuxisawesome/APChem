@@ -211,5 +211,8 @@ arrows:
   **e⁻ pair acceptor = Lewis acid**.
 - $\ce{OH-}$ shares the lone pair. It is the **e⁻ pair donor = Lewis base**.
 
+!!! teacher "Ms. Boppana"
+    "The FREAKING lone pair!"
+
 !!! formula "Lewis acid–base example: Al(OH)₃ + OH⁻"
     $$\underbrace{\ce{Al(OH)3}}_{\text{Lewis Acid}} + \underbrace{\ce{OH-}}_{\text{Lewis Base}} \;\ce{->}\; \ce{[Al(OH)4]-}$$

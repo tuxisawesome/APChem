@@ -81,3 +81,41 @@ quotes:
     category: mnemonic
     source: {nb: "10-2", page: 1}
     context: Redox
+
+  - text: "It's not rocket science."
+    who: Ms. Boppana
+    category: quote
+
+  - text: "Don't be bookish."
+    who: Ms. Boppana
+    category: quote
+
+  - text: "You've got to earn your Starbucks."
+    who: Ms. Boppana
+    category: quote
+
+  - text: "Do you see what I'm saying?"
+    who: Ms. Boppana
+    category: quote
+
+  - text: "The FREAKING lone pair!"
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "10-2", page: 26}
+    context: Lewis acids & bases — the lone pair gets shared
+
+  - text: "Remember to smile."
+    who: Ms. Boppana
+    category: quote
+
+  - text: "Don't play the blame game."
+    who: Ms. Boppana
+    category: quote
+
+  - text: "Train your brain."
+    who: Ms. Boppana
+    category: quote
+
+  - text: "It's sink or swim."
+    who: Ms. Boppana
+    category: quote
