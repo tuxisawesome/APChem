@@ -4,6 +4,7 @@ unit: 4
 description: Compounds that behave like both an acid and a base (amphoteric vs. amphiprotic), which H in an oxyacid is the acidic H⁺, what makes an oxyacid stronger (more O atoms, electronegativity, nearby Cl atoms), and monoprotic / diprotic / triprotic acids (with the overall K of H₃PO₄).
 sources:
   - {nb: "1", pages: "59-61"}
+  - {nb: "class-notes", pages: "52-55"}
 dates: ["10/7/26", "10/8/26"]
 tags: [amphoteric, amphiprotic, oxyacids, acid strength, electronegativity, polyprotic acids, sulfuric acid]
 ---

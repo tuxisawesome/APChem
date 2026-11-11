@@ -4,6 +4,7 @@ unit: 4
 description: Autoionization of water (Kw), the pH scale, pH/pOH, weak vs. strong (single vs. double arrow), and how Ka, Kb, pKa and pKb measure acid and base strength — with a table ranking common weak acids.
 sources:
   - {nb: "1", pages: "62-66"}
+  - {nb: "class-notes", pages: "75"}
 dates: ["10/8/26", "10/9/26"]
 tags: [pH, pOH, Kw, Ka, Kb, pKa, weak acids, strong acids]
 ---

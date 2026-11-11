@@ -4,6 +4,7 @@ unit: 1
 description: The stoichiometry steps, from mole ratio to limiting/excess reagent, theoretical yield and % yield, worked through with NaOH + CaCl₂ — plus Avogadro's number, the per-1-mol-of-LR shortcut and examples that start from moles or molecules.
 sources:
   - {nb: "1", pages: "1-4"}
+  - {nb: "class-notes", pages: "1-2, 22, 24-25"}
 dates: ["8/25/26"]
 tags: [stoichiometry, limiting reagent, percent yield]
 ---

@@ -4,6 +4,7 @@ unit: 2
 description: Why nitrogen-containing bases (ammonia and the amines) grab H⁺ with their lone pair — ammonia vs. amine, ammonia hydrolysis, amine + strong acid, and acetate ion → acetic acid.
 sources:
   - {nb: "1", pages: "20-22, 33"}
+  - {nb: "class-notes", pages: "12-14"}
 dates: ["9/8/26", "9/16/26"]
 tags: [bases, ammonia, amines, lone pair, hydrolysis, Lewis structures, acetic acid]
 ---

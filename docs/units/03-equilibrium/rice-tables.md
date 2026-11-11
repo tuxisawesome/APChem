@@ -4,6 +4,7 @@ unit: 3
 description: When to use a RICE table and how to set one up, solve it, and use it to find Kc (PCl5 example), plus practice with coefficients, pressures and using K to find x.
 sources:
   - {nb: "1", pages: "43-46"}
+  - {nb: "class-notes", pages: "23, 28-29, 51"}
 dates: ["9/23/26", "9/24/26"]
 tags: [equilibrium, RICE, Kc]
 ---

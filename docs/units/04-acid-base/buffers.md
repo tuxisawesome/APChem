@@ -4,6 +4,7 @@ unit: 4
 description: What a salt is, whether a salt solution is acidic, basic or neutral, what a buffer is and how it resists added acid or base, the Henderson–Hasselbalch equation, and buffer pH problems (solved two ways).
 sources:
   - {nb: "1", pages: "71-77"}
+  - {nb: "class-notes", pages: "56-57, 59-74, 76-88, 94-96"}
 dates: ["10/15/26", "10/19/26"]
 tags: [buffers, salts, salt hydrolysis, Henderson-Hasselbalch, common ion, pKa, RICE]
 ---

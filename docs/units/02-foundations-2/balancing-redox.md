@@ -4,6 +4,7 @@ unit: 2
 description: Balancing redox reactions with half reactions in acidic (and neutral) medium (MnO₄⁻ + Fe²⁺ and H₂O₂ + Fe²⁺ examples), the extra (OH)⁻ step for basic medium, and finding n = mol e⁻.
 sources:
   - {nb: "1", pages: "28-31, 33"}
+  - {nb: "class-notes", pages: "27"}
 dates: ["9/11/26", "9/14/26", "9/16/26"]
 tags: [redox, half reactions, balancing, acidic medium, basic medium]
 ---

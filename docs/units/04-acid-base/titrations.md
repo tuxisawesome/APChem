@@ -4,6 +4,7 @@ unit: 4
 description: Titration vocabulary, the four titration curves (SA + SB, WA + SB, WB + SA, WB + WA) and their pH at the equivalence point, finding pKa from the half-equivalence point, and choosing an indicator.
 sources:
   - {nb: "1", pages: "18"}
+  - {nb: "class-notes", pages: "52, 56-58, 93-96"}
 tags: [titration, titration curves, equivalence point, half-equivalence point, indicators, pKa, buffers]
 ---
 

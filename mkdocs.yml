@@ -179,6 +179,7 @@ nav:
       - Notebook Scans:
           - scans/index.md
           - scans/1.md
+          - scans/class-notes.md
       - Tags: tags.md
   - Settings & Help:
       - Settings: settings.md

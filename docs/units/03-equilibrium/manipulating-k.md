@@ -4,6 +4,7 @@ unit: 3
 description: Kc or Kp equations for different conditions — reversing a reaction, multiplying it by n, converting between Kp and Kc, adding elementary steps — and partial pressures from mole fractions.
 sources:
   - {nb: "1", pages: "38-39, 49"}
+  - {nb: "class-notes", pages: "38-43"}
 dates: ["9/22/26", "9/25/26"]
 tags: [equilibrium, Kc, Kp, Hess's law, mole fraction]
 ---

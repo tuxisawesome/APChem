@@ -4,6 +4,7 @@ unit: 2
 description: The two solubility charts to memorize (soluble / insoluble with exceptions and their mnemonics), heavy metals, and the Latin -ous / -ic ion names.
 sources:
   - {nb: "1", pages: "19-20, 32"}
+  - {nb: "class-notes", pages: "9-11"}
 dates: ["9/8/26", "9/16/26"]
 tags: [solubility, solubility rules, net ionic equations, mnemonics, naming]
 formulas: none

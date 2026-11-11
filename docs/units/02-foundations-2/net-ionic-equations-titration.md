@@ -4,6 +4,7 @@ unit: 2
 description: Reactive vs. spectator ions, the steps for writing net ionic equations (strong and weak acid + base, precipitations), and titration with its mole ratio.
 sources:
   - {nb: "1", pages: "18, 22"}
+  - {nb: "class-notes", pages: "9, 14, 19, 21, 93-94, 96"}
 dates: ["9/2/26", "9/8/26"]
 tags: [net ionic equations, spectator ions, titration, precipitation]
 ---

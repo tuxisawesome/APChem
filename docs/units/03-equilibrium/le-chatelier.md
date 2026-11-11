@@ -4,6 +4,7 @@ unit: 3
 description: Le Chatelier's principle and how changes in concentration, pressure and temperature shift an equilibrium (and which changes don't).
 sources:
   - {nb: "1", pages: "40, 46-48"}
+  - {nb: "class-notes", pages: "15-16, 34, 36, 44-49"}
 dates: ["9/23/26", "9/24/26"]
 tags: [equilibrium, Le Chatelier, stress]
 ---

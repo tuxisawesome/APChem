@@ -6,7 +6,11 @@
 #     - {nb: "1", pages: "43-46"}
 # To add more pages to a notebook:  python tools/add_notebook.py NEW.pdf --id 1 --append
 notebooks:
-- id: "1"
+- id: '1'
   title: Notebook 1
   pages: 83
   dates: 8/25/26 – 11/10/26
+- id: class-notes
+  title: Class Notes
+  pages: 96
+  dates: Ms. Boppana's smart-board notes

@@ -4,6 +4,7 @@ unit: 2
 description: The oxidation-number rules (#X = oxidation number of X) for hydrogen, oxygen and halogens, worked examples, oxidation vs. reduction, and oxidizing/reducing agents.
 sources:
   - {nb: "1", pages: "23-27"}
+  - {nb: "class-notes", pages: "21, 27"}
 dates: ["9/10/26"]
 tags: [redox, oxidation numbers, oxidation, reduction, oxidizing agent, reducing agent]
 ---

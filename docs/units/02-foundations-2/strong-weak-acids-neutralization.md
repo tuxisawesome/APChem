@@ -4,6 +4,7 @@ unit: 2
 description: Strong vs. weak acids (one direction → vs. two directions ⇌), molarity with acetic acid examples, neutralization with the acid-spill example, and the reaction types key.
 sources:
   - {nb: "1", pages: "15-17"}
+  - {nb: "class-notes", pages: "22, 26, 94"}
 dates: ["9/2/26"]
 tags: [acids, strong acid, weak acid, molarity, neutralization, reaction types]
 ---

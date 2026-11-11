@@ -75,6 +75,20 @@ Only for a genuinely **new physical notebook**: run without `--append` and with 
 (`--id 2 --title "Notebook 2"`), then create `docs/scans/2.md` (copy `docs/scans/1.md`, change
 the id) and add it to `nav:`.
 
+### Teacher's class notes (smart board)
+Ms. Boppana's smart-board notes are their own notebook: **"Class Notes"** (id `class-notes`,
+96 pages, ordered by unit — the table at the top of `docs/scans/class-notes.md` shows which page
+ranges cover which topic). They're from a previous school year, so **never copy their dates**
+into pages or the class log. When a wiki page uses material from them, cite it alongside the
+student's notebook:
+```yaml
+sources:
+  - {nb: "1", pages: "71-77"}
+  - {nb: "class-notes", pages: "59-74"}
+```
+New board PDFs: `tools/add_notebook.py NEW.pdf --id class-notes --append`, then add a row to the
+topic table in `docs/scans/class-notes.md`.
+
 ### Add a quote / greeting / exam date / resource
 Edit the YAML file in `data/` — the formats are described at the top of each file.
 

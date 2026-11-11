@@ -4,6 +4,7 @@ unit: 1
 description: Empirical vs. molecular formula, n = molecular mass ÷ empirical mass, the g → mol → mol ratio table with rounding rules, an iron oxide % composition example, and the unknown P & F compound example.
 sources:
   - {nb: "1", pages: "5-10"}
+  - {nb: "class-notes", pages: "3-6"}
 dates: ["8/26/26", "8/27/26"]
 tags: [empirical formula, molecular formula, ideal gas law]
 ---

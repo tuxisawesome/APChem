@@ -4,6 +4,7 @@ unit: 1
 description: Deriving the empirical and molecular formula of a carbon compound from the grams of CO₂ and H₂O made when it burns, with worked C/H/O and C/H/N examples.
 sources:
   - {nb: "1", pages: "11-12"}
+  - {nb: "class-notes", pages: "4, 6, 20"}
 dates: ["8/28/26"]
 tags: [combustion analysis, empirical formula, molecular formula]
 ---
