@@ -251,6 +251,11 @@ decode column is in [Study Skills](../../study-skills.md#how-to-process-an-frq).
 </div>
 
 !!! note "Cultural note"
+    ![A traditional copper water heater (bamb): a hammered copper tank with a chimney pipe through the middle, a brass tap, and a fire grate underneath](../../assets/img/copper-water-heater.jpg){ .note-photo loading=lazy }
+
     In India, when a girl gets married in an arranged marriage, her parents give her money and
     household necessities such as furniture. One item commonly given is a **copper water heater**:
     coal and kerosene are burned in it to heat the water.
+
+    <small>Photo: a copper water heater (*bamb*) by [Rohini Bhagat](https://commons.wikimedia.org/wiki/File:%E0%A4%AC%E0%A4%82%E0%A4%AC.jpg),
+    [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), via Wikimedia Commons (resized).</small>
