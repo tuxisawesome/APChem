@@ -29,6 +29,7 @@ PARTS and their label anchors (use `<id>.<anchor>`):
   bomb-calorimeter  insulation, water, bomb, sample, wires, thermometer, stirrer, lid
   gas-collection    generator, reaction, tube, bubbles, cylinder, gas, water, trough
   scrap-paper       paper, column, fold, title   (side: right|left, title: "Decode FRQ")
+  rod               rod, top, bottom              (a metal rod; hot: true adds heat waves)
 Parts are laid out left→right; add `at: [x, y]` (px) to place one yourself.
 """
 from __future__ import annotations
@@ -402,12 +403,34 @@ def scrap_paper(o):
     return "".join(out), A, BBox().add_rect(L, -h, R, 0)
 
 
+def rod(o):
+    """A metal rod, drawn standing on its bottom end with pencil-style shading.
+    Options: width (default 16), height (default 130), hot (heat waves above it).
+    To stand it in a container, give both parts an `at:` position. Anchors: rod, top, bottom."""
+    w, h = float(o.get("width", 16)), float(o.get("height", 130))
+    L, R = -w / 2, w / 2
+    out = [f'<rect x="{L:.1f}" y="{-h:.1f}" width="{w:.1f}" height="{h:.1f}" rx="2.5" class="dg-metal" stroke-width="1.8"/>',
+           f'<ellipse cx="0" cy="{-h:.1f}" rx="{w / 2:.1f}" ry="{w * 0.18:.1f}" class="dg-metal" stroke-width="1.4"/>']
+    y = -h + 10.0
+    while y < -4:
+        out.append(line(L + 2.5, y + 5, R - 2.5, y, "dg-muted", 1.0))
+        y += 8.0
+    bb = BBox().add_rect(L, -h - w * 0.2, R, 0)
+    if o.get("hot"):
+        for k, dx in enumerate((-w * 0.55, 0.0, w * 0.55)):
+            x0, y0 = dx, -h - 8 - (k % 2) * 3
+            out.append(f'<path d="M{x0:.1f},{y0:.1f} q4,-5 0,-10 q-4,-5 0,-10" class="dg-c2" fill="none" stroke-width="1.6" stroke-linecap="round"/>')
+        bb.add_rect(-w, -h - 32, w, 0)
+    A = {"rod": (R, -h * 0.55), "top": (0, -h), "bottom": (0, 0)}
+    return "".join(out), A, bb
+
+
 PARTS = {
     "beaker": beaker, "test-tube": test_tube, "erlenmeyer": erlenmeyer,
     "volumetric-flask": volumetric_flask, "graduated-cylinder": graduated_cylinder,
     "burette": burette, "titration": titration, "coffee-cup": coffee_cup,
     "bomb-calorimeter": bomb_calorimeter, "gas-collection": gas_collection,
-    "scrap-paper": scrap_paper,
+    "scrap-paper": scrap_paper, "rod": rod,
 }
 
 

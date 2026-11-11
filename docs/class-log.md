@@ -8,6 +8,21 @@ notebook pages.
 
 ## November 2026
 
+### Wed, Nov 11 — Heat flow calorimetry & enthalpy
+
+Objective
+:   Use the calorimetry equation to solve for the unknown in a given FRQ.
+:   Heat flow calorimetry: definition and an example problem.
+:   Define enthalpy ($H$) and the methods of calculating $\Delta H^{\circ}_{rxn}$.
+
+Covered
+:   Review of the calorimetry formulas, then [heat flow calorimetry](units/05-thermodynamics/calorimetry.md#heat-flow-calorimetry) — a hot metal rod in a bucket of water, and finding the specific heat of a metal with a decode column
+:   [Enthalpy](units/05-thermodynamics/enthalpy.md) — enthalpy and molar enthalpy
+:   Cultural note: the copper water heater given at Indian weddings
+
+Notebook
+:   [Notebook 1 pp. 84–88](scans/1.md#p84)
+
 ### Tue, Nov 10 — Thermochemistry begins (Unit 5)
 
 Covered

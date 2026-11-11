@@ -56,6 +56,7 @@ nav:
           - units/05-thermodynamics/index.md
           - units/05-thermodynamics/thermochemistry-basics.md
           - units/05-thermodynamics/calorimetry.md
+          - units/05-thermodynamics/enthalpy.md
       - "Unit 6 · Electrochemistry": units/06-electrochemistry/index.md
       - "Unit 7 · Kinetics": units/07-kinetics/index.md
       - "Unit 8 · Atomic Structure": units/08-atomic-structure/index.md

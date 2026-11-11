@@ -130,3 +130,9 @@ quotes:
     who: From class
     category: saying
     source: {nb: "1", page: 77}
+
+  - text: "Make sure to write the decode column!"
+    who: From class
+    category: saying
+    source: {nb: "1", page: 86}
+    context: Heat flow calorimetry example

@@ -1,11 +1,11 @@
 ---
 title: Calorimetry
 unit: 5
-description: How heat (q) is measured — coffee-cup vs. bomb calorimeters, heat capacity C vs. specific heat c, and the equations for the heat of a reaction (dissolution and combustion).
+description: How heat (q) is measured — coffee-cup vs. bomb calorimeters, heat capacity C vs. specific heat c, the equations for the heat of a reaction, and heat flow calorimetry (finding the specific heat of a metal).
 sources:
-  - {nb: "1", pages: "81-83"}
-dates: ["11/10/26"]
-tags: [calorimetry, calorimeter, heat capacity, specific heat, q, dissolution, combustion]
+  - {nb: "1", pages: "81-87"}
+dates: ["11/10/26", "11/11/26"]
+tags: [calorimetry, calorimeter, heat capacity, specific heat, q, dissolution, combustion, heat flow]
 ---
 
 ## How to measure heat (q)
@@ -89,13 +89,18 @@ The heat is proportional to the temperature change, $q \propto \Delta t$. With t
 (uppercase $C$):
 
 !!! formula "Heat from heat capacity (q = CΔt)"
-    $$q = C\Delta t \qquad \text{(uppercase)}$$
+    $$q_{calorimeter} = C\Delta t \qquad \text{(uppercase } C\text{)}$$
 
 The heat is also proportional to the mass, $q \propto m\cdot\Delta t$. With the specific heat
 (lowercase $c$):
 
 !!! formula "Heat from specific heat (q = mcΔt)"
-    $$q = mc\cdot\Delta t \qquad \text{(lowercase)}$$
+    $$q_{solution} = mc\cdot\Delta t \qquad \text{(lowercase } c\text{)}$$
+
+In both, $\Delta t$ is the change in temperature, always final minus initial:
+
+!!! formula "Temperature change (Δt)"
+    $$\Delta t = t_{final} - t_{initial}$$
 
 ### Overall equation to calculate the heat of reaction
 
@@ -135,3 +140,117 @@ heat of combustion:
     \ce{C_{x}H_{y} + O2 -> CO2 + H2O}
     \end{gathered}
     $$
+
+## Heat flow calorimetry
+
+!!! objective "Students will be able to"
+    - Use the calorimetry equation to solve for the unknown in a given FRQ.
+    - Explain heat flow calorimetry (definition and an example problem).
+    - Define enthalpy ($H$) and the methods of calculating $\Delta H^{\circ}_{rxn}$ (see [Enthalpy](enthalpy.md)).
+
+In **heat flow calorimetry**, a hot object is put into cooler water. Heat flows from the hot object
+into the water until **the temperature evens out**: both end at the same final temperature.
+
+<div class="cols" markdown>
+<div markdown>
+
+```apparatus
+parts:
+  - {type: rod, id: rod, hot: true}
+  - {type: beaker, id: bucket, style: cup, fill: 0.55, liquid: blue}
+labels:
+  - {text: "Hot metal rod\nt_{initial} = 95 °C", to: rod.bottom, side: bottom}
+  - {text: "Bucket of water\nt_{initial} = 25 °C", to: bucket.bottom, side: bottom}
+caption: Before
+```
+
+</div>
+<div markdown>
+
+```apparatus
+parts:
+  - {type: beaker, id: bucket, style: cup, fill: 0.62, liquid: blue, at: [0, 0]}
+  - {type: rod, id: rod, height: 150, at: [6, -8]}
+labels:
+  - {text: "The rod in the water bucket\nt = 45 °C", to: bucket.bottom, side: bottom}
+  - {text: "The temp\nevens out", to: bucket.liquid, side: right, arrow: true}
+caption: After
+```
+
+</div>
+</div>
+
+No heat is lost: the heat the metal gives off is the heat the water takes in, so the two $q$
+values add up to zero.
+
+!!! formula "Heat flow: metal + water"
+    $$
+    \begin{aligned}
+    q_{metal} &= m_{metal}\cdot c_{metal}\cdot\Delta t_{metal}\\
+    q_{water} &= m_{water}\cdot c_{water}\cdot\Delta t_{water}\\
+    q_{metal} + q_{water} &= 0
+    \end{aligned}
+    $$
+
+<div class="admonition example" markdown>
+<p class="admonition-title">Example: Specific heat of a metal</p>
+
+A calorimeter contains **125 g of water** and its initial temperature is **21 °C**. A **35.0 g metal
+sample** is heated to **99.8 °C** and dropped into the calorimeter. The final temperature of the
+water and the metal is **23.1 °C**. Calculate the **specific heat of the metal**.
+
+Make sure to write the decode column! {.star}
+
+<div class="cols sidebar" markdown>
+<div markdown>
+
+Start from the heat flow equation and write out each $q$:
+
+$$q_{metal} + q_{\ce{H2O}} = 0$$
+
+$$[m_{metal}\cdot c_{metal}\cdot\Delta t_{metal}] + [m_{\ce{H2O}}\cdot c_{\ce{H2O}}\cdot\Delta t_{\ce{H2O}}] = 0$$
+
+Substitute the values from the decode column:
+
+$$[35.0\ \text{g}\cdot c_{metal}\cdot -76.7\ {}^{\circ}C] + [125\ \text{g}\cdot 4.184\ \tfrac{J}{g\cdot{}^{\circ}C}\cdot 2.1\ {}^{\circ}C] = 0$$
+
+Solve for $c_{metal}$:
+
+$$c_{metal} = \frac{125\ \text{g}\cdot 4.184\ \tfrac{J}{g\cdot{}^{\circ}C}\cdot 2.1\ {}^{\circ}C}{35.0\ \text{g}\cdot 76.7\ {}^{\circ}C} = \frac{1098\ \text{J}}{2685\ \text{g}\cdot{}^{\circ}C}$$
+
+$$\therefore\ \boxed{c_{metal} = 0.409\ \tfrac{J}{g\cdot{}^{\circ}C}}$$
+
+</div>
+<div markdown>
+
+**Decode FRQ**
+
+$\ce{H2O}$
+:   $m_{\ce{H2O}} = 125\ \text{g}$
+:   $t_{initial} = 21.0\ {}^{\circ}C$
+:   $c_{\ce{H2O}} = 4.184\ \tfrac{J}{g\cdot{}^{\circ}C}$
+
+Metal
+:   $m_{metal} = 35.0\ \text{g}$
+:   $t_{initial} = 99.8\ {}^{\circ}C$
+:   $c_{metal} = \,?$
+
+$\ce{H2O}$ & metal
+:   $t_{final} = 23.1\ {}^{\circ}C$
+:   $\Delta t_{\ce{H2O}} = 23.1 - 21.0 = 2.1\ {}^{\circ}C$
+:   $\Delta t_{metal} = 23.1 - 99.8 = -76.7\ {}^{\circ}C$
+
+</div>
+</div>
+
+The metal **cools** ($\Delta t$ is negative, so $q_{metal} < 0$) and the water **warms**
+($q_{\ce{H2O}} > 0$). The specific heat of water comes from the
+[water facts](thermochemistry-basics.md#water-facts-specific-heat); how to fold the paper for the
+decode column is in [Study Skills](../../study-skills.md#how-to-process-an-frq).
+
+</div>
+
+!!! note "Cultural note"
+    In India, when a girl gets married in an arranged marriage, her parents give her money and
+    household necessities such as furniture. One item commonly given is a **copper water heater**:
+    coal and kerosene are burned in it to heat the water.

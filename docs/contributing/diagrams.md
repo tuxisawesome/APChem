@@ -216,7 +216,7 @@ caption: Collecting a gas over water
 
 All parts: `beaker` (styles `beaker` / `cup`), `test-tube`, `erlenmeyer`, `volumetric-flask`,
 `graduated-cylinder`, `burette`, `titration`, `coffee-cup`, `bomb-calorimeter`,
-`gas-collection`, `scrap-paper`. Liquids: `purple`, `blue`, `clear`, `pink`, `green`,
+`gas-collection`, `scrap-paper`, `rod`. Liquids: `purple`, `blue`, `clear`, `pink`, `green`,
 `amber`, `gray`. Particle pictures go inside liquids:
 
 ```apparatus
@@ -229,6 +229,18 @@ labels:
   - {text: "NaCl(aq)", to: b.wall, side: top}
   - {text: "calibration mark", to: v.mark, side: top}
   - {text: "fold → Decode FRQ column", to: p.fold, side: top}
+```
+
+A metal `rod` (with `hot: true` for heat waves) can stand inside a container: give both parts an
+`at:` position so they overlap.
+
+```apparatus
+parts:
+  - {type: beaker, id: bucket, style: cup, fill: 0.62, liquid: blue, at: [0, 0]}
+  - {type: rod, id: rod, height: 150, hot: true, at: [6, -8]}
+labels:
+  - {text: "metal rod", to: rod.rod, side: left}
+  - {text: "water", to: bucket.liquid, side: right}
 ```
 
 The full list of anchors for each part is in `wiki/diagrams/apparatus.py`.
