@@ -2,13 +2,22 @@
 title: Memorize
 description: The charts and lists to know by heart — none of these are on the AP reference sheet.
 sources:
-  - {nb: "1", pages: "32-33"}
-dates: ["9/16/26"]
+  - {nb: "1", pages: "32-33, 91"}
+dates: ["9/16/26", "11/12/26"]
 ---
 
 Everything on this page has to be **memorized** — the AP exam gives you the
 [equation sheet, periodic table and reduction potentials](reference.md), but not these.
 Each table also appears on its topic page, so editing it once updates it everywhere.
+
+## Standard states of the elements
+
+These elements are written in their **standard state** in thermochemistry: watch the ones that are
+liquids, solids, or **diatomic**, plus $\ce{S8}$ and $\ce{P4}$.
+
+--8<-- "standard-states.md"
+
+More on why this matters: [Enthalpy of formation](units/05-thermodynamics/enthalpy.md#method-2-standard-enthalpy-of-formation).
 
 ## Strong acids & strong bases
 

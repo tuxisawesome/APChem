@@ -8,6 +8,16 @@ notebook pages.
 
 ## November 2026
 
+### Thu, Nov 12 — Calculating ΔH°rxn
+
+Covered
+:   [Standard enthalpy of reaction](units/05-thermodynamics/enthalpy.md#standard-enthalpy-of-reaction) — $\Delta H^{\circ}_{rxn} = \Sigma H^{\circ}_{P} - \Sigma H^{\circ}_{R}$
+:   [Method 1: Hess's law](units/05-thermodynamics/enthalpy.md#method-1-hesss-law) — flip, multiply and add reactions ($\ce{2S + 3O2 -> 2SO3}$ example)
+:   [Method 2: Standard enthalpy of formation](units/05-thermodynamics/enthalpy.md#method-2-standard-enthalpy-of-formation) — $\Delta H_f^{\circ}$, the standard states to memorize, and the graphite → diamond example
+
+Notebook
+:   [Notebook 1 pp. 89–92](scans/1.md#p89)
+
 ### Wed, Nov 11 — Heat flow calorimetry & enthalpy
 
 Objective
