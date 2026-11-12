@@ -3,6 +3,7 @@ Pages poll /__version and reload themselves after a rebuild."""
 from __future__ import annotations
 
 import functools
+import mimetypes
 import os
 import subprocess
 import sys
@@ -13,6 +14,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from .util import ROOT
 
 WATCH = ["docs", "data", "snippets", "wiki", "site.yml"]
+mimetypes.add_type("application/manifest+json", ".webmanifest")
+mimetypes.add_type("font/woff2", ".woff2")
 OUT = ROOT / ".cache" / "site"
 
 

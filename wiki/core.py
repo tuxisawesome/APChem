@@ -267,7 +267,7 @@ class Site:
                 mark_parents(n["children"], n if n["kind"] == "section" else parent)
         mark_parents(self.nav)
         for src, p in self.pages.items():
-            if not p.in_nav and src not in ("404.md",):
+            if not p.in_nav and src not in ("404.md",) and p.meta.get("nav") is not False:
                 self.warn(f"{src} is not in the nav (add it to site.yml)")
 
     def scan(self):
@@ -520,6 +520,8 @@ class Site:
         self._write_search_index()
         self._write_sitemap()
         (self.out / ".nojekyll").write_text("")
+        from .pwa import write_all
+        write_all(self)  # manifest, service worker, offline media list (after everything else exists)
         return len(self.pages)
 
     def _copy_assets(self):

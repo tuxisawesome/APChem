@@ -6,6 +6,7 @@
 #  • Full editing guide: AGENTS.md (repo root).
 # ─────────────────────────────────────────────────────────────────────────────
 site_name: "Walter's AP Chem"
+short_name: AP Chem   # name under the Home Screen icon
 site_description: Digitized AP Chemistry notes — Ms. Boppana, 2026–2027
 site_url: https://tuxisawesome.github.io/APChem/
 copyright: AP Chemistry · 2026–2027

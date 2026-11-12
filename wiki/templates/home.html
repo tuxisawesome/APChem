@@ -32,6 +32,11 @@
         <a class="btn" href="{{ rel('memorize/') }}">{{ icon('brain') }} Memorize</a>
         <a class="btn" id="home-current-unit" href="{{ rel('units/') }}">{{ icon('book-open-page-variant-outline') }} <span>All units</span></a>
       </div>
+      <a class="continue-card" id="continue-reading" href="{{ rel('') }}" hidden>
+        <span class="cr-label">{{ icon('history') }} Continue reading</span>
+        <span class="cr-title"></span>
+        <span class="cr-bar"><span></span></span>
+      </a>
     </div>
     <div class="hero-art">
       <div class="hero-3d" id="hero-molecule" role="img" aria-label="Rotating 3D model of ammonia, NH3 (drag to spin)">

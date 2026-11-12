@@ -7,6 +7,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
+from .pwa import asset_version, build_info
 from .util import esc, fmt_pages, icon, nice_date, parse_date, parse_pages, relurl, slugify
 
 TEMPLATES = Path(__file__).resolve().parent / "templates"
@@ -18,13 +19,17 @@ class Renderer:
         self.env = Environment(loader=FileSystemLoader(str(TEMPLATES)), autoescape=select_autoescape(["html"]),
                                trim_blocks=True, lstrip_blocks=True)
         self.env.globals["icon"] = lambda name, cls="": Markup(icon(name, cls))
+        # asset URL with a content hash, so a cached old file is never used with a new page: v('assets/css/wiki.css')
+        self.env.globals["v"] = lambda rel: f"{rel}?v={asset_version(site.docs, rel)}"
         self.env.filters["nice_date"] = nice_date
         sched = site.data["schedule"]
+        self.build = build_info(site.root)
         public = {
             "quotes": site.data["quotes"], "greetings": site.data["greetings"], "course": sched.get("course", {}),
             "units": [{k: u.get(k) for k in ("number", "title", "short", "slug", "start", "end", "exam")}
                       for u in sched.get("units", [])],
             "events": sched.get("events", []), "default_name": site.config.get("default_name", ""),
+            "build": self.build,
         }
         self.public_json = Markup(json.dumps(public, ensure_ascii=False).replace("</", "<\\/"))
 

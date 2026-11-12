@@ -53,3 +53,11 @@ it reads `site.yml`, the Markdown pages in `docs/` and the data files in `data/`
 finished site to `site/`. Each page gets breadcrumbs, an infobox with its notebook pages, a
 Contents list, links to related pages and "What links here", and a search index.
 
+## Using it as an app on a phone
+
+On an iPhone, open the site in **Safari**, tap **Share**, then **Add to Home Screen**. It then
+opens like an app and works with no connection: every notes page is saved on the phone, and
+notebook scans and PDFs are saved once opened (or all at once in **Settings → Save all for
+offline**). When new notes are published, the app picks them up the next time it's online; if it
+ever looks out of date, use **Settings → Clear cache and refresh**.
+

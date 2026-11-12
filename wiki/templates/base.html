@@ -1,27 +1,39 @@
-{#- Page shell shared by every page: header, sidebar nav, main area, footer, scripts. -#}
+{#- Page shell shared by every page: header, sidebar nav, main area, footer, scripts.
+    Everything the page needs is local (assets/vendor/), so it also works offline as an app. -#}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}{{ page.title }} · {{ config.site_name }}{% endblock %}</title>
   <meta name="description" content="{{ description or config.site_description }}">
-  <link rel="icon" href="{% block root %}{{ rel('') }}{% endblock %}assets/img/flask.svg">
+  <link rel="icon" href="{% block root %}{{ rel('') }}{% endblock %}assets/img/flask.svg" type="image/svg+xml">
+  <link rel="icon" href="{{ self.root() }}assets/icons/favicon-32.png" sizes="32x32" type="image/png">
+  {#- installable app: manifest + iPhone Home Screen settings #}
+  <link rel="manifest" href="{{ self.root() }}manifest.webmanifest">
+  <link rel="apple-touch-icon" href="{{ self.root() }}assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="{{ config.short_name or config.site_name }}">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#f4f1fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0814" media="(prefers-color-scheme: dark)">
   <script>
-    /* theme before paint (no flash): pref = auto | light | dark */
+    /* before paint (no flash): theme (auto | light | dark) and text size */
     (function () {
-      var pref = "auto";
+      var d = document.documentElement, pref = "auto", scale = 1;
       try { pref = JSON.parse(localStorage.getItem("apchem.theme")) || "auto"; } catch (e) {}
+      try { scale = Number(JSON.parse(localStorage.getItem("apchem.textScale"))) || 1; } catch (e) {}
       var dark = pref === "dark" || (pref === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-      document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-      document.documentElement.setAttribute("data-theme-pref", pref);
+      d.setAttribute("data-theme", dark ? "dark" : "light");
+      d.setAttribute("data-theme-pref", pref);
+      if (scale !== 1) d.style.setProperty("--prose-scale", scale);
+      if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) d.classList.add("standalone");
     })();
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&display=swap">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
-  <link rel="stylesheet" href="{{ self.root() }}assets/css/wiki.css">
+  <link rel="stylesheet" href="{{ self.root() }}{{ v('assets/vendor/fonts/fonts.css') }}">
+  <link rel="stylesheet" href="{{ self.root() }}{{ v('assets/vendor/katex/katex.min.css') }}">
+  <link rel="stylesheet" href="{{ self.root() }}{{ v('assets/css/wiki.css') }}">
   <script id="wiki-data" type="application/json">{{ public_json }}</script>
   <meta name="wiki-root" content="{{ self.root() }}">
 </head>
@@ -30,6 +42,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <button type="button" class="icon-btn nav-toggle" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">{{ icon('menu') }}</button>
+      <button type="button" class="icon-btn app-back" aria-label="Back" title="Back" hidden>{{ icon('arrow-left') }}</button>
       <a class="brand" href="{{ self.root() }}">
         <img src="{{ self.root() }}assets/img/flask.svg" alt="" width="30" height="30">
         <span>{{ config.site_name }}</span>
@@ -38,6 +51,7 @@
         {{ icon('magnify') }}<span>Search notes…</span><kbd>/</kbd>
       </button>
       <div class="top-actions">
+        <span class="offline-pill" role="status" title="You're offline. Saved pages still work." hidden>{{ icon('cloud-off-outline') }}<span>Offline</span></span>
         <a class="icon-btn" href="{{ self.root() }}formulas/" title="Formulas" aria-label="Formulas">{{ icon('function-variant') }}</a>
         <button type="button" class="icon-btn theme-toggle" title="Theme: automatic" aria-label="Change theme">
           <span class="ti ti-auto">{{ icon('brightness-auto') }}</span><span class="ti ti-light">{{ icon('weather-sunny') }}</span><span class="ti ti-dark">{{ icon('weather-night') }}</span>
@@ -63,10 +77,10 @@
     </div>
   </footer>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/mhchem.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
-  <script defer src="{{ self.root() }}assets/js/wiki.js"></script>
+  <script defer src="{{ self.root() }}{{ v('assets/vendor/katex/katex.min.js') }}"></script>
+  <script defer src="{{ self.root() }}{{ v('assets/vendor/katex/contrib/mhchem.min.js') }}"></script>
+  <script defer src="{{ self.root() }}{{ v('assets/vendor/katex/contrib/auto-render.min.js') }}"></script>
+  <script defer src="{{ self.root() }}{{ v('assets/js/wiki.js') }}"></script>
   {% if has_mermaid %}
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";

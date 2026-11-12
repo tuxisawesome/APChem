@@ -52,6 +52,8 @@ Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
 | `wiki/diagrams/` | Diagram kit (YAML code block → SVG). One module per kind |
 | `wiki/icons/` | SVG icons used by templates (`icon('name')`) |
 | `docs/assets/css/wiki.css`, `docs/assets/js/wiki.js` | Styling and browser features |
+| `wiki/pwa.py`, `wiki/templates/sw.js` | Installable offline app: manifest, service worker, offline list |
+| `docs/assets/vendor/`, `docs/assets/icons/` | Bundled KaTeX + fonts (`tools/vendor_assets.py`), app icons (`tools/make_icons.py`) |
 | `tools/templates/` | Starting points for new topic/unit pages |
 
 ## Common tasks
@@ -188,11 +190,33 @@ drawer, greeting (`data/greetings.yml`, name in localStorage via Settings), rand
 study-time tracker (localStorage `apchem.study`), countdowns (from `data/schedule.yml`), PDF preview
 modal (`.rc-preview[data-pdf]`), scan lightbox (`.source-chip` / `.scan-open` with `data-nb`,
 `data-pages`, `data-base`), Formulas filter, Settings page (`#wiki-settings`), 3D NH₃ on the home
-page. Personal data never leaves the browser.
+page, and the app features below. Personal data never leaves the browser.
+
+## Installable offline app (PWA)
+
+The site installs on a phone (Safari → Share → **Add to Home Screen**) and works offline.
+
+- **Generated each build** by `wiki/pwa.py` (called at the end of `Site.build`):
+  `manifest.webmanifest`, `sw.js` (from `wiki/templates/sw.js`) and `offline-media.json`.
+  The service worker precaches **every page and asset** (~5 MB); scans and PDFs go into a separate
+  `apchem-media` cache when opened, or all at once from Settings → **Save all for offline**.
+  A page that isn't saved yet shows `docs/offline.md` (front matter `nav: false`).
+- **Updates:** pages are network-first, so online visits always get the newest notes; a new build
+  changes `sw.js`, which installs the new version and shows "The app was updated — Refresh".
+  Settings → **Clear cache and refresh** deletes all caches and the service worker, then reloads
+  (localStorage — name, settings, study time, reading position — is kept).
+- **Asset URLs carry `?v=<hash>`**: in templates write `{{ self.root() }}{{ v('assets/…') }}`.
+- **No CDNs:** KaTeX and the fonts are bundled in `docs/assets/vendor/` by
+  `tools/vendor_assets.py` (pinned versions; re-run to update). Only Mermaid (2 pages) loads from
+  jsDelivr, and the service worker keeps a copy. Don't add new CDN links.
+- **Icons:** `docs/assets/icons/*.png`, drawn from the flask logo by `tools/make_icons.py`.
+- **App extras in `wiki.js`** (`initPWA`): offline pill + toasts, back button when opened from the
+  Home Screen, Share button on pages, Continue reading (localStorage `apchem.lastRead`), text size
+  (`apchem.textScale` → CSS `--prose-scale`). iPhone safe areas use `--safe-top/-bottom/-left/-right`.
 
 ## Notes on the stack
 
 No theme framework: Python-Markdown + pymdown-extensions (math, details, snippets, custom fences),
-Jinja2 templates and PyYAML, pinned in `requirements.txt`. KaTeX (with mhchem) and Mermaid load
-from jsDelivr in the browser. All links in the output are relative, so the site works at
-`/APChem/` on GitHub Pages and at `/` locally.
+Jinja2 templates and PyYAML, pinned in `requirements.txt`. KaTeX (with mhchem) and the fonts are
+bundled in `docs/assets/vendor/`; Mermaid loads from jsDelivr. All links in the output are
+relative, so the site works at `/APChem/` on GitHub Pages and at `/` locally.
