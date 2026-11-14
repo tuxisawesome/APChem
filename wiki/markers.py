@@ -39,7 +39,9 @@ def m_formulas(site, page, args):
         if pages:
             groups.append((u, pages))
     for u, pages in groups:
-        out.append(f'## Unit {u["number"]} · {u["title"]} {{ #unit-{u["number"]} }}\n')
+        n = int(u["number"])
+        out.append(f'<div class="formula-unit" data-unit="{n}" data-title="Unit {n} · {esc(u["title"])}" markdown>\n')
+        out.append(f'## Unit {n} · {u["title"]} {{ #unit-{n} }}\n')
         for p in pages:
             link = site.page_rel(page, p.src)
             out.append('<div class="formula-group" markdown>\n')
@@ -57,6 +59,7 @@ def m_formulas(site, page, args):
                 out.append(f'!!! formula{extra} "{fm["title"]}"\n{body}\n\n'
                            f'    [{icon("arrow-top-right")} In my notes]({link}#{fm["id"]}){{ .formula-src }}\n')
             out.append("</div>\n")
+        out.append("</div>\n")
     if not groups:
         return '!!! note "No formulas yet"\n    Formulas from the notes pages will appear here automatically.\n'
     items = sorted(all_items, key=lambda x: re.sub(r"[^a-z0-9]", "", html.unescape(x[0]).lower()) or x[0])
@@ -70,9 +73,20 @@ def m_formulas(site, page, args):
             letter = first
         idx.append(f'<a href="#{anchor}">{esc(title)}</a>')
     idx.append("</div></div>")
-    head = ('<div class="formula-tools"><input type="search" class="formula-filter" '
+    # unit chips + print button (wiki.js → initFormulaFilter); the sheet head only shows when printed
+    total = len(all_items)
+    chips = [f'<button type="button" class="qt-chip fx-unit" data-unit="all" aria-pressed="true">All units <span>{total}</span></button>']
+    for u, pages in groups:
+        n, count = int(u["number"]), sum(len(site.formulas[p.src]) for p in pages)
+        chips.append(f'<button type="button" class="qt-chip fx-unit" data-unit="{n}" aria-pressed="false" '
+                     f'title="Unit {n} · {esc(u["title"])}">Unit {n} · {esc(u.get("short") or u["title"])} <span>{count}</span></button>')
+    head = ('<div class="fx-sheet-head"><p class="fx-sh-title">Formula sheet</p><p class="fx-sh-sub"></p></div>'
+            '<div class="formula-tools"><input type="search" class="formula-filter" '
             'placeholder="Filter formulas… (e.g. Kp, molarity, q)" aria-label="Filter formulas"></div>'
-            '<details class="az-details"><summary>A–Z index of formula names</summary>' + "".join(idx) + "</details>")
+            f'<div class="fx-bar"><div class="fx-units" role="group" aria-label="Show the formulas from one unit">{"".join(chips)}</div>'
+            f'<button type="button" class="btn btn-primary fx-print">{icon("printer")}<span class="fx-print-label">Print all {total} formulas</span></button></div>'
+            '<details class="az-details"><summary>A–Z index of formula names</summary>' + "".join(idx) + "</details>"
+            '<p class="fx-empty" hidden>No formulas match. Clear the filter or pick another unit.</p>')
     return _block(head) + "\n".join(out)
 
 
@@ -187,6 +201,13 @@ def m_unit_header(site, page, args):
     if ex:
         parts.append(f'<span class="uh-chip uh-exam">{icon("file-document-edit-outline")} {esc(ex.get("title", "Exam"))} · '
                      f'{nice_date(ex.get("date"))}</span>')
+    n = int(u["number"])
+    count = sum(len(site.formulas.get(p.src, [])) for p in site.topic_pages() if int(p.meta.get("unit", 0) or 0) == n)
+    fx_page = site.pages.get("formulas.md")
+    if count and fx_page:
+        href = esc(relurl(page.url, fx_page.url)) + f"?unit={n}"
+        parts.append(f'<a class="uh-chip uh-formulas" href="{href}">{icon("function-variant")} '
+                     f'{count} formula{"s" if count != 1 else ""} · print sheet</a>')
     return _block(f'<div class="unit-header">{"".join(parts)}</div>')
 
 

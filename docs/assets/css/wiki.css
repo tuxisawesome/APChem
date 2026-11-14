@@ -978,6 +978,25 @@ html.wm-open { overflow: hidden; }
 .az-letter { font-weight: 800; background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .formula-group > h3 { margin-top: 1.3em; }
 .prose a.formula-src { display: inline-flex; align-items: center; gap: .25em; font-size: .86rem; font-weight: 650; }
+/* unit chips + print button; the sheet heading only appears on paper */
+.fx-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 1.1em; }
+.fx-units { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 340px; min-width: 0; }
+.fx-units .qt-chip { white-space: nowrap; }
+.fx-print { flex: none; margin-left: auto; }
+.fx-print:disabled { opacity: .5; cursor: default; }
+.fx-sheet-head { display: none; }
+.prose .fx-empty { color: var(--fg-3); font-style: italic; }
+/* measuring for the printed sheet: equations can't wrap (natural width); tables can (narrowest width) */
+html.fx-measuring .admonition.formula .katex-display { width: max-content !important; max-width: none !important; }
+html.fx-measuring .admonition.formula table { width: min-content !important; max-width: none !important; }
+a.uh-chip { color: var(--fg); text-decoration: none; transition: border-color .2s; }
+a.uh-chip:hover { color: var(--fg); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+@media (max-width: 640px) {
+  /* one swipeable row of unit chips, the print button under it */
+  .fx-units { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -2px; padding: 2px; flex-basis: 100%; }
+  .fx-units::-webkit-scrollbar { display: none; }
+  .fx-print { width: 100%; margin-left: 0; }
+}
 /* the sticky filter box sits under the top bar on this page */
 .prose .formula[id], .prose h2[id^="unit-"], .formula-group > h3 { scroll-margin-top: 64px; }
 
@@ -1062,14 +1081,44 @@ html.wm-open { overflow: hidden; }
 }
 
 /* ── 24. print ──────────────────────────────────────────────────────────── */
+@page { margin: 0.5in; }
 @media print {
-  body::before, body::after, .topbar, .site-nav, .toc, .toc-mobile, .site-footer, .article-foot, .nav-scrim, .headerlink { display: none !important; }
+  body::before, body::after, .topbar, .site-nav, .toc, .toc-mobile, .site-footer, .article-foot, .nav-scrim, .headerlink, .tabbar, .toast { display: none !important; }
   body { background: #fff; color: #000; }
   .layout, .layout.has-toc { display: block; padding: 0; max-width: none; }
   .article { padding: 0; border: 0; box-shadow: none; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .article::after { display: none; }
   .prose .admonition, .prose details, .prose figure.diagram { break-inside: avoid; box-shadow: none; }
   .prose a { color: inherit; text-decoration: none; }
+
+  /* Formulas page → a two-column formula sheet of just the formulas showing (filter/unit chips).
+     wiki.js marks formulas too wide for a column: .fx-wide spans both, --fx-fit shrinks to fit. */
+  html.fx-page .crumbs, html.fx-page .article-head, html.fx-page .af-block, html.fx-page .prevnext, html.fx-page .af-updated,
+  html.fx-page .prose > :not(.formula-unit):not(.fx-sheet-head), html.fx-page .prose a.formula-src { display: none !important; }
+  html.fx-page .prose { font-size: 9.5pt; line-height: 1.4; color: #000; }
+  html.fx-page .fx-sheet-head { display: block; margin: 0 0 8pt; padding: 0 0 5pt; border-bottom: 1.5pt solid #000; }
+  html.fx-page .prose .fx-sh-title { margin: 0; font-size: 16pt; font-weight: 750; line-height: 1.2; }
+  html.fx-page .prose .fx-sh-sub { margin: 2pt 0 0; font-size: 8.5pt; color: #444; }
+  html.fx-page .formula-unit { columns: 2; column-gap: 16px; }
+  html.fx-page .prose .formula-unit > h2 {
+    column-span: all; margin: 12pt 0 5pt; padding: 0 0 2pt; font-size: 13pt; color: #000;
+    border-bottom: .75pt solid #777; break-after: avoid;
+  }
+  html.fx-page .prose .formula-group > h3 { margin: 7pt 0 3pt; font-size: 10.5pt; color: #000; break-after: avoid; }
+  html.fx-page .prose .formula-group > h3 a { color: #000; }
+  html.fx-page .prose .admonition.formula {
+    margin: 0 0 6pt; padding: 0 8px 2px; font-size: 9.5pt; color: #000; background: none;
+    border: .75pt solid #999; border-radius: 4pt; box-shadow: none; break-inside: avoid;
+  }
+  html.fx-page .prose .admonition.formula.fx-wide { column-span: all; }
+  html.fx-page .prose .admonition.formula > .admonition-title { margin: 0 -8px; padding: 3pt 8px 1pt; font-size: 9.5pt; color: #000; }
+  html.fx-page .prose .admonition.formula > .admonition-title::before { display: none; }
+  html.fx-page .prose .admonition.formula.memorize { border: 1.25pt solid #000; }
+  html.fx-page .prose .admonition.formula.memorize > .admonition-title::after { color: #000; background: none; border: .75pt solid #000; box-shadow: none; padding: 0 4pt; }
+  html.fx-page .prose .admonition.formula > :last-child, html.fx-page .prose .admonition.formula p { margin-top: 2pt; margin-bottom: 2pt; }
+  html.fx-page .prose .admonition.formula :is(.katex-display, div.arithmatex, .table-wrap) { overflow: visible !important; }
+  html.fx-page .prose .admonition.formula .katex-display { margin: 3pt 0; padding: 0; font-size: calc(var(--fx-fit, 1) * 1em); }
+  html.fx-page .prose .admonition.formula table { margin: 3pt 0; font-size: calc(var(--fx-fit, 1) * 1em); }
 }
 
 /* ── 25. app (PWA): offline pill, toasts, back/share, continue reading, settings ── */

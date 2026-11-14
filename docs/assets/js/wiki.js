@@ -625,27 +625,107 @@
   });
 
   // ── Formulas page filter ─────────────────────────────────────────────────
+  // Formulas page: text filter + unit chips (?unit=N in the URL) + "Print" → a two-column formula
+  // sheet of exactly the formulas on screen (print styles: html.fx-page in wiki.css § 24).
   function initFormulaFilter() {
     const input = $(".formula-filter");
     if (!input) return;
+    const html = document.documentElement;
+    html.classList.add("fx-page");
+    const units = $$(".formula-unit"), chips = $$(".fx-unit"), printBtn = $(".fx-print");
     const n = (s) => norm(s).replace(/\s+/g, " ");
-    input.oninput = () => {
-      const q = n(input.value.trim());
-      $$(".formula-group").forEach((g) => {
-        let any = false;
-        const title = n(($("h3", g) || {}).textContent || "");
-        $$(".admonition.formula", g).forEach((f) => {
-          const hit = !q || n(f.textContent).includes(q) || title.includes(q);
-          f.hidden = !hit; any = any || hit;
+    let unit = new URLSearchParams(location.search).get("unit") || "all";
+    if (!units.some((u) => u.dataset.unit === unit)) unit = "all";
+
+    function apply() {
+      const raw = input.value.trim(), q = n(raw);
+      let shown = 0;
+      units.forEach((u) => {
+        const inUnit = unit === "all" || u.dataset.unit === unit;
+        let anyU = false;
+        $$(".formula-group", u).forEach((g) => {
+          const title = n(($("h3", g) || {}).textContent || "");
+          let any = false;
+          $$(".admonition.formula", g).forEach((f) => {
+            const hit = inUnit && (!q || n(f.textContent).includes(q) || title.includes(q));
+            f.hidden = !hit;
+            if (hit) { any = true; shown++; }
+          });
+          g.hidden = !any; anyU = anyU || any;
         });
-        g.hidden = !any;
+        u.hidden = !anyU;
       });
-      $$(".prose h2[id^='unit-']").forEach((h) => {
-        let el = h.nextElementSibling, any = false;
-        while (el && el.tagName !== "H2") { if (el.classList.contains("formula-group") && !el.hidden) any = true; el = el.nextElementSibling; }
-        h.hidden = !any;
+      chips.forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.unit === unit)));
+      // on a phone the chips are one swipeable row: keep the selected one in view (sideways only)
+      const on = chips.find((c) => c.dataset.unit === unit), row = on && on.parentElement;
+      if (row && row.scrollWidth > row.clientWidth) {
+        const r = row.getBoundingClientRect(), c = on.getBoundingClientRect();
+        if (c.left < r.left || c.right > r.right) row.scrollLeft += c.left - r.left - (r.width - c.width) / 2;
+      }
+      // the A–Z index and the Contents only list what's showing
+      $$(".az-index a, .toc a[href^='#'], .toc-mobile a[href^='#']").forEach((a) => {
+        const t = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+        const el = a.closest("li") || a;
+        el.hidden = !!(t && t.closest("[hidden]"));
       });
-    };
+      $$(".az-group").forEach((g) => { g.hidden = !$$("a", g).some((a) => !a.hidden); });
+      ($(".fx-empty") || {}).hidden = shown > 0;
+      // print button + the heading printed on the sheet
+      const uEl = units.find((u) => u.dataset.unit === unit);
+      const what = unit === "all" ? "all units" : (uEl ? uEl.dataset.title : "Unit " + unit);
+      const label = q ? `Print these ${shown} formula${shown === 1 ? "" : "s"}`
+        : unit === "all" ? `Print all ${shown} formulas` : `Print Unit ${unit} formulas (${shown})`;
+      if (printBtn) { $(".fx-print-label", printBtn).textContent = label; printBtn.disabled = !shown; }
+      $(".fx-sh-title").textContent = "Formula sheet · " + (unit === "all" ? "All units" : what);
+      const site = (($(".brand span") || {}).textContent || "").trim();
+      $(".fx-sh-sub").textContent = [site, `${shown} formula${shown === 1 ? "" : "s"}` + (q ? ` matching “${raw}”` : ""),
+        new Date().toLocaleDateString()].filter(Boolean).join(" · ");
+      const url = new URL(location.href);
+      if (unit === "all") url.searchParams.delete("unit"); else url.searchParams.set("unit", unit);
+      if (url.href !== location.href) window.history.replaceState(window.history.state, "", url.href);
+    }
+
+    // Measure each formula's natural width once, so the printed sheet can keep it in a column,
+    // shrink it a little (--fx-fit), or let it span both columns (.fx-wide). Paper: the narrower of
+    // A4 / Letter with 0.5in margins ≈ 698 CSS px → 2 columns of ≈ 316 px of formula, 670 px full width.
+    const PRINT_PX = 12.67, COL = 316, FULL = 670, MIN_FIT = 0.72;   // 9.5pt formula text when printed
+    function measure() {
+      const forms = $$(".formula-unit .admonition.formula").filter((f) => !f.closest("[hidden]"));
+      if (!forms.length) return;
+      html.classList.add("fx-measuring");
+      const sizes = forms.map((f) => {
+        let w = 0;
+        $$(".katex-display, table", f).forEach((el) => { w = Math.max(w, el.getBoundingClientRect().width); });
+        return [f, w * PRINT_PX / (parseFloat(getComputedStyle(f).fontSize) || 16)];
+      });
+      html.classList.remove("fx-measuring");
+      sizes.forEach(([f, w]) => {
+        const wide = w > COL / MIN_FIT;
+        const fit = Math.min(1, (wide ? FULL : COL) / Math.max(w, 1));
+        f.classList.toggle("fx-wide", wide);
+        if (fit < 1) f.style.setProperty("--fx-fit", fit.toFixed(3)); else f.style.removeProperty("--fx-fit");
+      });
+    }
+
+    input.oninput = apply;
+    chips.forEach((c) => c.addEventListener("click", () => { unit = c.dataset.unit; apply(); }));
+    if (printBtn) printBtn.addEventListener("click", () => { apply(); measure(); window.print(); });
+    window.addEventListener("beforeprint", () => { apply(); measure(); });
+    apply();
+    measure();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  }
+
+  // Printing always uses the light colors (dark text on white paper), whatever the theme.
+  function initPrint() {
+    let restore = null;
+    window.addEventListener("beforeprint", () => {
+      const html = document.documentElement;
+      if (html.getAttribute("data-theme") === "dark") { restore = "dark"; html.setAttribute("data-theme", "light"); }
+    });
+    window.addEventListener("afterprint", () => {
+      if (restore) { document.documentElement.setAttribute("data-theme", restore); restore = null; }
+    });
   }
 
   // ── Teacher Quotes page: quote of the day, filters, search ───────────────
@@ -1584,6 +1664,7 @@
     initTilt();
     initHome();
     initFormulaFilter();
+    initPrint();
     initQuotesPage();
     initSettings();
     initPWA();
