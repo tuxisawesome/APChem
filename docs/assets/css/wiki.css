@@ -1143,12 +1143,15 @@ html.standalone .skip-link { display: none; }
   .focus-pill { padding: 0 9px; margin-right: 2px; }
 }
 
-/* bottom tab bar: only in the Home Screen app, at phone/tablet widths */
+/* bottom tab bar: only in the Home Screen app, at phone/tablet widths.
+   position: sticky (like the top bar), not fixed: in iOS Home Screen apps a fixed bottom bar can
+   stay where the screen's bottom was and scroll away with the page. It is the last child of <body>
+   (a min-height: 100dvh column), so it rests at the bottom of short pages too. */
 .tabbar { display: none; }
 @media (max-width: 1023px) {
   html.standalone { --tab-h: 56px; }
   html.standalone .tabbar {
-    position: fixed; z-index: 70; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr);
+    position: sticky; z-index: 70; bottom: 0; flex: none; display: grid; grid-template-columns: repeat(5, 1fr);
     height: calc(var(--tab-h) + var(--safe-bottom)); padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
     background: color-mix(in srgb, var(--bg) 78%, transparent); border-top: 1px solid var(--line);
     -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
@@ -1160,7 +1163,6 @@ html.standalone .skip-link { display: none; }
   html.standalone .tab .icon { width: 25px; height: 25px; vertical-align: 0; }
   html.standalone .tab[aria-current="page"], html.standalone body.nav-open .tab[data-tab="notes"] { color: var(--accent); }
   html.standalone .tab:hover { color: var(--accent); }
-  html.standalone body { padding-bottom: calc(var(--tab-h) + var(--safe-bottom)); }
   html.standalone .toast { bottom: calc(14px + var(--tab-h) + var(--safe-bottom)); }
   html.standalone .site-nav { bottom: calc(var(--tab-h) + var(--safe-bottom)); padding-bottom: 18px; border-radius: 0 var(--r-lg) var(--r-lg) 0; }
   html.standalone .nav-scrim { bottom: calc(var(--tab-h) + var(--safe-bottom)); }

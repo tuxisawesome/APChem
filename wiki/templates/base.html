@@ -71,7 +71,15 @@
     {% block aside %}{% endblock %}
   </div>
 
-  {#- bottom tabs: only shown in the Home Screen app on a phone/tablet (CSS: html.standalone) #}
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span>{{ config.copyright }}</span>
+      <span class="sf-links"><a href="{{ self.root() }}">Home</a> · <a href="{{ self.root() }}formulas/">Formulas</a> · <a href="{{ self.root() }}scans/">Notebook scans</a> · <a href="{{ self.root() }}contributing/">Editing the wiki</a></span>
+    </div>
+  </footer>
+
+  {#- bottom tabs: only shown in the Home Screen app on a phone/tablet (CSS: html.standalone).
+      Last thing in <body> because it is position: sticky (bottom: 0), not fixed — see wiki.css. #}
   <nav class="tabbar" aria-label="App tabs">
     <a class="tab" data-tab="home" href="{{ self.root() }}">{{ icon('home-outline') }}<span>Home</span></a>
     <button type="button" class="tab nav-toggle-tab" data-tab="notes" aria-controls="site-nav">{{ icon('book-open-page-variant-outline') }}<span>Notes</span></button>
@@ -79,13 +87,6 @@
     <a class="tab" data-tab="formulas" href="{{ self.root() }}formulas/">{{ icon('function-variant') }}<span>Formulas</span></a>
     <a class="tab" data-tab="saved" href="{{ self.root() }}saved/">{{ icon('bookmark-outline') }}<span>Saved</span></a>
   </nav>
-
-  <footer class="site-footer">
-    <div class="site-footer-inner">
-      <span>{{ config.copyright }}</span>
-      <span class="sf-links"><a href="{{ self.root() }}">Home</a> · <a href="{{ self.root() }}formulas/">Formulas</a> · <a href="{{ self.root() }}scans/">Notebook scans</a> · <a href="{{ self.root() }}contributing/">Editing the wiki</a></span>
-    </div>
-  </footer>
 
   <script defer src="{{ self.root() }}{{ v('assets/vendor/katex/katex.min.js') }}"></script>
   <script defer src="{{ self.root() }}{{ v('assets/vendor/katex/contrib/mhchem.min.js') }}"></script>
