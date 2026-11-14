@@ -243,6 +243,19 @@ labels:
   - {text: "water", to: bucket.liquid, side: right}
 ```
 
+A `piston` shows a gas doing work: the piston moves from `start` (dashed) to `end` (as fractions
+of the cylinder's height), with an arrow and a Δl bracket. Use `end` below `start` for a contraction.
+
+```apparatus
+parts:
+  - {type: piston, id: p, start: 0.3, end: 0.62}
+labels:
+  - {text: Surroundings, to: p.rod, side: right}
+  - {text: "Final position", to: p.piston, side: left}
+  - {text: "Initial position", to: p.initial, side: left}
+  - {text: "System (gas)", to: p.gas, side: right}
+```
+
 The full list of anchors for each part is in `wiki/diagrams/apparatus.py`.
 
 ## `lewis` — Lewis structures & reaction schemes

@@ -84,7 +84,7 @@ the id) and add it to `nav:`.
 
 ### Teacher's class notes (smart board)
 Ms. Boppana's smart-board notes are their own notebook: **"Class Notes"** (id `class-notes`,
-96 pages, ordered by unit — the table at the top of `docs/scans/class-notes.md` shows which page
+112 pages, ordered by unit — the table at the top of `docs/scans/class-notes.md` shows which page
 ranges cover which topic). They're from a previous school year, so **never copy their dates**
 into pages or the class log. When a wiki page uses material from them, cite it alongside the
 student's notebook:

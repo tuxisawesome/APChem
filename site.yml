@@ -58,6 +58,10 @@ nav:
           - units/05-thermodynamics/thermochemistry-basics.md
           - units/05-thermodynamics/calorimetry.md
           - units/05-thermodynamics/enthalpy.md
+          - units/05-thermodynamics/bond-enthalpy.md
+          - units/05-thermodynamics/first-law.md
+          - units/05-thermodynamics/spontaneity-entropy.md
+          - units/05-thermodynamics/gibbs-free-energy.md
       - "Unit 6 · Electrochemistry": units/06-electrochemistry/index.md
       - "Unit 7 · Kinetics": units/07-kinetics/index.md
       - "Unit 8 · Atomic Structure": units/08-atomic-structure/index.md

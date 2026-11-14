@@ -30,6 +30,7 @@ PARTS and their label anchors (use `<id>.<anchor>`):
   gas-collection    generator, reaction, tube, bubbles, cylinder, gas, water, trough
   scrap-paper       paper, column, fold, title   (side: right|left, title: "Decode FRQ")
   rod               rod, top, bottom              (a metal rod; hot: true adds heat waves)
+  piston            cylinder, gas, piston, initial, rod, dl   (gas pushing a piston; start:/end: heights)
 Parts are laid out left→right; add `at: [x, y]` (px) to place one yourself.
 """
 from __future__ import annotations
@@ -425,12 +426,42 @@ def rod(o):
     return "".join(out), A, bb
 
 
+def piston(o):
+    """A gas in a cylinder with a movable piston (expansion work, w = −PΔV).
+    Options: width (default 90), height (default 170), start / end (piston height as a fraction of
+    the cylinder, default 0.3 → 0.62; end < start draws a contraction).
+    Draws the piston at `end`, a dashed outline at `start`, an arrow between them and a Δl bracket.
+    Anchors: cylinder, gas, piston, initial, rod, dl."""
+    w, h = float(o.get("width", 90)), float(o.get("height", 170))
+    s, e = float(o.get("start", 0.3)), float(o.get("end", 0.62))
+    L, R, th = -w / 2, w / 2, 12.0
+    ys, ye = -h * s, -h * e                      # bottom face of the piston: initial, final
+    out = [f'<rect x="{L + 1.5:.1f}" y="{ye:.1f}" width="{w - 3:.1f}" height="{-ye:.1f}" class="dg-gas"/>']
+    rng = random.Random(5)
+    for _ in range(int(w * -ye / 260)):           # gas particles
+        out.append(f'<circle cx="{rng.uniform(L + 7, R - 7):.1f}" cy="{rng.uniform(ye + 7, -7):.1f}" r="2.2" class="dg-accent-fill" opacity=".55"/>')
+    out.append(f'<rect x="{L + 2:.1f}" y="{ys - th:.1f}" width="{w - 4:.1f}" height="{th:.1f}" rx="2" fill="none" class="dg-accent" stroke-width="1.4" stroke-dasharray="5 4"/>')
+    out.append(line(0, ye - th, 0, -h - 26, "dg-glass", 3.2))
+    out.append(f'<rect x="{L + 2:.1f}" y="{ye - th:.1f}" width="{w - 4:.1f}" height="{th:.1f}" rx="2" class="dg-metal" stroke-width="1.6"/>')
+    out.append(f'<path d="M{L:.1f},{-h:.1f} L{L:.1f},0 L{R:.1f},0 L{R:.1f},{-h:.1f}" class="dg-glass" fill="none" stroke-width="2.4"/>')
+    if abs(ys - ye) > 24:                         # motion arrow from the old to the new position
+        up = ye < ys
+        out.append(arrow(L + w * 0.28, ys - (th + 4 if up else -4), L + w * 0.28, ye + (4 if up else -th - 4),
+                         cls="dg-accent", head_cls="dg-accent-fill", width=1.6, size=7))
+    bx, y0, y1 = R + 8, min(ys, ye), max(ys, ye)
+    out.append(f'<path d="M{bx:.1f},{y0:.1f} h6 V{y1:.1f} h-6" class="dg-ink" fill="none" stroke-width="1.4"/>')
+    out.append(rich("Δl", bx + 11, (y0 + y1) / 2 + 5, FONT, "start", "dg-text", chem=False))
+    A = {"cylinder": (L, -h * 0.12), "gas": (R - 6, ye / 2), "piston": (L + 2, ye - th / 2),
+         "initial": (L + 2, ys - th / 2), "rod": (0, -h - 16), "dl": (bx + 26, (y0 + y1) / 2)}
+    return "".join(out), A, BBox().add_rect(L - 2, -h - 28, bx + 34, 0)
+
+
 PARTS = {
     "beaker": beaker, "test-tube": test_tube, "erlenmeyer": erlenmeyer,
     "volumetric-flask": volumetric_flask, "graduated-cylinder": graduated_cylinder,
     "burette": burette, "titration": titration, "coffee-cup": coffee_cup,
     "bomb-calorimeter": bomb_calorimeter, "gas-collection": gas_collection,
-    "scrap-paper": scrap_paper, "rod": rod,
+    "scrap-paper": scrap_paper, "rod": rod, "piston": piston,
 }
 
 

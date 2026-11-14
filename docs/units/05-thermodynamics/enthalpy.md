@@ -48,7 +48,7 @@ The enthalpy change of a reaction is the enthalpy of the **products** minus the 
 | $R$ | "reactants" (usually written as R) |
 
 There are two methods of calculating $\Delta H^{\circ}_{rxn}$: Hess's law and standard enthalpies of
-formation.
+formation. (A third method uses [bond enthalpies](bond-enthalpy.md).)
 
 ## Method 1: Hess's law
 

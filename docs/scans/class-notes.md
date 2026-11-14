@@ -1,6 +1,6 @@
 ---
 title: Class Notes
-description: Ms. Boppana's smart-board class notes, all 96 pages combined in unit order.
+description: Ms. Boppana's smart-board class notes and handouts, all 112 pages combined in unit order.
 hide: [toc]
 ---
 
@@ -19,5 +19,8 @@ page to open it; under each page are the wiki pages that use it.
 | 59–66 | Buffer notes |
 | 67–92 | Buffer solutions and salt hydrolysis |
 | 93–96 | Acid–base titration (typed handout) |
+| 97–105 | Bond enthalpy, the first law of thermodynamics (ΔE = q + w, PΔV work, Δn<sub>g</sub>), spontaneous reactions |
+| 106–109 | Bond enthalpy, work, spontaneity, entropy, and the second and third laws (typed handout) |
+| 110–112 | Gibbs free energy: ΔG, Q and K (typed handout) |
 
 <!-- wiki:scans nb=class-notes -->

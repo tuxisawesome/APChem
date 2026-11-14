@@ -8,6 +8,15 @@ notebook pages.
 
 ## November 2026
 
+### Fri, Nov 13 — Bond enthalpy
+
+Covered
+:   [Bond enthalpy](units/05-thermodynamics/bond-enthalpy.md#bond-enthalpy-hb) — counting bonds from Lewis structures ($\ce{CH4}$ has 4 C–H bonds); triple > double > single
+:   [ΔH°rxn from bond enthalpies](units/05-thermodynamics/bond-enthalpy.md#hrxn-from-bond-enthalpies) — $\Sigma H^{\circ}_b$ Reactants − $\Sigma H^{\circ}_b$ Products, with the $\ce{C2H4}$ combustion example ($-1032\ kJ/mol$)
+
+Notebook
+:   [Notebook 1 p. 93](scans/1.md#p93)
+
 ### Thu, Nov 12 — Calculating ΔH°rxn
 
 Covered
