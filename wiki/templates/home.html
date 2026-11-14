@@ -61,7 +61,7 @@
   <h2 class="home-h2">{{ icon('chart-box-outline') }} Study stats</h2>
   <section class="stat-grid">
     <article class="stat-card" id="study-card" data-tilt>
-      <header>{{ icon('timer-outline') }} Study time <span class="sc-hint">tracked while this site is open</span></header>
+      <header>{{ icon('timer-outline') }} Study time <a class="sc-hint sc-focus" href="{{ rel('focus/') }}">Focus timer {{ icon('arrow-right') }}</a></header>
       <div class="sc-big"><span id="st-today">0m</span><small>today</small></div>
       <div class="sc-row">
         <div><b id="st-week">0m</b><small>this week</small></div>
@@ -108,6 +108,17 @@
     </div>
     {% endfor %}
   </section>
+
+  <div class="home-cols your-pages" id="your-pages" hidden>
+    <section id="yp-saved">
+      <h2 class="home-h2">{{ icon('bookmark-outline') }} Saved pages</h2>
+      <div class="recent-list" id="yp-saved-list"></div>
+    </section>
+    <section id="yp-recent">
+      <h2 class="home-h2">{{ icon('history') }} Recently viewed</h2>
+      <div class="recent-list" id="yp-recent-list"></div>
+    </section>
+  </div>
 
   <div class="home-cols">
     <section>

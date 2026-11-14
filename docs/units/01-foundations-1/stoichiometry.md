@@ -62,7 +62,8 @@ bridge from one substance to another, so every problem goes through moles.
     calculating it in a lab.
 
 **Actual yield**
-:   The amount of product really made, for example the 8.56 g of NaCl in part b) below.
+:   The amount of product really made, for example the 8.56 g of NaCl in part b) of the
+    NaOH + CaCl₂ worked example.
 
 Focus on the LR: once you know it, every product amount (the theoretical yield) comes from the
 LR's moles and the mole ratio. {.star}

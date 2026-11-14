@@ -59,5 +59,6 @@ On an iPhone, open the site in **Safari**, tap **Share**, then **Add to Home Scr
 opens like an app and works with no connection: every notes page is saved on the phone, and
 notebook scans and PDFs are saved once opened (or all at once in **Settings → Save all for
 offline**). When new notes are published, the app picks them up the next time it's online; if it
-ever looks out of date, use **Settings → Clear cache and refresh**.
+ever looks out of date, use **Settings → Clear cache and refresh**. In the app, tabs along the
+bottom go to Home, Notes, Search, Formulas and Saved pages.
 

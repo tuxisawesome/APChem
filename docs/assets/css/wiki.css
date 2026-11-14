@@ -9,7 +9,8 @@
    9 prose typography · 10 buttons & chips · 11 callouts (admonitions)
    12 note conventions · 13 RICE · 14 diagrams · 15 cards & unit pages
    16 home · 17 search · 18 link previews · 19 modal & lightbox · 20 scans
-   21 formulas page · 22 settings · 23 responsive · 24 print · 25 app (PWA)
+   21 formulas page · 22 settings · 23 responsive · 24 print · 25 app (PWA, tab bar)
+   26 tools (saved pages, focus timer, molar mass, glossary)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── 1. tokens ──────────────────────────────────────────────────────────── */
@@ -638,6 +639,9 @@ kbd {
 /* ── 13. RICE tables ────────────────────────────────────────────────────── */
 .prose .diagram-rice { display: flow-root; margin: 1.4em 0; }
 .prose .rice-wrap { overflow-x: auto; padding: 2px; }
+/* KaTeX's hidden MathML copy is position:absolute; without a positioned scroll box it escapes the
+   sideways scroll and makes the whole page wider than a phone screen */
+.prose .rice-wrap, .prose .table-wrap, .prose .katex-display, .prose div.arithmatex, .prose pre, .mm-work, .mm-chain { position: relative; }
 .prose table.rice {
   border-collapse: separate; border-spacing: 0; margin: 0; min-width: 60%; font-size: 1rem;
   border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line-2);
@@ -1114,3 +1118,166 @@ html { -webkit-tap-highlight-color: transparent; }
 .offline-page .set-row { margin-top: 1.2em; }
 html.standalone .skip-link { display: none; }
 
+
+/* bookmark button (article header) + focus timer pill (top bar) */
+.bookmark-btn[hidden] { display: none; }
+.bookmark-btn { margin-top: 6px; }
+.bookmark-btn .bm-on, .bookmark-btn[aria-pressed="true"] .bm-off { display: none; }
+.bookmark-btn[aria-pressed="true"] .bm-on { display: inline; color: var(--accent); }
+.bookmark-btn .bm-on .icon, .bookmark-btn .bm-off .icon { vertical-align: 0; }
+.focus-pill {
+  display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; margin-right: 4px; border-radius: 99px;
+  font-size: .82rem; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: #fff;
+  background: linear-gradient(180deg, rgba(255,255,255,.25), transparent 60%), var(--grad-brand); box-shadow: 0 6px 16px -8px rgba(124,58,237,.7);
+}
+.focus-pill:hover { color: #fff; filter: brightness(1.06); }
+.focus-pill[hidden] { display: none; }
+.focus-pill .icon { width: 16px; height: 16px; vertical-align: 0; }
+.focus-pill.is-break { background: linear-gradient(180deg, rgba(255,255,255,.25), transparent 60%), linear-gradient(120deg, #059669, #10b981); box-shadow: 0 6px 16px -8px rgba(5,150,105,.7); }
+.focus-pill.is-paused { opacity: .7; }
+.fp-label:empty { display: none; }
+.search-trigger { min-width: 0; }
+@media (max-width: 760px) {
+  .fp-label { display: none; }                      /* green = break */
+  .top-actions:has(.focus-pill:not([hidden])) .top-formulas { display: none; } /* make room for the pill */
+  .focus-pill { padding: 0 9px; margin-right: 2px; }
+}
+
+/* bottom tab bar: only in the Home Screen app, at phone/tablet widths */
+.tabbar { display: none; }
+@media (max-width: 1023px) {
+  html.standalone { --tab-h: 56px; }
+  html.standalone .tabbar {
+    position: fixed; z-index: 70; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr);
+    height: calc(var(--tab-h) + var(--safe-bottom)); padding: 0 var(--safe-right) var(--safe-bottom) var(--safe-left);
+    background: color-mix(in srgb, var(--bg) 78%, transparent); border-top: 1px solid var(--line);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  }
+  html.standalone .tab {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 0; border: 0; background: none;
+    color: var(--fg-3); font: inherit; font-size: .68rem; font-weight: 600; cursor: pointer;
+  }
+  html.standalone .tab .icon { width: 25px; height: 25px; vertical-align: 0; }
+  html.standalone .tab[aria-current="page"], html.standalone body.nav-open .tab[data-tab="notes"] { color: var(--accent); }
+  html.standalone .tab:hover { color: var(--accent); }
+  html.standalone body { padding-bottom: calc(var(--tab-h) + var(--safe-bottom)); }
+  html.standalone .toast { bottom: calc(14px + var(--tab-h) + var(--safe-bottom)); }
+  html.standalone .site-nav { bottom: calc(var(--tab-h) + var(--safe-bottom)); padding-bottom: 18px; border-radius: 0 var(--r-lg) var(--r-lg) 0; }
+  html.standalone .nav-scrim { bottom: calc(var(--tab-h) + var(--safe-bottom)); }
+  html.standalone .site-footer-inner { padding-bottom: 18px; }
+  /* the tabs replace these top-bar buttons */
+  html.standalone .nav-toggle, html.standalone .search-trigger, html.standalone .top-formulas { display: none; }
+  html.standalone .brand { flex: 1; min-width: 0; }
+  html.standalone .brand span { display: inline; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* ── 26. tools: saved pages, focus timer, molar mass, glossary ─────────────── */
+.prose a.recent-row, .prose .az-jump a, .prose .gl-src a, .prose a.yp-more { text-decoration: none; }
+.prose a.recent-row { color: var(--fg); }
+.your-pages { margin-top: 6px; }
+.your-pages[hidden], .your-pages > section[hidden] { display: none; }
+.your-pages:has(> section[hidden]) { grid-template-columns: minmax(0, 1fr); }
+.yp-more { display: inline-flex; align-items: center; gap: 4px; margin: 4px 0 0 12px; font-size: .9rem; font-weight: 600; }
+.yp-more .icon { width: 16px; height: 16px; vertical-align: 0; }
+.sc-focus { display: inline-flex; align-items: center; gap: 3px; font-weight: 650; color: var(--accent); }
+.sc-focus .icon { width: 15px; height: 15px; }
+/* saved pages */
+.set-card h3 .icon { color: var(--accent); }
+.sp-count { font-size: .8rem; font-weight: 700; color: var(--fg-3); }
+.saved-list { display: flex; flex-direction: column; gap: 6px; margin: .4em 0 .9em; }
+.saved-row { display: flex; align-items: center; gap: 6px; }
+.saved-row .recent-row { flex: 1; min-width: 0; }
+.saved-row .rr-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-row .rr-meta { overflow: hidden; text-overflow: ellipsis; max-width: 45%; }
+.sp-remove { flex: none; color: var(--fg-3); }
+.sp-remove .icon { width: 19px; height: 19px; }
+.sp-empty { color: var(--fg-3); }
+.sp-empty .icon { width: 1.1em; height: 1.1em; vertical-align: -.2em; color: var(--accent); }
+/* focus timer */
+.focus-card { text-align: center; }
+.focus-presets { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 16px 0 6px; }
+.focus-presets .btn { font-size: .86rem; padding: .45em 1em; }
+.focus-presets .btn[aria-pressed="true"] { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: var(--hi), 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.focus-presets .btn:disabled { opacity: .55; cursor: default; }
+.focus-ring { position: relative; width: min(280px, 72vw); aspect-ratio: 1; margin: 10px auto 14px; }
+.focus-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.fr-track { fill: none; stroke: var(--glass-tint); stroke-width: 9; }
+.fr-bar { fill: none; stroke: var(--v600); stroke-width: 9; stroke-linecap: round; transition: stroke-dashoffset .9s linear; }
+.focus.is-break .fr-bar { stroke: #10b981; }
+.fr-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.fr-phase { font-size: .78rem; font-weight: 750; text-transform: uppercase; letter-spacing: .12em; color: var(--accent); }
+.focus.is-break .fr-phase { color: #059669; }
+[data-theme="dark"] .focus.is-break .fr-phase { color: #34d399; }
+.fr-time { font-size: clamp(2.6rem, 12vw, 3.6rem); font-weight: 750; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.05; }
+.fr-sub { font-size: .86rem; color: var(--fg-3); }
+.focus-actions { justify-content: center; margin-bottom: 10px; }
+.focus-actions .btn { min-width: 6.5em; }
+.focus-actions .btn:disabled { opacity: .5; cursor: default; }
+.focus-card .set-check { justify-content: center; }
+.focus-stats { text-align: left; }
+/* molar mass calculator */
+.mm { margin: 1.2em 0 1.6em; }
+.mm-form label { display: block; margin-bottom: 6px; font-weight: 700; }
+.mm-row { display: flex; gap: 8px; }
+.mm-row input {
+  flex: 1; min-width: 0; padding: .6em .9em; font-size: 1.15rem; font-family: var(--font-mono, ui-monospace, monospace); border-radius: 12px; color: var(--fg);
+  border: 1px solid var(--line-2); background: var(--glass-strong); box-shadow: inset 0 1px 3px rgba(46, 16, 101, .08);
+}
+.mm-row input:focus, .mm-conv input:focus { outline: 2px solid color-mix(in srgb, var(--v500) 55%, transparent); outline-offset: 1px; }
+.mm-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.mm-chip-label { font-size: .74rem; font-weight: 750; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-3); margin-right: 2px; }
+.mm-chip-label:not(:first-child) { margin-left: 8px; }
+.mm-chips .chip { padding: .3em .75em; border-radius: 99px; border: 1px solid var(--line-2); background: var(--glass-soft); color: var(--fg-2); font: inherit; font-size: .86rem; cursor: pointer; }
+.mm-chips .chip:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
+.mm-out:empty { display: none; }
+.mm-out { margin-top: 18px; }
+.mm-error { padding: .7em 1em; border-radius: 12px; color: #b91c1c; background: rgba(239, 68, 68, .1); border: 1px solid rgba(239, 68, 68, .3); }
+[data-theme="dark"] .mm-error { color: #fca5a5; }
+.mm-error .icon { width: 1.1em; height: 1.1em; vertical-align: -.2em; }
+.mm-result { padding: 16px 18px; margin-bottom: 14px; border-radius: var(--r-lg); background: var(--glass-soft); border: 1px solid var(--line-2); }
+.mm-formula { font-size: 1.5rem; }
+.mm-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35em; margin: 4px 0 6px; font-size: 1.1rem; }
+.mm-total span { font-size: .78rem; font-weight: 750; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-right: .3em; }
+.mm-total b { font-size: 2.2rem; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.mm-work { overflow-x: auto; overflow-y: hidden; color: var(--fg-2); padding-bottom: 2px; }
+.mm-table td:nth-child(n+2), .mm-table th:nth-child(n+2) { text-align: right; font-variant-numeric: tabular-nums; }
+.mm-name { color: var(--fg-3); font-size: .86em; }
+.mm-table tfoot td { font-weight: 700; }
+.mm-conv h3 { margin-top: 1em; }
+.mm-conv-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mm-conv label { display: flex; flex-direction: column; gap: 4px; font-size: .86rem; font-weight: 650; color: var(--fg-2); }
+.mm-conv input { min-width: 0; padding: .55em .75em; font-size: 1rem; border-radius: 11px; color: var(--fg); border: 1px solid var(--line-2); background: var(--glass-strong); }
+.mm-chain { margin-top: 10px; overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+/* glossary */
+.glossary-tools { position: sticky; top: calc(var(--top-full) + 8px); z-index: 5; display: flex; align-items: center; gap: 10px; padding: 6px 0; margin-bottom: 4px; }
+.glossary-filter {
+  flex: 1; min-width: 0; padding: .75em 1.1em; font-size: 1rem; border-radius: 14px; color: var(--fg); border: 1px solid var(--line-2);
+  background: var(--glass-solid); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: var(--hi), 0 12px 26px -16px rgba(46,16,101,.5);
+}
+.glossary-filter:focus { outline: 2px solid color-mix(in srgb, var(--v500) 55%, transparent); outline-offset: 1px; }
+.gl-count { flex: none; font-size: .84rem; color: var(--fg-3); }
+.az-jump { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 14px; }
+.az-jump a, .az-jump span { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 9px; font-size: .86rem; font-weight: 750; }
+.az-jump a { color: var(--accent); background: var(--glass-tint); border: 1px solid var(--line); }
+.az-jump a:hover { color: #fff; background: var(--grad-brand); }
+.az-jump span { color: var(--fg-3); opacity: .45; }
+.gl-letter { scroll-margin-top: calc(var(--top-full) + 70px); }
+.gl-letter[hidden], .gl-entry[hidden] { display: none; }
+.prose h2.gl-h { margin: 1.1em 0 .3em; padding-bottom: .15em; border-bottom: 1px solid var(--line); font-size: 1.5rem; }
+.prose dl.glossary { margin: 0; }
+.gl-entry { padding: .2em 0 .5em; border-bottom: 1px dashed var(--line); }
+.gl-entry:last-child { border-bottom: 0; }
+.prose dl.glossary dd.gl-src { margin-top: -.1em; font-size: .84rem; }
+.gl-src a { color: var(--fg-3); }
+.gl-src a:hover { color: var(--accent); }
+.gl-src .icon { width: 14px; height: 14px; vertical-align: -.15em; }
+@media (max-width: 760px) {
+  .mm-conv-row { grid-template-columns: 1fr; }
+  .mm-row .btn { padding-inline: .9em; }
+  .gl-count { display: none; }
+  .mm-name { display: none; }
+  .mm-table { font-size: .9rem; }
+  .mm-table th { white-space: nowrap; }
+  .saved-row .recent-row { flex-direction: column; align-items: flex-start; gap: 1px; }
+  .saved-row .rr-title, .saved-row .rr-meta { max-width: 100%; }
+}

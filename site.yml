@@ -65,8 +65,12 @@ nav:
       - "Unit 10 · IMFs, Gases & Solutions": units/10-imf-gases-solutions/index.md
       - "Unit 11 · Analysis Methods": units/11-analysis/index.md
   - Toolkit:
+      - Saved Pages: saved.md
       - Formulas: formulas.md
       - Memorize: memorize.md
+      - Glossary: glossary.md
+      - Molar Mass Calculator: molar-mass.md
+      - Focus Timer: focus.md
       - Reference Sheets: reference.md
       - Study Skills: study-skills.md
       - Class Log: class-log.md

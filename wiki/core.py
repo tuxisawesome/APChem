@@ -153,6 +153,7 @@ class Site:
         self.nav: list[dict] = []
         self.order: list[Page] = []
         self.formulas: dict[str, list] = {}
+        self.glossary: list[dict] = []                # definition-list terms from topic pages (Glossary page)
         self.citations: dict = {}
         self.current: Page | None = None
         self.base_path = urlparse(self.config.get("site_url", "/")).path or "/"
@@ -188,6 +189,7 @@ class Site:
             "schedule": sched,
             "resources": load("resources").get("resources", []),
             "notebooks": load("notebooks").get("notebooks", []),
+            "elements": [e for e in load("elements").get("elements", []) if isinstance(e, dict) and e.get("s")],
         }
 
     def discover(self):
@@ -399,6 +401,8 @@ class Site:
         page.html = html
         page.ids = set(re.findall(r'\sid="([^"]+)"', html))
         page.sections = _search_sections(page, html)
+        if page.is_topic:
+            self.glossary.extend(scan_glossary(page, html))
 
     def _validate(self, page: Page):
         if not page.is_topic:
@@ -507,7 +511,8 @@ class Site:
         self.build_nav()
         self.scan()
         self.git_dates()
-        for p in sorted(self.pages.values(), key=lambda p: p.nav_index):
+        # the Glossary page is built from the other pages' definition lists, so it renders last
+        for p in sorted(self.pages.values(), key=lambda p: ("wiki:glossary" in p.body, p.nav_index)):
             self.render_page(p)
         self.link_checks()
         stats = self.stats()
@@ -555,6 +560,36 @@ class Site:
 
 
 # ─── module helpers ─────────────────────────────────────────────────────────
+GLOSS_HEAD_RE = re.compile(r'<h([23]) id="([^"]+)"[^>]*>(.*?)</h\1>', re.S)
+GLOSS_DL_RE = re.compile(r"<dl>(.*?)</dl>", re.S)
+GLOSS_PAIR_RE = re.compile(r"<dt>(.*?)</dt>\s*((?:<dd>.*?</dd>\s*)+)", re.S)
+
+
+def scan_glossary(page: Page, html: str) -> list[dict]:
+    """Every term of a definition list (`**Term**` + `:   definition`) on a rendered topic page,
+    with the section it's in. Links are reduced to text and ids dropped, so the copy is safe to
+    show on the Glossary page."""
+    heads = [(m.start(), m.group(2), html_to_text(m.group(3)).rstrip("#").strip()) for m in GLOSS_HEAD_RE.finditer(html)]
+
+    def clean(h):
+        h = re.sub(r"<a\b[^>]*>(.*?)</a>", r"\1", h, flags=re.S)
+        h = re.sub(r'\sid="[^"]*"', "", h)
+        return re.sub(r"\n\s*\n", "\n", h).strip()
+    found = []
+    for dl in GLOSS_DL_RE.finditer(html):
+        sec = [(i, t) for pos, i, t in heads if pos < dl.start()]
+        anchor, heading = sec[-1] if sec else ("", "")
+        for m in GLOSS_PAIR_RE.finditer(dl.group(1)):
+            term = clean(m.group(1))
+            defs = [clean(d) for d in re.findall(r"<dd>(.*?)</dd>", m.group(2), re.S)]
+            plain = html_to_text(term)
+            if not plain:
+                continue
+            found.append({"term": term, "plain": plain, "defs": defs, "src": page.src,
+                          "anchor": anchor, "heading": heading})
+    return found
+
+
 def scan_formulas(text: str) -> list[dict]:
     lines = text.split("\n")
     found = []

@@ -11,11 +11,14 @@ Each function returns Markdown (or raw HTML blocks) that replaces the marker lin
   notebooks                cards for the scanned notebooks
   scans nb=ID              thumbnail gallery of one notebook
   tags                     every tag with the pages that use it
+  glossary                 every definition-list term from the topic pages, A–Z (Glossary page)
+  molar-mass               the Molar Mass Calculator + element data (data/elements.yml)
 """
 from __future__ import annotations
 
 import datetime as dt
 import html
+import json
 import re
 
 from .util import esc, fmt_pages, icon, nice_date, parse_date, parse_pages, relurl, slugify
@@ -288,8 +291,63 @@ def m_tags(site, page, args):
     return "".join(out)
 
 
+def m_glossary(site, page, args):
+    seen, items = set(), []
+    for g in site.glossary:
+        defs = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", " ".join(g["defs"]))).strip().lower()
+        key = (g["plain"].lower(), defs)  # the same snippet included on two pages → one entry
+        if key in seen:
+            continue
+        seen.add(key)
+        items.append(g)
+    if not items:
+        return "No terms yet. Definition lists in the notes (`**Term**` + `:   definition`) appear here.\n"
+
+    def sort_key(g):
+        k = re.sub(r"^[^a-z0-9]+", "", html.unescape(g["plain"]).lower())
+        return (k or g["plain"].lower(), g["src"])
+
+    def letter(g):
+        k = sort_key(g)[0][:1].upper()
+        return k if "A" <= k <= "Z" else "#"
+    items.sort(key=sort_key)
+    groups: dict[str, list] = {}
+    for g in items:
+        groups.setdefault(letter(g), []).append(g)
+    order = [c for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"] + (["#"] if "#" in groups else [])
+    gid = lambda c: "g-" + ("other" if c == "#" else c.lower())
+    jump = "".join(f'<a href="#{gid(c)}">{c}</a>' if c in groups else f'<span aria-hidden="true">{c}</span>' for c in order)
+    pages = len({g["src"] for g in items})
+    head = (f'<div class="glossary-tools"><input type="search" class="glossary-filter" placeholder="Filter terms… (e.g. enthalpy, Kc, buffer)" '
+            f'aria-label="Filter the glossary"><span class="gl-count" data-total="{len(items)}">{len(items)} terms from {pages} pages</span></div>'
+            f'<nav class="az-jump" aria-label="Jump to a letter">{jump}</nav>')
+    out = [head]
+    for c in order:
+        if c not in groups:
+            continue
+        entries = []
+        for g in groups[c]:
+            src = site.pages[g["src"]]
+            label = f'Unit {src.meta.get("unit")} · {esc(src.title)}' + (f' › {esc(g["heading"])}' if g["heading"] and g["heading"] != src.title else "")
+            href = relurl(page.url, src.url) + (f'#{g["anchor"]}' if g["anchor"] else "")
+            dds = "".join(f"<dd>{d}</dd>" for d in g["defs"])
+            entries.append(f'<div class="gl-entry"><dt>{g["term"]}</dt>{dds}'
+                           f'<dd class="gl-src"><a href="{esc(href)}">{icon("arrow-top-right")} {label}</a></dd></div>')
+        out.append(f'<section class="gl-letter" id="{gid(c)}"><h2 class="gl-h">{c}</h2><dl class="glossary">{"".join(entries)}</dl></section>')
+    out.append('<p class="gl-empty" hidden>No terms match that filter.</p>')
+    return _block("".join(out))
+
+
+def m_molar_mass(site, page, args):
+    els = [[str(e["s"]), str(e.get("name", "")), str(e.get("m") or "")] for e in site.data.get("elements", [])]
+    data = json.dumps(els, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return _block(f'<div class="mm" id="molar-mass"><p class="mm-loading">Loading the calculator…</p>'
+                  f'<script type="application/json" id="mm-elements">{data}</script></div>')
+
+
 MARKERS = {
     "formulas": m_formulas, "quotes": m_quotes, "units": m_units, "unit-header": m_unit_header,
     "unit-pages": m_unit_pages, "syllabus": m_syllabus, "resources": m_resources,
-    "notebooks": m_notebooks, "scans": m_scans, "tags": m_tags,
+    "notebooks": m_notebooks, "scans": m_scans, "tags": m_tags, "glossary": m_glossary,
+    "molar-mass": m_molar_mass,
 }

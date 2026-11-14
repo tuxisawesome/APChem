@@ -38,12 +38,14 @@ Deploys happen automatically on push to `main` (`.github/workflows/deploy.yml`).
 | `docs/units/NN-slug/` | One folder per syllabus unit: `index.md` + topic pages |
 | `docs/formulas.md` | Formulas page (auto-filled by `<!-- wiki:formulas -->`) |
 | `docs/memorize.md`, `study-skills.md`, `class-log.md`, `quotes.md`, `reference.md` | Toolkit pages |
+| `docs/glossary.md`, `molar-mass.md`, `focus.md`, `saved.md` | Tool pages: Glossary (built from the notes), Molar Mass Calculator, Focus Timer, Saved Pages |
 | `docs/scans/` | Notebook scan galleries; images in `docs/assets/scans/<nb>/pNN.webp` |
 | `docs/contributing/` | Human docs: editing guide, style guide, diagram reference (live gallery) |
 | `data/quotes.yml` | Teacher quotes (home page + Quotes page) |
 | `data/greetings.yml` | Home-page greetings (`{name}`, `{exam}`, `{days}` placeholders) |
 | `data/schedule.yml` | Units, dates, syllabus sections, exam dates (countdowns + unit pages) |
 | `data/resources.yml` | Reference PDFs (files in `docs/assets/resources/`) |
+| `data/elements.yml` | Elements + atomic masses from the AP periodic table (Molar Mass Calculator) |
 | `data/notebooks.yml` | Scanned notebooks (written by `tools/add_notebook.py`) |
 | `snippets/` | Shared Markdown included in several pages |
 | `wiki/core.py` | The generator: pages, nav, Markdown, links, validation, stats, search index |
@@ -106,7 +108,9 @@ Units and sections come from `data/schedule.yml`; unit index pages just contain 
 - Write clean wiki prose: short intro sentence per section, **bold** key terms, normal bullet
   lists (nested for sub-points). **Never start lines with → or ↳**, and **no bare "ex."** prefixes.
 - Prefer **tables** for rules/comparisons/cases (e.g. Case | Meaning | Favored reaction) and
-  **definition lists** (`**Term**` newline `:   definition`) for vocabulary.
+  **definition lists** (`**Term**` newline `:   definition`) for vocabulary. Every definition list
+  on a topic page is collected into the **Glossary** automatically, so write each vocabulary term
+  that way (and keep definitions self-contained: no "see below").
 - Arrows only in chemistry/math (reactions, conversion chains).
 
 ## Note conventions (match the notebook)
@@ -169,7 +173,9 @@ To add a new kind: new module in `wiki/diagrams/` with `render(data) -> str`, re
 Put on their own line: `<!-- wiki:formulas -->`, `<!-- wiki:quotes -->`, `<!-- wiki:units -->`,
 `<!-- wiki:unit-header unit=N -->`, `<!-- wiki:unit-pages unit=N -->`,
 `<!-- wiki:syllabus unit=N -->`, `<!-- wiki:resources -->`, `<!-- wiki:notebooks -->`,
-`<!-- wiki:scans nb=ID -->`, `<!-- wiki:tags -->`. To add one: a function in `wiki/markers.py`
+`<!-- wiki:scans nb=ID -->`, `<!-- wiki:tags -->`, `<!-- wiki:glossary -->` (every definition-list
+term from the topic pages; pages using it render last), `<!-- wiki:molar-mass -->` (calculator +
+`data/elements.yml`). To add one: a function in `wiki/markers.py`
 (`fn(site, page, args) -> Markdown`), registered in `MARKERS`.
 
 ## Page layout (wiki/templates/page.html)
@@ -190,7 +196,22 @@ drawer, greeting (`data/greetings.yml`, name in localStorage via Settings), rand
 study-time tracker (localStorage `apchem.study`), countdowns (from `data/schedule.yml`), PDF preview
 modal (`.rc-preview[data-pdf]`), scan lightbox (`.source-chip` / `.scan-open` with `data-nb`,
 `data-pages`, `data-base`), Formulas filter, Settings page (`#wiki-settings`), 3D NH₃ on the home
-page, and the app features below. Personal data never leaves the browser.
+page, and the app features below. Also:
+
+- **Saved pages:** bookmark button by each page title (`apchem.bookmarks`), recently viewed
+  (`apchem.recent`, last 12), listed on `saved/` (`#saved-pages`) and the home page (`#your-pages`).
+- **Focus timer** (`focus/`, `#focus-timer`): Pomodoro state in `apchem.focus` (wall-clock times, so it
+  survives page changes and closing the app), a top-bar `.focus-pill` while it runs. Finished or stopped
+  focus time is added to `apchem.study` (the passive tracker pauses meanwhile); per-day sessions in
+  `apchem.focusDays`.
+- **Molar Mass Calculator** (`#molar-mass`): formula parser (brackets, hydrates, charges), breakdown,
+  g ⇄ mol ⇄ particles with sig figs; recent formulas in `apchem.mmHistory`, `?f=` in the URL.
+- **Glossary filter** (`.glossary-filter`).
+- **Bottom tab bar** (`.tabbar` in `base.html`): only in the Home Screen app at ≤ 1023px
+  (`html.standalone`); replaces the top bar's menu, search and Formulas buttons.
+
+Settings → Export/Import carries study time, bookmarks, history and the focus log. Personal data
+never leaves the browser.
 
 ## Installable offline app (PWA)
 

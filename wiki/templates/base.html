@@ -51,8 +51,9 @@
         {{ icon('magnify') }}<span>Search notes…</span><kbd>/</kbd>
       </button>
       <div class="top-actions">
+        <a class="focus-pill" href="{{ self.root() }}focus/" title="Focus timer" hidden>{{ icon('timer-outline') }}<span class="fp-label"></span><span class="fp-time">25:00</span></a>
         <span class="offline-pill" role="status" title="You're offline. Saved pages still work." hidden>{{ icon('cloud-off-outline') }}<span>Offline</span></span>
-        <a class="icon-btn" href="{{ self.root() }}formulas/" title="Formulas" aria-label="Formulas">{{ icon('function-variant') }}</a>
+        <a class="icon-btn top-formulas" href="{{ self.root() }}formulas/" title="Formulas" aria-label="Formulas">{{ icon('function-variant') }}</a>
         <button type="button" class="icon-btn theme-toggle" title="Theme: automatic" aria-label="Change theme">
           <span class="ti ti-auto">{{ icon('brightness-auto') }}</span><span class="ti ti-light">{{ icon('weather-sunny') }}</span><span class="ti ti-dark">{{ icon('weather-night') }}</span>
         </button>
@@ -69,6 +70,15 @@
     <main id="content" class="main">{% block main %}{% endblock %}</main>
     {% block aside %}{% endblock %}
   </div>
+
+  {#- bottom tabs: only shown in the Home Screen app on a phone/tablet (CSS: html.standalone) #}
+  <nav class="tabbar" aria-label="App tabs">
+    <a class="tab" data-tab="home" href="{{ self.root() }}">{{ icon('home-outline') }}<span>Home</span></a>
+    <button type="button" class="tab nav-toggle-tab" data-tab="notes" aria-controls="site-nav">{{ icon('book-open-page-variant-outline') }}<span>Notes</span></button>
+    <button type="button" class="tab" data-tab="search" data-open-search>{{ icon('magnify') }}<span>Search</span></button>
+    <a class="tab" data-tab="formulas" href="{{ self.root() }}formulas/">{{ icon('function-variant') }}<span>Formulas</span></a>
+    <a class="tab" data-tab="saved" href="{{ self.root() }}saved/">{{ icon('bookmark-outline') }}<span>Saved</span></a>
+  </nav>
 
   <footer class="site-footer">
     <div class="site-footer-inner">

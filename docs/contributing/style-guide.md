@@ -121,6 +121,9 @@ Add `???` instead of `!!!` to make a box collapsible (`???+` = starts open).
 
 ## Definition lists
 
+Every definition list on a notes page also appears in the [Glossary](../glossary.md),
+with a link back to its section, so use one for each vocabulary term.
+
 ```markdown
 **System**
 :   The area on which the study is done.

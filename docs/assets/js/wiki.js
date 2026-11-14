@@ -5,6 +5,9 @@
    • link previews on hover               • KaTeX + mhchem rendering
    • study-time tracker                   • home: greeting, quotes, stats, countdowns, 3D NH₃
    • PDF preview + notebook-scan lightbox • Formulas filter · Settings page
+   • app: offline, updates, back/share, continue reading, text size, bottom tabs
+   • saved pages + history              • focus timer (Pomodoro → study time)
+   • Molar Mass Calculator              • Glossary filter
    Data comes from <script id="wiki-data"> (built from data/*.yml by wiki/).
    Everything personal is stored ONLY in this browser (localStorage "apchem.*").
    ────────────────────────────────────────────────────────────────────────── */
@@ -47,6 +50,11 @@
     search: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>',
     share: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 8 5h3v9h2V5h3m2 18H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3v2H6v12h12V9h-3V7h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2"/></svg>',
     "cellphone-arrow-down": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 1H7a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2m0 18H7V5h10zm-1-6h-3V8h-2v5H8l4 4z"/></svg>',
+    "bookmark-outline": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 18-5-2.18L7 18V5h10m0-2H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2"/></svg>',
+    history: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 8H12v5l4.28 2.54.72-1.21-3.5-2.08zM13 3a9 9 0 0 0-9 9H1l3.96 4.03L9 12H6a7 7 0 0 1 7-7 7 7 0 0 1 7 7 7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 9-9 9 9 0 0 0-9-9"/></svg>',
+    "chart-box-outline": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2zm2 2H5V5h14v14.1M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"/></svg>',
+    "alert-outline": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22M12 6l7.53 13H4.47M11 10v4h2v-4m-2 6v2h2v-2"/></svg>',
+    "arrow-right": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>',
   };
 
   const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -351,6 +359,7 @@
     if (!prefs().tracker) return;
     if (document.visibilityState !== "visible") return;
     if (Date.now() - lastActivity > 3 * 60 * 1000) return; // idle > 3 min: don't count
+    if (focusing()) return; // a running focus session counts its own time (see creditFocus)
     const d = studyData();
     const k = dayKey();
     d.days[k] = (d.days[k] || 0) + TICK;
@@ -872,6 +881,464 @@
   }
   const icon = (name) => (ICON[name] || "");
 
+  // ── saved pages: bookmarks + recently viewed (localStorage only) ─────────
+  const NO_HISTORY = ["settings/", "offline/", "saved/"];
+  const pageTitle = () => (($(".article-head h1") || {}).textContent || document.title).trim();
+  const pageSection = () => { const c = $$(".crumbs a, .crumbs > span:not(.crumb-sep)"); return c.length > 1 ? c[c.length - 1].textContent.trim() : ""; };
+  const listOf = (key) => { const v = store.get(key, []); return Array.isArray(v) ? v.filter((x) => x && typeof x.u === "string") : []; };
+  const bookmarks = () => listOf("bookmarks");
+  function relTime(t) {
+    const s = (Date.now() - t) / 1000;
+    if (s < 60) return "just now";
+    if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+    if (s < 86400) return plural(Math.floor(s / 3600), "hour") + " ago";
+    const d = Math.floor(s / 86400);
+    return d === 1 ? "yesterday" : d < 7 ? `${d} days ago` : fmtDate(new Date(t));
+  }
+  const pageRow = (p, meta) => `<a class="recent-row" href="${esc(ROOT + p.u)}"><span class="rr-title">${esc(p.t || p.u)}</span>` +
+    `<span class="rr-meta">${esc(meta || "")}</span></a>`;
+  function initSaved() {
+    const path = pagePath();
+    const article = document.body.classList.contains("page-article") && $(".article-head") && !NO_HISTORY.includes(path);
+    const btn = $(".bookmark-btn");
+    if (btn && article) {
+      btn.hidden = false;
+      const sync = () => {
+        const on = bookmarks().some((b) => b.u === path);
+        btn.setAttribute("aria-pressed", String(on));
+        btn.title = on ? "Remove from saved pages" : "Save this page";
+        btn.setAttribute("aria-label", btn.title);
+      };
+      sync();
+      btn.onclick = () => {
+        let list = bookmarks();
+        if (list.some((b) => b.u === path)) {
+          list = list.filter((b) => b.u !== path);
+          toast("Removed from your saved pages.", null, null, 2500);
+        } else {
+          list.unshift({ u: path, t: pageTitle(), s: pageSection(), at: Date.now() });
+          toast("Saved to your pages.", "View", () => { location.href = ROOT + "saved/"; }, 4000);
+        }
+        store.set("bookmarks", list);
+        sync();
+      };
+    }
+    if (article) {
+      const entry = { u: path, t: pageTitle(), s: pageSection(), at: Date.now() };
+      store.set("recent", [entry].concat(listOf("recent").filter((r) => r.u !== path)).slice(0, 12));
+      const bm = bookmarks(), i = bm.findIndex((b) => b.u === path); // keep saved titles current
+      if (i >= 0 && (bm[i].t !== entry.t || bm[i].s !== entry.s)) { bm[i] = Object.assign(bm[i], { t: entry.t, s: entry.s }); store.set("bookmarks", bm); }
+    }
+    renderYourPages();
+    renderSavedPage();
+  }
+  function renderYourPages() {
+    const box = $("#your-pages");
+    if (!box) return;
+    const bm = bookmarks(), rec = listOf("recent");
+    $("#yp-saved").hidden = !bm.length;
+    $("#yp-recent").hidden = !rec.length;
+    box.hidden = !bm.length && !rec.length;
+    $("#yp-saved-list").innerHTML = bm.slice(0, 5).map((p) => pageRow(p, p.s)).join("") +
+      (bm.length > 5 ? `<a class="yp-more" href="${ROOT}saved/">All ${bm.length} saved pages ${icon("arrow-right")}</a>` : "");
+    $("#yp-recent-list").innerHTML = rec.slice(0, 5).map((p) => pageRow(p, relTime(p.at))).join("");
+  }
+  async function renderSavedPage() {
+    const root = $("#saved-pages");
+    if (!root) return;
+    const draw = () => {
+      const bm = bookmarks(), rec = listOf("recent");
+      root.innerHTML = `
+        <section class="set-card"><h3>${icon("bookmark-outline")} Saved pages <span class="sp-count">${bm.length || ""}</span></h3>
+          ${bm.length ? `<div class="saved-list">${bm.map((p) => `<div class="saved-row">${pageRow(p, p.s)}<button type="button" class="icon-btn sp-remove" data-remove-bm="${esc(p.u)}" aria-label="Remove ${esc(p.t)} from saved pages" title="Remove">${ICON.close}</button></div>`).join("")}</div>`
+            : `<p class="sp-empty">Nothing saved yet. Tap the bookmark ${icon("bookmark-outline")} next to any page's title to save it here.</p>`}
+        </section>
+        <section class="set-card"><h3>${icon("history")} Recently viewed</h3>
+          ${rec.length ? `<div class="saved-list">${rec.map((p) => `<div class="saved-row">${pageRow(p, (p.s ? p.s + " · " : "") + relTime(p.at))}</div>`).join("")}</div>
+            <div class="set-row"><button type="button" class="btn" id="sp-clear">Clear history</button></div>`
+            : `<p class="sp-empty">Pages you read show up here.</p>`}
+        </section>`;
+      $$("[data-remove-bm]", root).forEach((b) => { b.onclick = () => { store.set("bookmarks", bookmarks().filter((x) => x.u !== b.dataset.removeBm)); draw(); }; });
+      const clear = $("#sp-clear", root);
+      if (clear) clear.onclick = () => { store.del("recent"); draw(); };
+    };
+    draw();
+    // refresh titles of saved pages that were renamed since (the search index is saved offline too)
+    const pages = await loadIndex();
+    if (!pages.length) return;
+    const byUrl = new Map(pages.map((p) => [p.u, p.t]));
+    let changed = false;
+    const bm = bookmarks().map((b) => { const t = byUrl.get(b.u); if (t && t !== b.t) { changed = true; return Object.assign(b, { t }); } return b; });
+    if (changed) { store.set("bookmarks", bm); draw(); }
+  }
+
+  // ── focus timer (Pomodoro): state in localStorage, so it keeps going across pages ──
+  const FOCUS_PRESETS = [[25, 5], [50, 10], [15, 3]];
+  const focusState = () => {
+    const st = Object.assign({ mode: "focus", status: "idle", endsAt: 0, left: 0, preset: [25, 5], chime: true }, store.get("focus", {}));
+    if (!Array.isArray(st.preset) || st.preset.length !== 2) st.preset = [25, 5];
+    return st;
+  };
+  const phaseLen = (st, mode) => ((mode || st.mode) === "focus" ? st.preset[0] : st.preset[1]) * 60;
+  const focusLeft = (st) => st.status === "running" ? Math.max(0, Math.ceil((st.endsAt - Date.now()) / 1000))
+    : st.status === "paused" ? st.left : phaseLen(st);
+  const focusing = () => { const st = focusState(); return st.mode === "focus" && st.status === "running"; };
+  const mmss = (sec) => `${Math.floor(sec / 60)}:${pad(sec % 60)}`;
+  const focusDays = () => { const f = store.get("focusDays", {}); return f && typeof f === "object" ? f : {}; };
+  // finished (or stopped) focus time counts as study time, even if the screen was off
+  function creditFocus(sec, finished) {
+    sec = Math.round(sec);
+    if (sec < 1 && !finished) return;
+    const k = dayKey(), f = focusDays(), t = f[k] || { n: 0, s: 0 };
+    t.s += sec; if (finished) t.n += 1;
+    f[k] = t; store.set("focusDays", f);
+    if (prefs().tracker) { const d = studyData(); d.days[k] = (d.days[k] || 0) + sec; store.set("study", d); }
+  }
+  let audioCtx = null;
+  function unlockAudio() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) { audioCtx = null; }
+  }
+  function chime() {
+    if (!focusState().chime || !audioCtx) return;
+    try {
+      const t0 = audioCtx.currentTime;
+      [659.25, 783.99, 1046.5].forEach((f, i) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0 + i * 0.18);
+        g.gain.exponentialRampToValueAtTime(0.25, t0 + i * 0.18 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.18 + 0.9);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t0 + i * 0.18); o.stop(t0 + i * 0.18 + 1);
+      });
+    } catch (e) { /* no audio */ }
+  }
+  function focusStart(mode) {
+    unlockAudio();
+    const st = focusState();
+    if (mode) st.mode = mode;
+    const left = st.status === "paused" && !mode ? st.left : phaseLen(st);
+    store.set("focus", Object.assign(st, { status: "running", endsAt: Date.now() + left * 1000, left: 0 }));
+    focusTick();
+  }
+  function focusPause() {
+    const st = focusState();
+    if (st.status !== "running") return;
+    store.set("focus", Object.assign(st, { status: "paused", left: focusLeft(st), endsAt: 0 }));
+    focusTick();
+  }
+  // stop the current phase: a stopped focus phase still counts the minutes done so far
+  function focusStop(next) {
+    const st = focusState();
+    if (st.mode === "focus" && st.status !== "idle") creditFocus(phaseLen(st) - focusLeft(st), false);
+    store.set("focus", Object.assign(st, { mode: next || "focus", status: "idle", endsAt: 0, left: 0 }));
+    focusTick();
+  }
+  function focusFinish(st) {
+    const len = phaseLen(st), was = st.mode;
+    store.set("focus", Object.assign(st, { mode: was === "focus" ? "break" : "focus", status: "idle", endsAt: 0, left: 0 }));
+    if (was === "focus") {
+      creditFocus(len, true);
+      toast(`Focus session done (+${fmtDur(len)} study time). Time for a break.`, "Start break", () => focusStart("break"));
+    } else {
+      toast("Break's over. Ready for another focus session?", "Start focus", () => focusStart("focus"));
+    }
+    chime();
+  }
+  let focusTimer = 0, baseTitle = document.title;
+  function focusTick() {
+    let st = focusState();
+    if (st.status === "running" && Date.now() >= st.endsAt) { focusFinish(st); st = focusState(); }
+    const left = focusLeft(st), active = st.status !== "idle";
+    const pill = $(".focus-pill");
+    if (pill) {
+      pill.hidden = !active || pagePath() === "focus/";
+      pill.classList.toggle("is-break", st.mode === "break");
+      pill.classList.toggle("is-paused", st.status === "paused");
+      $(".fp-label", pill).textContent = st.mode === "break" ? "Break" : "";
+      $(".fp-time", pill).textContent = mmss(left);
+      pill.title = `${st.mode === "focus" ? "Focus" : "Break"}: ${mmss(left)} left${st.status === "paused" ? " (paused)" : ""}`;
+    }
+    renderFocusPage(st, left);
+    clearInterval(focusTimer);
+    if (st.status === "running") focusTimer = setInterval(focusTick, 1000);
+  }
+  function renderFocusPage(st, left) {
+    const root = $("#focus-timer");
+    if (!root) return;
+    if (!root.dataset.ready) {
+      root.dataset.ready = "1";
+      root.innerHTML = `
+        <section class="set-card focus-card">
+          <div class="focus-presets" role="group" aria-label="Focus and break length">
+            ${FOCUS_PRESETS.map((p, i) => `<button type="button" class="btn" data-preset="${i}">${p[0]} / ${p[1]} min</button>`).join("")}
+          </div>
+          <div class="focus-ring">
+            <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fr-track" cx="60" cy="60" r="54"/><circle class="fr-bar" cx="60" cy="60" r="54"/></svg>
+            <div class="fr-center"><span class="fr-phase" id="fc-phase">Focus</span><span class="fr-time" id="fc-time" role="timer">25:00</span><span class="fr-sub" id="fc-sub"></span></div>
+          </div>
+          <div class="set-row focus-actions">
+            <button type="button" class="btn btn-primary" id="fc-main">Start focus</button>
+            <button type="button" class="btn" id="fc-skip">Skip</button>
+            <button type="button" class="btn" id="fc-reset">Reset</button>
+          </div>
+          <label class="set-check"><input type="checkbox" id="fc-chime"> Play a chime when a session ends</label>
+          <p class="set-hint">On iPhone, the app can't ring while it's closed or the screen is locked. The timer keeps
+            time anyway, and finished sessions show up when you open the app again.</p>
+        </section>
+        <section class="set-card"><h3>${icon("chart-box-outline")} Focus stats</h3>
+          <div class="sc-row focus-stats">
+            <div><b id="fc-n">0</b><small>sessions today</small></div>
+            <div><b id="fc-today">0m</b><small>focus today</small></div>
+            <div><b id="fc-week">0m</b><small>focus this week</small></div>
+          </div></section>`;
+      $$("[data-preset]", root).forEach((b) => { b.onclick = () => {
+        const s = focusState();
+        if (s.status !== "idle") return;
+        store.set("focus", Object.assign(s, { preset: FOCUS_PRESETS[+b.dataset.preset] }));
+        focusTick();
+      }; });
+      $("#fc-main").onclick = () => { const s = focusState(); if (s.status === "running") focusPause(); else focusStart(); };
+      $("#fc-skip").onclick = () => { const s = focusState(); focusStop(s.mode === "focus" ? "break" : "focus"); focusStart(); };
+      $("#fc-reset").onclick = () => focusStop("focus");
+      $("#fc-chime").onchange = (e) => { store.set("focus", Object.assign(focusState(), { chime: e.target.checked })); if (e.target.checked) unlockAudio(); };
+    }
+    const len = phaseLen(st), C = 2 * Math.PI * 54;
+    const bar = $(".fr-bar", root);
+    bar.style.strokeDasharray = C.toFixed(2);
+    bar.style.strokeDashoffset = (C * (left / len)).toFixed(2);
+    root.classList.toggle("is-break", st.mode === "break");
+    $("#fc-phase").textContent = st.mode === "focus" ? "Focus" : "Break";
+    $("#fc-time").textContent = mmss(left);
+    $("#fc-sub").textContent = st.status === "paused" ? "Paused" : st.status === "running" ? `ends ${new Date(st.endsAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : "Ready";
+    $("#fc-main").textContent = st.status === "running" ? "Pause" : st.status === "paused" ? "Resume" : st.mode === "focus" ? "Start focus" : "Start break";
+    $("#fc-reset").disabled = st.status === "idle" && st.mode === "focus";
+    $$("[data-preset]", root).forEach((b) => {
+      const p = FOCUS_PRESETS[+b.dataset.preset];
+      b.setAttribute("aria-pressed", String(p[0] === st.preset[0] && p[1] === st.preset[1]));
+      b.disabled = st.status !== "idle";
+    });
+    $("#fc-chime").checked = !!st.chime;
+    const f = focusDays(), today = f[dayKey()] || { n: 0, s: 0 };
+    const monday = startOfDay(now()); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    let week = 0;
+    for (let d = new Date(monday); d <= now(); d.setDate(d.getDate() + 1)) week += (f[dayKey(d)] || {}).s || 0;
+    $("#fc-n").textContent = today.n;
+    $("#fc-today").textContent = fmtDur(today.s);
+    $("#fc-week").textContent = fmtDur(week);
+    document.title = st.status === "running" ? `${mmss(left)} · ${st.mode === "focus" ? "Focus" : "Break"}` : baseTitle;
+  }
+  function initFocus() {
+    focusTick();
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") focusTick(); });
+    window.addEventListener("storage", (e) => { if (e.key === "apchem.focus") focusTick(); });
+    // iOS only plays sound after a tap on this page: unlock audio on the first touch while a timer runs
+    document.addEventListener("pointerdown", () => { if (focusState().status !== "idle") unlockAudio(); }, { once: true, passive: true });
+  }
+
+  // ── Molar Mass Calculator ────────────────────────────────────────────────
+  const SUBSCRIPTS = /[₀₁₂₃₄₅₆₇₈₉]/g;
+  function parseFormula(raw, EL) {
+    let s = String(raw || "").replace(SUBSCRIPTS, (c) => String(c.charCodeAt(0) - 0x2080)).replace(/[·•∙⋅*]/g, ".").replace(/\s+/g, "");
+    const notes = [];
+    const state = /\((s|l|g|aq)\)$/i.exec(s);
+    if (state) { s = s.slice(0, state.index); notes.push(`The state symbol (${state[1]}) doesn't change the molar mass.`); }
+    const charge = /\^.*$|[+-]+$/.exec(s);
+    if (charge && s.length > charge[0].length) { s = s.slice(0, charge.index); notes.push("The charge is ignored: electrons have almost no mass."); }
+    if (!s) return null;
+    const counts = {};
+    const add = (into, from, k) => { Object.keys(from).forEach((e) => { into[e] = (into[e] || 0) + from[e] * k; }); };
+    s.split(".").forEach((part, pi) => {
+      if (!part) throw new Error(pi ? "Something is missing after the dot." : "Something is missing before the dot.");
+      let i = 0;
+      const num = () => { const m = /^\d+/.exec(part.slice(i)); if (!m) return 1; i += m[0].length; const n = parseInt(m[0], 10); if (!n) throw new Error("A number in a formula can't be 0."); return n; };
+      const coef = num();
+      const seq = (close) => {
+        const c = {};
+        while (i < part.length) {
+          const ch = part[i];
+          if (ch === "(" || ch === "[") { i++; const inner = seq(ch === "(" ? ")" : "]"); add(c, inner, num()); continue; }
+          if (ch === ")" || ch === "]") {
+            if (ch !== close) throw new Error(close ? `Expected "${close}" but found "${ch}".` : `There's a "${ch}" without a matching opening bracket.`);
+            i++; return c;
+          }
+          const m = /^[A-Z][a-z]?/.exec(part.slice(i));
+          if (!m) {
+            if (/[a-z]/.test(ch)) throw new Error("Element symbols start with a capital letter: CO is carbon monoxide, Co is cobalt.");
+            if (/\d/.test(ch)) throw new Error("A number has to come after an element or a bracket.");
+            throw new Error(`"${ch}" can't be part of a formula.`);
+          }
+          const sym = m[0];
+          if (!EL[sym]) throw new Error(`"${sym}" isn't an element symbol.`);
+          if (EL[sym].v === null) throw new Error(`${EL[sym].name} (${sym}) has no atomic mass on the AP periodic table.`);
+          i += sym.length;
+          c[sym] = (c[sym] || 0) + num();
+        }
+        if (close) throw new Error(`Missing "${close}".`);
+        return c;
+      };
+      add(counts, seq(""), coef);
+    });
+    const rows = Object.keys(counts).map((sym) => ({ sym, name: EL[sym].name, m: EL[sym].m, n: counts[sym], sub: counts[sym] * EL[sym].v }));
+    const total = rows.reduce((a, r) => a + r.sub, 0);
+    rows.forEach((r) => { r.pct = (r.sub / total) * 100; });
+    return { rows, total, notes, display: s.replace(/\./g, "*") + (charge && charge[0].startsWith("^") ? charge[0] : charge ? "^" + charge[0] : "") };
+  }
+  // n significant figures, as TeX (8.8\cdot10^{-12}) for the KaTeX lines
+  function sigTex(x, n = 4) {
+    if (!isFinite(x)) return "?";
+    const p = x.toPrecision(n); // "1.6e+2" when the sig figs can't be shown as a plain number
+    if (x !== 0 && (Math.abs(x) >= 1e5 || Math.abs(x) < 1e-3 || p.includes("e"))) {
+      const [a, b] = x.toExponential(n - 1).split("e");
+      return `${a}\\cdot10^{${+b}}`;
+    }
+    return p.replace(/^(\d+)\.$/, "$1");
+  }
+  const sigText = (x, n = 4) => sigTex(x, n).replace("\\cdot10^{", "e").replace("}", "");
+  function texInto(el, tex) {
+    if (window.katex) { try { window.katex.render(tex, el, { throwOnError: false }); return; } catch (e) { /* fall through */ } }
+    el.textContent = tex;
+  }
+  function initMolarMass() {
+    const root = $("#molar-mass");
+    if (!root) return;
+    const EL = {};
+    try { JSON.parse($("#mm-elements").textContent).forEach(([s, name, m]) => { EL[s] = { name, m, v: m ? parseFloat(m) : null }; }); } catch (e) { /* no data */ }
+    const EXAMPLES = ["H2O", "C6H12O6", "Ca(NO3)2", "CuSO4·5H2O", "(NH4)3PO4", "Fe2(SO4)3"];
+    root.innerHTML = `
+      <form class="mm-form" id="mm-form" autocomplete="off">
+        <label for="mm-input">Formula</label>
+        <div class="mm-row"><input id="mm-input" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="e.g. Ca(NO3)2 or CuSO4·5H2O">
+          <button class="btn btn-primary" type="submit">Calculate</button></div>
+        <div class="mm-chips" id="mm-chips"></div>
+      </form>
+      <div class="mm-out" id="mm-out" aria-live="polite"></div>`;
+    const input = $("#mm-input"), out = $("#mm-out");
+    let cur = null, curF = "";
+    const recentFormulas = () => listOf("mmHistory").map((x) => x.u);
+    const chips = () => {
+      const h = recentFormulas();
+      $("#mm-chips").innerHTML = (h.length ? `<span class="mm-chip-label">Recent</span>${h.map((f) => `<button type="button" class="chip" data-f="${esc(f)}">${esc(f)}</button>`).join("")}` : "") +
+        `<span class="mm-chip-label">Try</span>${EXAMPLES.filter((f) => !h.includes(f)).map((f) => `<button type="button" class="chip" data-f="${esc(f)}">${esc(f)}</button>`).join("")}`;
+      $$("[data-f]", root).forEach((b) => { b.onclick = () => { input.value = b.dataset.f; calc(true); }; });
+    };
+    const remember = (f) => { store.set("mmHistory", [{ u: f }].concat(listOf("mmHistory").filter((x) => x.u !== f)).slice(0, 6)); chips(); };
+    function calc(save) {
+      const f = input.value.trim();
+      try { window.history.replaceState(null, "", f ? "?f=" + encodeURIComponent(f) : location.pathname); } catch (e) { /* file:// */ }
+      if (!f) { out.innerHTML = ""; cur = null; return; }
+      let r;
+      try { r = parseFormula(f, EL); } catch (e) { out.innerHTML = `<p class="mm-error">${icon("alert-outline")} ${esc(e.message)}</p>`; cur = null; return; }
+      if (!r) { out.innerHTML = ""; return; }
+      cur = r; curF = f;
+      const total = r.total.toFixed(2);
+      out.innerHTML = `
+        <div class="mm-result">
+          <div class="mm-formula" id="mm-formula"></div>
+          <div class="mm-total"><span>Molar mass</span><b>${total}</b> g/mol</div>
+          <div class="mm-work" id="mm-work"></div>
+          ${r.notes.map((n) => `<p class="set-hint">${esc(n)}</p>`).join("")}
+        </div>
+        <div class="table-wrap"><table class="mm-table"><thead><tr><th>Element</th><th>Count</th><th>Atomic mass</th><th>Subtotal</th><th>Mass %</th></tr></thead>
+          <tbody>${r.rows.map((x) => `<tr><td><b>${esc(x.sym)}</b> <span class="mm-name">${esc(x.name)}</span></td><td>${x.n}</td><td>${esc(x.m)}</td><td>${x.sub.toFixed((x.m.split(".")[1] || "").length)}</td><td>${x.pct.toFixed(2)}%</td></tr>`).join("")}</tbody>
+          <tfoot><tr><td>Total</td><td></td><td></td><td>${total}</td><td>100%</td></tr></tfoot></table></div>
+        <section class="mm-conv">
+          <h3>Convert</h3>
+          <div class="mm-conv-row">
+            <label>Grams <input type="text" inputmode="decimal" id="mm-g" placeholder="g"></label>
+            <label>Moles <input type="text" inputmode="decimal" id="mm-mol" placeholder="mol"></label>
+            <label>Particles <input type="text" inputmode="decimal" id="mm-n" placeholder="e.g. 3.01e23"></label>
+          </div>
+          <div class="mm-chain" id="mm-chain"></div>
+          <p class="set-hint" id="mm-sf"></p>
+        </section>`;
+      texInto($("#mm-formula"), `\\ce{${r.display.replace(/[^A-Za-z0-9()[\]*^+\-]/g, "")}}`);
+      texInto($("#mm-work"), r.rows.map((x) => (x.n === 1 ? x.m : `${x.n}(${x.m})`)).join(" + ") + ` = ${total}\\ \\text{g/mol}`);
+      ["mm-g", "mm-mol", "mm-n"].forEach((id) => { $("#" + id).oninput = () => convert(id); });
+      if (save) remember(f);
+    }
+    // significant figures in a typed number ("50.0" → 3, "0.25" → 2, "3.01x10^23" → 3, "50" → 1)
+    const sigOf = (v) => {
+      const m = String(v).replace(/\s+/g, "").split(/[eE]|[x×*·]10/)[0].replace(/^[+-]/, "");
+      let d = m.replace(".", "").replace(/^0+/, "");
+      if (!m.includes(".")) d = d.replace(/0+$/, "");
+      return d.length || 1;
+    };
+    const parseNum = (v) => {
+      const s = String(v).replace(/\s+/g, "").replace(/,/g, "");
+      const m = /^(\d*\.?\d+)(?:(?:[x×*·]10\^?|e)([+-]?\d+))?$/i.exec(s);
+      return m ? parseFloat(m[1]) * Math.pow(10, m[2] ? +m[2] : 0) : NaN;
+    };
+    function convert(from) {
+      if (!cur) return;
+      const M = +cur.total.toFixed(2), NA = 6.022e23;
+      const raw = $("#" + from).value, val = parseNum(raw);
+      const typed = sigOf(raw), sf = Math.min(4, Math.max(3, typed)); // like the number you typed, 3–4 sig figs
+      const chain = $("#mm-chain");
+      if (!(val > 0)) { chain.innerHTML = ""; $("#mm-sf").textContent = ""; return; }
+      const mol = from === "mm-g" ? val / M : from === "mm-mol" ? val : val / NA;
+      const g = mol * M, n = mol * NA;
+      if (from !== "mm-g") $("#mm-g").value = sigText(g, sf);
+      if (from !== "mm-mol") $("#mm-mol").value = sigText(mol, sf);
+      if (from !== "mm-n") $("#mm-n").value = sigText(n, sf);
+      const Mt = `${M.toFixed(2)}\\ \\text{g}`, NAt = "6.022\\cdot10^{23}";
+      const tex = from === "mm-g"
+        ? `${sigTex(val, sf)}\\ \\text{g}\\cdot\\dfrac{1\\ \\text{mol}}{${Mt}} = ${sigTex(mol, sf)}\\ \\text{mol}\\cdot\\dfrac{${NAt}}{1\\ \\text{mol}} = ${sigTex(n, sf)}\\ \\text{particles}`
+        : from === "mm-mol"
+          ? `${sigTex(val, sf)}\\ \\text{mol}\\cdot\\dfrac{${Mt}}{1\\ \\text{mol}} = ${sigTex(g, sf)}\\ \\text{g} \\qquad ${sigTex(val, sf)}\\ \\text{mol}\\cdot\\dfrac{${NAt}}{1\\ \\text{mol}} = ${sigTex(n, sf)}\\ \\text{particles}`
+          : `${sigTex(val, sf)}\\ \\text{particles}\\cdot\\dfrac{1\\ \\text{mol}}{${NAt}} = ${sigTex(mol, sf)}\\ \\text{mol}\\cdot\\dfrac{${Mt}}{1\\ \\text{mol}} = ${sigTex(g, sf)}\\ \\text{g}`;
+      texInto(chain, tex);
+      $("#mm-sf").textContent = `Rounded to ${sf} significant figures${typed === sf ? ", like the number you typed" : ""}.`;
+    }
+    let t = 0;
+    input.oninput = () => { clearTimeout(t); t = setTimeout(() => calc(false), 250); };
+    input.onblur = () => { if (cur && curF === input.value.trim()) remember(curF); };
+    $("#mm-form").onsubmit = (e) => { e.preventDefault(); calc(true); input.blur(); };
+    chips();
+    const q = new URLSearchParams(location.search).get("f");
+    if (q) { input.value = q; calc(false); }
+  }
+
+  // ── Glossary filter ──────────────────────────────────────────────────────
+  function initGlossaryFilter() {
+    const input = $(".glossary-filter");
+    if (!input) return;
+    const count = $(".gl-count"), label = count ? count.textContent : "";
+    let texts = null;
+    input.oninput = () => {
+      if (!texts) texts = new Map($$(".gl-entry").map((e) => [e, norm($("dt", e).textContent + " " + $$("dd:not(.gl-src)", e).map((d) => d.textContent).join(" ")).replace(/\s+/g, " ")]));
+      const q = norm(input.value.trim()).replace(/\s+/g, " ");
+      let shown = 0;
+      $$(".gl-letter").forEach((sec) => {
+        let any = false;
+        $$(".gl-entry", sec).forEach((e) => { const hit = !q || texts.get(e).includes(q); e.hidden = !hit; if (hit) { any = true; shown++; } });
+        sec.hidden = !any;
+      });
+      const empty = $(".gl-empty"); if (empty) empty.hidden = shown > 0;
+      if (count) count.textContent = q ? `${shown} of ${count.dataset.total} terms` : label;
+    };
+  }
+
+  // ── bottom tab bar (Home Screen app on a phone) ──────────────────────────
+  function initTabbar() {
+    const bar = $(".tabbar");
+    if (!bar) return;
+    const path = pagePath();
+    const cur = path === "" ? "home" : path.startsWith("units/") ? "notes" : path === "formulas/" ? "formulas" : path === "saved/" ? "saved" : "";
+    $$(".tab", bar).forEach((t) => { if (t.dataset.tab === cur) t.setAttribute("aria-current", "page"); });
+    bar.addEventListener("click", (e) => {
+      const t = e.target.closest(".tab");
+      if (!t) return;
+      if (t.dataset.tab === "notes") { setNav(!document.body.classList.contains("nav-open")); return; }
+      if (document.body.classList.contains("nav-open")) setNav(false);
+      // tapping the tab you're on scrolls back to the top, like an iPhone app
+      if (t.tagName === "A" && t.getAttribute("aria-current") === "page") { e.preventDefault(); window.scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" }); }
+    });
+  }
+
   // ── Settings page ────────────────────────────────────────────────────────
   function flash(sel, msg) { const el = $(sel); if (!el) return; el.textContent = msg; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, 2500); }
   function initSettings() {
@@ -946,7 +1413,7 @@
     window.addEventListener("apchem-sw", refreshAppCard);
     window.addEventListener("apchem-install", refreshAppCard);
     $("#set-export").onclick = () => {
-      const blob = new Blob([JSON.stringify({ study: studyData(), prefs: prefs(), name: getName() }, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify({ study: studyData(), prefs: prefs(), name: getName(), bookmarks: bookmarks(), recent: listOf("recent"), focusDays: focusDays() }, null, 2)], { type: "application/json" });
       const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `apchem-study-${dayKey()}.json`; a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     };
@@ -960,6 +1427,13 @@
           store.set("study", cur);
         }
         if (d.name && !getName()) store.set("name", d.name);
+        if (Array.isArray(d.bookmarks)) { const have = new Set(bookmarks().map((b) => b.u)); store.set("bookmarks", bookmarks().concat(d.bookmarks.filter((b) => b && b.u && !have.has(b.u)))); }
+        if (Array.isArray(d.recent) && !listOf("recent").length) store.set("recent", d.recent.filter((r) => r && r.u).slice(0, 12));
+        if (d.focusDays && typeof d.focusDays === "object") {
+          const f = focusDays();
+          Object.entries(d.focusDays).forEach(([k, v]) => { const c = f[k] || { n: 0, s: 0 }; f[k] = { n: Math.max(c.n, +(v || {}).n || 0), s: Math.max(c.s, +(v || {}).s || 0) }; });
+          store.set("focusDays", f);
+        }
         flash("#set-study-ok", "Imported ✓");
       }).catch(() => flash("#set-study-ok", "That file couldn't be read."));
     };
@@ -1113,6 +1587,11 @@
     initQuotesPage();
     initSettings();
     initPWA();
+    initSaved();
+    initFocus();
+    initMolarMass();
+    initGlossaryFilter();
+    initTabbar();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   window.__apchemRefreshHome = initHome; // handy for testing
