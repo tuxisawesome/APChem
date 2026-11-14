@@ -1,7 +1,7 @@
 ---
 title: First Law of Thermodynamics
 unit: 5
-description: Energy is conserved — ΔE = q + w, the work done when a gas expands or contracts (w = −PΔV), ΔE @ constant P vs. @ constant V, and ΔE = ΔH − RTΔng for reactions with gases.
+description: Energy is conserved — ΔE = q + w, the work done when a gas expands or contracts (w = −PΔV), ΔE at constant pressure vs. constant volume, and ΔE = ΔH − RTΔng for reactions with gases.
 sources:
   - {nb: "class-notes", pages: "97, 102-104, 106"}
 tags: [first law, internal energy, ΔE, work, PΔV, heat, constant pressure, constant volume, Δng]
@@ -79,24 +79,24 @@ Putting it into the first law:
 
 ## Constant pressure vs. constant volume
 
-**@ const P**, the heat is the enthalpy change: $q_p = \Delta H_{RXN}$
+**At constant pressure**, the heat is the enthalpy change: $q_p = \Delta H_{RXN}$
 ([Enthalpy](enthalpy.md#enthalpy-h)). So:
 
-!!! formula "ΔE @ constant P"
+!!! formula "ΔE at constant pressure"
     $$\Delta E_{RXN} = \Delta H_{RXN} - P\Delta V$$
 
-**@ constant V**, nothing moves: $\Delta V = 0$, so $P\Delta V = 0$ and $w = 0$. All the energy
+**At constant volume**, nothing moves: $\Delta V = 0$, so $P\Delta V = 0$ and $w = 0$. All the energy
 change is heat:
 
 !!! formula "ΔE = qv and ΔH = qp"
     $$\Delta E_{RXN} = q_v \qquad ; \qquad \Delta H_{RXN} = q_p$$
 
-Comparing the heat @ constant V and @ constant P:
+Comparing the heat at constant volume and at constant pressure:
 
 !!! formula "qv vs. qp"
     $$q_v = q_p - P\Delta V \qquad\text{OR}\qquad \Delta E_{RXN} = \Delta H_{RXN} - P\Delta V$$
 
-| | **@ constant P** | **@ constant V** |
+| | **Constant pressure** | **Constant volume** |
 |---|---|---|
 | Work | $w = -P\Delta V$ | $w = 0$ |
 | The heat measured is | $q_p = \Delta H_{RXN}$ | $q_v = \Delta E_{RXN}$ |

@@ -78,7 +78,7 @@ The entropy change of the **surroundings** comes from the heat they gain or lose
 !!! formula memorize "Entropy of the surroundings — Remember this!!!"
     $$\Delta S_{surr} = \frac{q_{surr}}{T}$$
 
-@ const P, the surroundings gain the heat the system loses:
+At constant pressure, the surroundings gain the heat the system loses:
 $q_{surr} = -q_{sys} = -\Delta H^{\circ}_{rxn}$. So:
 
 !!! formula "ΔSsurr from ΔH°rxn"
@@ -126,7 +126,7 @@ The entropy of matter also varies with:
 |---|---|
 | 1. Amount of Matter | there is more of it (more particles to arrange) |
 | 2. Temperature | the temperature is higher (particles move faster) |
-| 3. Pressure @ const Temperature | a gas's pressure is lower (more volume to spread out in) |
+| 3. Pressure (at constant temperature) | a gas's pressure is lower (more volume to spread out in) |
 | 4. Structure of Matter | the atoms are heavier or the molecules are bigger |
 
 **Structure, down a group:** $\ce{Be(s)}$, $\ce{Mg(s)}$, $\ce{Ca(s)}$, $\ce{Sr(s)}$, $\ce{Ba(s)}$.
