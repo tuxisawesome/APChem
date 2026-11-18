@@ -8,6 +8,18 @@ notebook pages.
 
 ## November 2026
 
+### Mon, Nov 16 – Tue, Nov 17 — Laws of thermodynamics
+
+Covered
+:   [First law](units/05-thermodynamics/first-law.md#energy-is-conserved) — the energy of the universe is constant; $\Delta E = w + q$ and the signs of $q$ and $w$
+:   [Work](units/05-thermodynamics/first-law.md#work-done-by-a-gas-w-pv) — evaporating water pushes a piston: $w = -P_{atm}\Delta V$, $w = -RT\Delta n_g$; heat at constant pressure vs. constant volume
+:   [Spontaneity and the second law](units/05-thermodynamics/spontaneity-entropy.md#second-law-of-thermodynamics) — $\Delta S_{sys} + \Delta S_{surr} > 0$
+:   [Third law](units/05-thermodynamics/spontaneity-entropy.md#third-law-of-thermodynamics) — $S = k\cdot\ln(W)$, a $\ce{CCl4}$ crystal at 0 K
+:   [What affects entropy](units/05-thermodynamics/spontaneity-entropy.md#what-affects-entropy) — amount of matter ($S = n\cdot S_m$), temperature, pressure, structure
+
+Notes
+:   [Class Notes pp. 113–115](scans/class-notes.md#p113) (Ms. Boppana's typed notes)
+
 ### Fri, Nov 13 — Bond enthalpy
 
 Covered

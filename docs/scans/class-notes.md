@@ -1,11 +1,12 @@
 ---
 title: Class Notes
-description: Ms. Boppana's smart-board class notes and handouts, all 112 pages combined in unit order.
+description: Ms. Boppana's smart-board class notes and handouts, all 115 pages combined in unit order.
 hide: [toc]
 ---
 
-Ms. Boppana's smart-board notes, combined into one notebook and ordered by unit. They're from a
-previous school year, so the dates written on them don't match this year's class days. Click a
+Ms. Boppana's smart-board notes, combined into one notebook and ordered by unit. Most are from a
+previous school year, so the dates written on them don't match this year's class days
+(pages 113–115 are this year's). Click a
 page to open it; under each page are the wiki pages that use it.
 
 | Pages | Topic |
@@ -22,5 +23,6 @@ page to open it; under each page are the wiki pages that use it.
 | 97–105 | Bond enthalpy, the first law of thermodynamics (ΔE = q + w, PΔV work, Δn<sub>g</sub>), spontaneous reactions |
 | 106–109 | Bond enthalpy, work, spontaneity, entropy, and the second and third laws (typed handout) |
 | 110–112 | Gibbs free energy: ΔG, Q and K (typed handout) |
+| 113–115 | Laws of thermodynamics: first law (work and heat), spontaneity, entropy, the third law (typed notes) |
 
 <!-- wiki:scans nb=class-notes -->

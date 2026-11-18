@@ -1,9 +1,10 @@
 ---
 title: First Law of Thermodynamics
 unit: 5
-description: Energy is conserved — ΔE = q + w, the work done when a gas expands or contracts (w = −PΔV), ΔE at constant pressure vs. constant volume, and ΔE = ΔH − RTΔng for reactions with gases.
+description: Energy is conserved — ΔE = q + w, the signs of heat and work, the work done when a gas expands or contracts (w = −PΔV), ΔE at constant pressure vs. constant volume, and ΔE = ΔH − RTΔng for reactions with gases.
 sources:
-  - {nb: "class-notes", pages: "97, 102-104, 106"}
+  - {nb: "class-notes", pages: "97, 102-104, 106, 113"}
+dates: ["11/16/26", "11/17/26"]
 tags: [first law, internal energy, ΔE, work, PΔV, heat, constant pressure, constant volume, Δng]
 ---
 
@@ -16,8 +17,19 @@ tags: [first law, internal energy, ΔE, work, PΔV, heat, constant pressure, con
 The first law is the law of conservation of energy, applied to a reaction and its surroundings.
 
 **First law of thermodynamics**
-:   Energy is conserved: it can't be created or destroyed, only transferred between the system and
-    the surroundings. Any energy the system gains, the surroundings lose.
+:   The energy of the universe is constant: energy can neither be created nor destroyed. It can
+    only be changed from one form to another.
+
+The first law can be said three ways:
+
+1. "The energy of the universe is constant." Energy can neither be created nor destroyed; it can
+   only be changed from one form to another.
+2. "The change in the energy of a system is equal in magnitude, and opposite in sign, to the change
+   in the energy of the surroundings of that system."
+3. "The change in the energy of a system during a certain process is equal to the sum of the heat
+   ($q$) and work ($w$) exchanged by the system and the surroundings": $\Delta E = w + q$.
+
+Statement 2, as an equation:
 
 !!! formula "First law: energy of the universe"
     $$\Delta E_{system} + \Delta E_{SURR} = 0 = \Delta E_{universe}$$
@@ -31,15 +43,20 @@ A system's energy changes in two ways: by heat ($q$) and by work ($w$).
 !!! formula "First law (ΔE = q + w)"
     $$\Delta E_{RXN} = q + w$$
 
-    $q$ = heat changes in the system, $w$ = work.
+    $q$ = heat exchanged by the system, $w$ = work done on ($+$) or by ($-$) the system.
 
 **Heat** ($q$)
-:   Energy that moves into or out of the system because of a temperature difference: $+$ when the
-    system absorbs heat, $-$ when it releases heat.
+:   Energy that moves into or out of the system because of a temperature difference: $+$ when heat
+    flows into the system, $-$ when heat flows out of it.
 
 **Work** ($w$)
-:   Energy transferred when a force moves something, such as a gas pushing a piston: $-$ when the
-    system does work on the surroundings, $+$ when the surroundings do work on the system.
+:   Energy transferred when a force moves something, such as a gas pushing a piston: $+$ when it is
+    work done on the system, $-$ when it is work done by the system during the process.
+
+| | Heat flows | Process | In the absence of work |
+|:-:|---|---|---|
+| $q > 0$ | **into** the system (from the surroundings) | [endothermic](thermochemistry-basics.md#endothermic-vs-exothermic) | $\Delta E > 0$: the energy of the system increases |
+| $q < 0$ | **out of** the system (into the surroundings) | exothermic | $\Delta E < 0$: the energy of the system decreases |
 
 | | **Expansion** | **Contraction** |
 |---|---|---|
@@ -49,28 +66,42 @@ A system's energy changes in two ways: by heat ($q$) and by work ($w$).
 
 ## Work done by a gas (w = −PΔV)
 
-When a gas expands, it pushes a piston up a distance $\Delta l$ against the outside pressure:
+Consider the simple process of evaporation of water at a temperature of 373 K:
+
+$$\ce{H2O(l) -> H2O(g)}$$
+
+The vapor pushes a piston of area $A$ up a distance $\Delta l$ against the atmosphere's pressure
+($P_{atm}$):
 
 ```apparatus
 parts:
   - {type: piston, id: p, start: 0.3, end: 0.62}
 labels:
   - {text: SURR, to: p.rod, side: right}
+  - {text: "Area A", to: p.piston, side: right}
   - {text: "Final position", to: p.piston, side: left}
   - {text: "Initial position", to: p.initial, side: left}
   - {text: System, to: p.gas, side: right}
 caption: A gas expanding against a piston
 ```
 
-Work is force times distance. Pressure is force per area, so the force is $P \cdot A$, and the area
-times the distance is the change in volume:
+Work is force times displacement. The applied force is the pressure times the area, and the area
+times the displacement is the change in volume:
 
-$$w = F \cdot \Delta l = (P \cdot A) \cdot \Delta l = P\Delta V$$
+$$
+\begin{aligned}
+F_{app} &= P_{atm}\cdot A \\
+w &= F_{app}\cdot \Delta l \\
+w &= (P_{atm}\cdot A)\cdot \Delta l = P_{atm}\cdot\Delta V
+\end{aligned}
+$$
 
-The expanding system **loses** that energy, so expansion work is negative:
+Since it is the system doing work on the surroundings, $w$ is negative:
 
 !!! formula "Expansion work"
-    $$w_{exp} = -P\Delta V$$
+    $$w = -P_{atm}\Delta V$$
+
+    $P_{atm}$ = the outside (atmospheric) pressure the gas pushes against.
 
 Putting it into the first law:
 
@@ -86,7 +117,7 @@ Putting it into the first law:
     $$\Delta E_{RXN} = \Delta H_{RXN} - P\Delta V$$
 
 **At constant volume**, nothing moves: $\Delta V = 0$, so $P\Delta V = 0$ and $w = 0$. All the energy
-change is heat:
+change is heat: $\Delta E = w + q = -P_{atm}\Delta V + q = q_v$.
 
 !!! formula "ΔE = qv and ΔH = qp"
     $$\Delta E_{RXN} = q_v \qquad ; \qquad \Delta H_{RXN} = q_p$$
@@ -106,29 +137,32 @@ Comparing the heat at constant volume and at constant pressure:
 
 Gases take up far more space than liquids or solids, so for a gas only the gas volume counts.
 
-For example, boiling 1 mol of water, $\ce{1H2O(l) -> 1H2O(g)}$:
+For the evaporation of 1 mol of water, $\ce{1H2O(l) -> 1H2O(g)}$:
 
-- $\Delta V = V_g - V_l$, and $V_g \gg V_l$, so $\Delta V \approx V_g$.
-- From the [ideal gas law](../01-foundations-1/ideal-gas-equations.md), $V_g = \dfrac{RT}{P}$ for 1 mol.
-- So $\Delta E_{RXN} = \Delta H_{RXN} - P \cdot \dfrac{RT}{P}$.
+- $V_{(g)} \ggg V_{(l)}$, so $\Delta V = V_{(g)} - V_{(l)} \approx V_{(g)}$.
+- From the [ideal gas law](../01-foundations-1/ideal-gas-equations.md), $V_{(g)} = \dfrac{RT}{P}$ for 1 mol.
+- So $w = -P_{atm}\cdot\dfrac{RT}{P} = -RT$, and $\Delta E_{RXN} = \Delta H_{RXN} - RT$.
+
+!!! formula "Work for 1 mol of gas formed"
+    $$w = -RT \qquad (\text{for 1 mol})$$
 
 !!! formula "ΔE for 1 mol of gas formed"
     $$\Delta E_{RXN} = \Delta H_{RXN} - RT \qquad (\text{for 1 mol})$$
 
-In a RXN having all gases, use the **change in moles of gas**, $\Delta n_g$:
-
-!!! formula "ΔE for a RXN having all gases"
-    $$\Delta E_{RXN} = \Delta H_{RXN} - RT\Delta n_g$$
+For a reaction, use the **change in moles of gas**, $\Delta n_g$:
 
 !!! formula "Change in moles of gas (Δng)"
     $$\Delta n_g = \Sigma n_g\ \text{Products} - \Sigma n_g\ \text{Reactants}$$
 
     Count only the gases, using the coefficients.
 
-The work done by the system is the same idea, written with $\Delta n_g$:
-
 !!! formula "Work from Δng"
     $$w = -P_{ext}\Delta V = -RT\Delta n_g$$
+
+Hence, putting the work into the first law:
+
+!!! formula "ΔE for a RXN with gases"
+    $$\Delta E_{RXN} = \Delta H_{RXN} - RT\Delta n_g \qquad\text{or}\qquad q_v = q_p - RT\Delta n_g$$
 
 !!! formula "Gas constant R (energy units)"
     $$R = 8.314\ \frac{J}{mol\,K}$$
