@@ -1170,8 +1170,11 @@
   // The surface is a row of spring-linked columns that drops and bubbles disturb. It only animates while on screen.
   function createVessel(box) {
     const canvas = $(".fv-canvas", box), wet = $(".fv-wet", box), ctx = canvas.getContext("2d");
-    const N = 48, STEP = 1 / 60, TIP_Y = 11, TOP = 6;
+    const N = Math.round(Math.max(48, Math.min(120, box.clientWidth / 5.6))), STEP = 1 / 60;
     const hs = new Float32Array(N), vs = new Float32Array(N);
+    const inPanel = !!box.closest("#tb-panel"), fullPage = !!box.closest(".fs");
+    let K = 1, TIP_Y = 11, TOP = 6; // K scales the drops, burette and markings up in a taller vessel
+    let CEIL = 0, LEFT = 0, RIGHT = 0; // the full-page vessel runs behind the top bar, sidebar and tools panel
     const FOCUS = [[124, 58, 237], [91, 33, 182]], BREAK = [[4, 120, 87], [6, 95, 70]], PAUSED = [[110, 104, 130], [88, 83, 106]];
     const lerp = (a, b, k) => a + (b - a) * k;
     const mix = (a, b, k) => a.map((x, i) => lerp(x, b[i], k));
@@ -1181,17 +1184,24 @@
     let breakMix = 0, pauseMix = 0, amp = 0, clock = 0, acc = 0, raf = 0, last = 0, dripIn = 0.9, bubbleIn = 0, pendant = 0;
     let drops = [], bubbles = [], ink = {};
     const readInk = () => { const c = getComputedStyle(box); ink = { line: c.getPropertyValue("--line-2").trim(), label: c.getPropertyValue("--fg-3").trim() }; };
-    const tipX = () => Math.round(W * 0.62);
+    const tipX = () => Math.round(fullPage ? LEFT + (W - LEFT - RIGHT) * 0.8 : W * 0.62); // beside the time, so drops don't fall through it
+    function insets() {
+      if (!fullPage) return;
+      const nav = $(".site-nav"), bar = $(".topbar");
+      CEIL = bar ? bar.offsetHeight : 0;
+      LEFT = nav && TOOLS_MQ.matches ? nav.offsetWidth : 0;
+      RIGHT = parseFloat(getComputedStyle(html).getPropertyValue("--tb-space")) || 0;
+    }
     const surfaceY = () => H - level * (H - TOP);
     const colOf = (x) => Math.max(0, Math.min(N - 1, Math.round((x / W) * (N - 1))));
     function yAt(i) {
       const k = Math.min(1, level * 20); // an empty vessel has a flat, still floor
-      const meniscus = 2.6 * (Math.exp(-i / 2.2) + Math.exp(-(N - 1 - i) / 2.2));
-      const swell = (Math.sin(i * 0.34 + clock * 1.5) + 0.6 * Math.sin(i * 0.13 - clock * 0.9)) * amp;
+      const meniscus = 2.6 * K * (Math.exp(-i / 2.2) + Math.exp(-(N - 1 - i) / 2.2));
+      const swell = (Math.sin(i * 0.34 + clock * 1.5) + 0.6 * Math.sin(i * 0.13 - clock * 0.9)) * amp * K;
       return surfaceY() + (hs[i] + swell - meniscus) * k;
     }
     function poke(i, force) {
-      for (let j = -2; j <= 2; j++) { const c = i + j; if (c >= 0 && c < N) vs[c] += force * (1 - Math.abs(j) / 3); }
+      for (let j = -2; j <= 2; j++) { const c = i + j; if (c >= 0 && c < N) vs[c] += force * K * (1 - Math.abs(j) / 3); }
     }
     function step(dt) {
       clock += dt;
@@ -1200,28 +1210,31 @@
       breakMix = lerp(breakMix, state.mode === "break" ? 1 : 0, 1 - Math.exp(-dt * 4));
       pauseMix = lerp(pauseMix, state.status === "paused" ? 1 : 0, 1 - Math.exp(-dt * 4));
       amp = lerp(amp, calm ? 0 : running ? 1 : 0.25, 1 - Math.exp(-dt * 3));
-      for (let i = 0; i < N; i++) { vs[i] += -0.03 * hs[i] - 0.035 * vs[i]; hs[i] = Math.max(-9, Math.min(9, hs[i] + vs[i])); }
+      for (let i = 0; i < N; i++) { vs[i] += -0.03 * hs[i] - 0.035 * vs[i]; hs[i] = Math.max(-9 * K, Math.min(9 * K, hs[i] + vs[i])); }
       for (let p = 0; p < 2; p++) for (let i = 1; i < N; i++) { const d = 0.12 * (hs[i] - hs[i - 1]); vs[i - 1] += d; vs[i] -= d; }
       // a drop swells at the burette tip, lets go, and lands with a splash
       pendant = 0;
-      if (running && state.mode === "focus" && !calm && level < 0.93) {
+      if (running && state.mode === "focus" && !calm && surfaceY() > TIP_Y + 8 * K) {
         dripIn -= dt;
         if (dripIn < 0.55) pendant = 1 - Math.max(0, dripIn) / 0.55;
-        if (dripIn <= 0) { drops.push({ x: tipX(), y: TIP_Y + 2, vx: 0, vy: 10, r: 2.4, main: true }); dripIn = rand(1.3, 2); }
+        if (dripIn <= 0) { drops.push({ x: tipX(), y: TIP_Y + 2 * K, vx: 0, vy: 10, r: 2.4 * K, main: true }); dripIn = rand(1.3, 2); }
       }
       const splash = [];
       drops = drops.filter((d) => {
-        d.vy += 620 * dt; d.x += d.vx * dt; d.y += d.vy * dt;
+        d.vy += 620 * K * dt; d.x += d.vx * dt; d.y += d.vy * dt;
         const c = colOf(d.x);
         if (d.y < yAt(c)) return d.x > 0 && d.x < W;
         poke(c, d.main ? 1.9 : 0.25);
-        if (d.main) for (let n = 0; n < 4; n++) splash.push({ x: d.x, y: yAt(c) - 2, vx: rand(-48, 48), vy: rand(-125, -55), r: rand(0.8, 1.4), main: false });
+        if (d.main) for (let n = 0; n < 4 + (fullPage ? 3 : 0); n++) splash.push({ x: d.x, y: yAt(c) - 2, vx: rand(-48, 48) * K, vy: rand(-125, -55) * K, r: rand(0.8, 1.4) * K, main: false });
         return false;
       }).concat(splash);
-      // bubbles rise through the liquid during a break
-      if (running && state.mode === "break" && !calm && level > 0.08) {
+      // bubbles rise through the liquid during a break, and all the time in the full-page vessel
+      if (running && (state.mode === "break" || fullPage) && !calm && level > 0.08) {
         bubbleIn -= dt;
-        if (bubbleIn <= 0) { bubbles.push({ x: rand(14, W - 34), y: H - 2, r: rand(0.9, 2.1), vy: rand(14, 28), w: rand(0, 6) }); bubbleIn = rand(0.25, 0.7); }
+        if (bubbleIn <= 0) {
+          bubbles.push({ x: rand(14, W - 34 * K), y: H - 2, r: rand(0.9, 2.1) * Math.min(K, 1.8), vy: rand(14, 28) * K, w: rand(0, 6) });
+          bubbleIn = rand(0.25, 0.7) * Math.min(1, 270 / W) * (state.mode === "break" ? 1 : 2.5);
+        }
       }
       bubbles = bubbles.filter((b) => {
         b.y -= b.vy * dt; b.x += Math.sin(clock * 3 + b.w) * 0.14;
@@ -1236,12 +1249,17 @@
       ctx.lineTo(W, H); ctx.closePath();
     }
     function ticks(line, label) {
-      const min = state.minutes, by = min <= 5 ? 1 : min <= 10 ? 2 : min <= 25 ? 5 : 10;
-      ctx.font = "500 9px Geist, system-ui, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      const min = state.minutes, by = min <= 5 ? 1 : min <= 10 ? 2 : min <= 25 ? 5 : 10, S = Math.min(K, 1.6), X = W - RIGHT;
+      ctx.font = `500 ${Math.round(9 * S)}px Geist, system-ui, sans-serif`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
       for (let m = by; m < min; m += by) {
         const y = Math.round(H - (m / min) * (H - TOP));
-        ctx.fillStyle = line; ctx.fillRect(W - 9, y, 9, 1);
-        ctx.fillStyle = label; ctx.fillText(String(m), W - 12, y + 0.5);
+        ctx.fillStyle = line; ctx.fillRect(X - 9 * S, y, 9 * S, 1);
+        ctx.fillStyle = label; ctx.fillText(String(m), X - 12 * S, y + 0.5);
+      }
+      // a tall vessel has room for a finer scale
+      const fine = K > 1.5 ? (by >= 5 ? by / 5 : by === 2 ? 1 : 0) : 0;
+      if (fine) for (let m = fine; m < min; m += fine) {
+        if (m % by) { ctx.fillStyle = line; ctx.fillRect(X - 5 * S, Math.round(H - (m / min) * (H - TOP)), 5 * S, 1); }
       }
     }
     function draw() {
@@ -1251,7 +1269,7 @@
       const tone = (n) => mix(mix(FOCUS[n], BREAK[n], breakMix), PAUSED[n], pauseMix);
       const top = tone(0), wetNow = level > 0.002;
       if (wetNow) {
-        trace((i) => -2.5 + Math.sin(i * 0.22 + clock * 1.1) * 1.2 * amp);
+        trace((i) => (-2.5 + Math.sin(i * 0.22 + clock * 1.1) * 1.2 * amp) * K);
         ctx.fillStyle = rgb(top, 0.35); ctx.fill();
         trace(() => 0);
         const fill = ctx.createLinearGradient(0, surfaceY(), 0, H);
@@ -1269,8 +1287,8 @@
       ctx.fillStyle = rgb(top);
       drops.forEach((d) => { ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
       const x = tipX();
-      if (pendant > 0) { const r = 2.4 * pendant; ctx.beginPath(); ctx.arc(x, TIP_Y + r * 0.7, r, 0, Math.PI * 2); ctx.fill(); }
-      ctx.beginPath(); ctx.moveTo(x - 4, 0); ctx.lineTo(x + 4, 0); ctx.lineTo(x + 1.5, TIP_Y); ctx.lineTo(x - 1.5, TIP_Y); ctx.closePath();
+      if (pendant > 0) { const r = 2.4 * K * pendant; ctx.beginPath(); ctx.arc(x, TIP_Y + r * 0.7, r, 0, Math.PI * 2); ctx.fill(); }
+      ctx.beginPath(); ctx.moveTo(x - 4 * K, CEIL); ctx.lineTo(x + 4 * K, CEIL); ctx.lineTo(x + 1.5 * K, TIP_Y); ctx.lineTo(x - 1.5 * K, TIP_Y); ctx.closePath();
       ctx.fillStyle = ink.line; ctx.fill();
       // the white copy of the time shows only where the liquid covers it
       if (!wetNow) { wet.style.clipPath = "inset(100% 0 0 0)"; return; }
@@ -1281,7 +1299,15 @@
     }
     const busy = () => state.status === "running" || drops.length || bubbles.length || Math.abs(target - level) > 0.002 ||
       vs.some((v) => Math.abs(v) > 0.01) || Math.abs(breakMix - (state.mode === "break" ? 1 : 0)) > 0.01 || Math.abs(pauseMix - (state.status === "paused" ? 1 : 0)) > 0.01;
-    const onScreen = () => canvas.offsetParent && toolOpen() === "focus";
+    const onScreen = () => canvas.offsetParent && (!inPanel || toolOpen() === "focus");
+    function fit() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || (w === W && h === H)) return;
+      insets();
+      W = w; H = h; K = Math.max(1, Math.min(2.4, H / 116)); TIP_Y = CEIL + 11 * K; TOP = CEIL + 6 * K;
+      dpr = Math.min(W > 600 ? 1.5 : 2, window.devicePixelRatio || 1); // a full-page canvas doesn't need every pixel
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    }
     function frame(now) {
       raf = 0;
       if (!onScreen()) return;
@@ -1292,27 +1318,27 @@
     }
     const wake = () => { if (!raf && onScreen()) { last = performance.now(); raf = requestAnimationFrame(frame); } };
     readInk();
-    new MutationObserver(() => { readInk(); wake(); }).observe(html, { attributes: true, attributeFilter: ["data-theme"] });
+    new MutationObserver(() => { readInk(); insets(); wake(); }).observe(html, { attributes: true, attributeFilter: ["data-theme", "data-tool"] });
+    // resizing clears a canvas, so redraw right away to avoid a blank frame
+    if (window.ResizeObserver) new ResizeObserver(() => { fit(); if (level !== null && W) draw(); wake(); }).observe(box);
     return {
       set(s) {
         state = s; target = s.level;
         if (level === null || reduceMotion()) { // arriving on a page: already at the right level, no filling animation
           level = target; breakMix = s.mode === "break" ? 1 : 0; pauseMix = s.status === "paused" ? 1 : 0;
         }
-        if (canvas.clientWidth && canvas.clientWidth !== W) {
-          W = canvas.clientWidth; H = canvas.clientHeight; dpr = Math.min(2, window.devicePixelRatio || 1);
-          canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-        }
+        fit();
         wake();
       },
     };
   }
-  const focusPanelHTML = () => `
+  const focusVesselHTML = () => `
     <div class="fv">
       <canvas class="fv-canvas" aria-hidden="true"></canvas>
       <div class="fv-read"><span class="fc-time" role="timer">25:00</span><span class="fc-status"><span class="fc-phase">Focus</span><span class="fc-sub"></span></span></div>
       <div class="fv-read fv-wet" aria-hidden="true"><span class="fc-time-wet">25:00</span><span class="fc-status"><span class="fc-phase-wet">Focus</span><span class="fc-sub-wet"></span></span></div>
-    </div>
+    </div>`;
+  const focusControlsHTML = () => `
     <div class="focus-actions">
       <button type="button" class="btn btn-primary fc-main">Start focus</button>
       <button type="button" class="btn fc-skip">Skip</button>
@@ -1322,7 +1348,7 @@
       <div class="focus-presets" role="group" aria-label="Focus and break length">
         ${FOCUS_PRESETS.map((p, i) => `<button type="button" class="btn" data-preset="${i}" title="${p[0]} min focus, ${p[1]} min break" aria-label="${p[0]} minutes focus, ${p[1]} minutes break">${p[0]}/${p[1]}</button>`).join("")}
       </div>
-      <label class="set-check"><input type="checkbox" class="fc-chime"> Chime</label>
+      <label class="set-check" title="Play a chime when a session ends"><input type="checkbox" class="fc-chime"> Chime</label>
     </div>
     <div class="fc-stats">
       <span><b class="fc-n">0</b> sessions</span><span><b class="fc-today">0m</b> today</span><span><b class="fc-week">0m</b> this week</span>
@@ -1332,30 +1358,7 @@
     const q = (c) => $("." + c, root);
     if (!root.dataset.ready) {
       root.dataset.ready = "1";
-      root.innerHTML = compact ? focusPanelHTML() : `
-        <section class="set-card focus-card">
-          <div class="focus-presets" role="group" aria-label="Focus and break length">
-            ${FOCUS_PRESETS.map((p, i) => `<button type="button" class="btn" data-preset="${i}">${p[0]} / ${p[1]} min</button>`).join("")}
-          </div>
-          <div class="focus-ring">
-            <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fr-track" cx="60" cy="60" r="54"/><circle class="fr-bar" cx="60" cy="60" r="54"/></svg>
-            <div class="fr-center"><span class="fr-phase fc-phase">Focus</span><span class="fr-time fc-time" role="timer">25:00</span><span class="fr-sub fc-sub"></span></div>
-          </div>
-          <div class="set-row focus-actions">
-            <button type="button" class="btn btn-primary fc-main">Start focus</button>
-            <button type="button" class="btn fc-skip">Skip</button>
-            <button type="button" class="btn fc-reset">Reset</button>
-          </div>
-          <label class="set-check"><input type="checkbox" class="fc-chime"> Play a chime when a session ends</label>
-          <p class="set-hint">On iPhone, the app can't ring while it's closed or the screen is locked. The timer keeps
-            time anyway, and finished sessions show up when you open the app again.</p>
-        </section>
-        <section class="set-card"><h3>${icon("chart-box-outline")} Focus stats</h3>
-          <div class="sc-row focus-stats">
-            <div><b class="fc-n">0</b><small>sessions today</small></div>
-            <div><b class="fc-today">0m</b><small>focus today</small></div>
-            <div><b class="fc-week">0m</b><small>focus this week</small></div>
-          </div></section>`;
+      root.innerHTML = focusVesselHTML() + (compact ? focusControlsHTML() : `<div class="fs-dock">${focusControlsHTML()}</div>`);
       $$("[data-preset]", root).forEach((b) => { b.onclick = () => {
         const s = focusState();
         if (s.status !== "idle") return;
@@ -1367,12 +1370,7 @@
       q("fc-reset").onclick = () => focusStop("focus");
       q("fc-chime").onchange = (e) => { store.set("focus", Object.assign(focusState(), { chime: e.target.checked })); if (e.target.checked) unlockAudio(); };
     }
-    const len = phaseLen(st), C = 2 * Math.PI * 54;
-    if (!compact) {
-      const bar = $(".fr-bar", root);
-      bar.style.strokeDasharray = C.toFixed(2);
-      bar.style.strokeDashoffset = (C * (left / len)).toFixed(2);
-    }
+    const len = phaseLen(st);
     root.classList.toggle("is-break", st.mode === "break");
     q("fc-phase").textContent = st.mode === "focus" ? "Focus" : "Break";
     q("fc-time").textContent = mmss(left);
@@ -1393,11 +1391,9 @@
     q("fc-today").textContent = fmtDur(today.s);
     q("fc-week").textContent = fmtDur(week);
     if (!compact) document.title = st.status === "running" ? `${mmss(left)} · ${st.mode === "focus" ? "Focus" : "Break"}` : baseTitle;
-    if (compact) {
-      ["time", "phase", "sub"].forEach((k) => { q(`fc-${k}-wet`).textContent = q(`fc-${k}`).textContent; });
-      root._vessel = root._vessel || createVessel($(".fv", root));
-      root._vessel.set({ level: focusLevel(st, left), mode: st.mode, status: st.status, minutes: len / 60 });
-    }
+    ["time", "phase", "sub"].forEach((k) => { q(`fc-${k}-wet`).textContent = q(`fc-${k}`).textContent; });
+    root._vessel = root._vessel || createVessel($(".fv", root));
+    root._vessel.set({ level: focusLevel(st, left), mode: st.mode, status: st.status, minutes: len / 60 });
   }
   function initFocus() {
     focusTick();
@@ -1703,7 +1699,7 @@
     window.addEventListener("pageshow", (e) => {
       if (!e.persisted) return;
       const t = store.get("toolbar", "");
-      showTool(TOOLS[t] && TOOLS_MQ.matches ? t : "");
+      showTool(TOOLS[t] && TOOLS_MQ.matches && t !== html.getAttribute("data-own-tool") ? t : "");
       const m = $("#tb-molar");
       if (m._restore) m._restore();
       renderPanelRecent();

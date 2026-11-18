@@ -212,6 +212,8 @@ page, and the app features below. Also:
   It slides in and out (`.tb-moving`, clicks only). While open it holds the page's Contents (the Contents column
   closes up) with recently viewed pages pinned to its bottom. The timer is a liquid vessel (`createVessel`, a
   canvas): it fills during focus, drains during a break, and the top-bar timer button shows the same level.
+  On `focus/` (full-page vessel, `wiki/templates/focus.html`) and `molar-mass/`, that tool's button and panel are
+  hidden (`data-own-tool` on `<html>`) and the page's own version is used.
   It stays the same from page to page: open tool in `apchem.toolbar` (`data-tool` on `<html>`, set before
   paint), typed formula and amount in `apchem.toolbarMolar`, scroll position in `apchem.toolbarScroll`.
 - **Glossary filter** (`.glossary-filter`).

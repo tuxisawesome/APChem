@@ -1061,25 +1061,6 @@ html.standalone .skip-link { display: none; }
 .sp-empty { color: var(--fg-3); }
 .sp-empty .icon { width: 1.1em; height: 1.1em; vertical-align: -.2em; color: var(--accent); }
 /* focus timer */
-.focus-card { text-align: center; }
-.focus-presets { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 16px 0 6px; }
-.focus-presets .btn { min-height: 32px; font-size: .8125rem; padding: .3em .8em; }
-.focus-presets .btn:disabled { opacity: .55; cursor: default; }
-.focus-ring { position: relative; width: min(260px, 72vw); aspect-ratio: 1; margin: 12px auto 16px; }
-.focus-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.fr-track { fill: none; stroke: var(--surface-3); stroke-width: 5; }
-.fr-bar { fill: none; stroke: var(--accent-solid); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset .9s linear; }
-.focus.is-break .fr-bar { stroke: #059669; }
-.fr-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-.fr-phase { font-size: .8125rem; font-weight: 550; color: var(--accent); }
-.focus.is-break .fr-phase { color: var(--ok); }
-.fr-time { font-size: clamp(2.5rem, 12vw, 3.25rem); font-weight: 620; letter-spacing: -.04em; font-variant-numeric: tabular-nums; line-height: 1.05; }
-.fr-sub { font-size: .8125rem; color: var(--fg-3); }
-.focus-actions { justify-content: center; margin-bottom: 10px; }
-.focus-actions .btn { min-width: 6.5em; }
-.focus-actions .btn:disabled { opacity: .5; cursor: default; }
-.focus-card .set-check { justify-content: center; }
-.focus-stats { text-align: left; }
 /* molar mass calculator */
 .mm { margin: 1.2em 0 1.6em; }
 .mm-form label { display: block; margin-bottom: 6px; font-weight: 550; font-size: .875rem; }
@@ -1148,6 +1129,8 @@ html.standalone .skip-link { display: none; }
 :root.tb-moving .site-footer { transition: padding-right var(--tb-time) var(--ease); }
 .tool-btn, .tb-panel, .tb-tool { display: none; }
 .tool-btn { position: relative; }
+/* a page that IS the tool uses its own full-size version instead */
+:root[data-own-tool="focus"] [data-tool-btn="focus"], :root[data-own-tool="molar"] [data-tool-btn="molar"] { display: none; }
 .tool-btn[aria-expanded="true"], .tool-btn[aria-expanded="true"]:hover { color: var(--accent); background: var(--accent-soft-2); }
 /* the timer button fills like the vessel, so progress shows even with the panel closed */
 .tool-btn.is-running { --fc-liquid: var(--accent-solid); }
@@ -1222,16 +1205,58 @@ html.standalone .skip-link { display: none; }
 .fc-phase, .fc-phase-wet { font-weight: 600; }
 .fc-phase { color: var(--accent); }
 .focus.is-break .fc-phase { color: var(--ok); }
-.tb-body .focus-actions { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr); gap: 6px; margin: 0; }
-.tb-body .focus-actions .btn { min-width: 0; min-height: 30px; padding: .2em .4em; font-size: .8125rem; white-space: nowrap; box-shadow: none; }
-.fc-opts { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
-.tb-body .focus-presets { display: inline-flex; flex-wrap: nowrap; gap: 0; margin: 0; padding: 2px; border-radius: var(--r-sm); background: var(--surface-3); }
-.tb-body .focus-presets .btn { min-height: 22px; padding: 0 .6em; border: 0; border-radius: var(--r-xs); background: none; box-shadow: none; font-size: .75rem; font-weight: 500; color: var(--fg-2); font-variant-numeric: tabular-nums; }
-.tb-body .focus-presets .btn[aria-pressed="true"] { color: var(--fg); background: var(--surface); box-shadow: var(--shadow-xs); }
-.tb-body .set-check { gap: .4em; margin: 0; font-size: .75rem; color: var(--fg-2); }
-.tb-body .set-check input { width: 14px; height: 14px; margin: 0; }
+.focus-actions { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+.focus-actions .btn { min-width: 0; white-space: nowrap; box-shadow: none; }
+.focus-actions .btn:disabled { opacity: .5; cursor: default; }
+.tb-body .focus-actions .btn { min-height: 30px; padding: .2em .4em; font-size: .8125rem; }
+.fc-opts { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.focus-presets { display: inline-flex; padding: 2px; border-radius: var(--r-sm); background: var(--surface-3); }
+.focus-presets .btn { min-height: 28px; padding: 0 .75em; border: 0; border-radius: var(--r-xs); background: none; box-shadow: none; font-size: .8125rem; font-weight: 500; color: var(--fg-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.focus-presets .btn:disabled { opacity: .55; cursor: default; }
+.focus-presets .btn[aria-pressed="true"] { color: var(--fg); background: var(--surface); box-shadow: var(--shadow-xs); }
+.tb-body .focus-presets .btn { min-height: 22px; padding: 0 .6em; font-size: .75rem; }
+.fc-opts .set-check { gap: .4em; margin: 0; font-size: .8125rem; color: var(--fg-2); }
+.fc-opts .set-check input { width: 14px; height: 14px; margin: 0; }
+.tb-body .set-check { font-size: .75rem; }
 .fc-stats { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: .75rem; color: var(--fg-3); white-space: nowrap; }
 .fc-stats b { font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
+/* the Focus Timer page: the vessel fills the whole window, behind the frosted top bar and sidebar.
+   --fs-h is its height; --fs-left and --tb-space keep the time and controls in the part you can see */
+.page-focus { --fs-h: max(100dvh, 560px); --fs-left: 0px; }
+.page-focus .main { padding: calc(var(--fs-h) - var(--top-full)) 0 0; }
+.fs { position: absolute; z-index: 1; top: 0; left: 0; right: 0; height: var(--fs-h); overflow: hidden; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.fs .fv { position: absolute; inset: 0; height: auto; margin: 0; border: 0; border-radius: 0; background: none; }
+.fs .fv-read { align-items: center; gap: .35rem; padding: var(--top-full) var(--tb-space) 72px var(--fs-left); text-align: center; }
+.fs .fc-time, .fs .fc-time-wet { font-size: clamp(3rem, min(7.5vw, 13vh), 6rem); line-height: 1; letter-spacing: -.045em; }
+.fs .fc-status { gap: .6em; font-size: .9375rem; }
+.fs-dock {
+  position: absolute; bottom: 16px; left: calc(var(--fs-left) + (100% - var(--fs-left) - var(--tb-space)) / 2); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px;
+  width: max-content; max-width: calc(100% - var(--fs-left) - var(--tb-space) - 24px); padding: 8px 12px; transform: translateX(-50%);
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: color-mix(in srgb, var(--surface) 84%, transparent); box-shadow: var(--shadow-md);
+  -webkit-backdrop-filter: blur(14px) saturate(150%); backdrop-filter: blur(14px) saturate(150%);
+}
+.fs-dock .focus-actions { grid-template-columns: repeat(3, auto); }
+.fs-dock .focus-actions .btn { min-height: 32px; padding: .2em .85em; font-size: .8125rem; }
+.fs-dock .fc-opts { flex-wrap: nowrap; gap: 14px; margin: 0; }
+.fs-dock .fc-stats { gap: 14px; margin: 0; padding: 0; border: 0; }
+:root.tb-moving .fs .fv-read { transition: padding-right var(--tb-time) var(--ease); }
+:root.tb-moving .fs-dock { transition: left var(--tb-time) var(--ease), max-width var(--tb-time) var(--ease); }
+.fs-notes { padding: 36px var(--page-pad) 64px; }
+@media (min-width: 1024px) {
+  .page-focus { --fs-left: var(--sb-w); }
+  .page-focus .site-nav { z-index: 2; background: color-mix(in srgb, var(--sidebar) 76%, transparent); -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%); }
+}
+@media (max-width: 1023px) {
+  html.standalone .page-focus { --fs-h: max(calc(100dvh - var(--tab-h) - var(--safe-bottom)), 560px); }
+  .fs-notes { padding: 24px max(16px, var(--safe-right)) 40px max(16px, var(--safe-left)); }
+}
+@media (max-width: 760px) {
+  .fs .fv-read { padding-bottom: 150px; }
+  .fs-dock { width: calc(100% - 24px); padding: 8px; }
+  .fs-dock .focus-actions, .fs-dock .fc-opts, .fs-dock .fc-stats { flex: 1 1 100%; }
+  .fs-dock .focus-actions { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .fs-dock .fc-opts, .fs-dock .fc-stats { justify-content: space-between; }
+}
 /* molar mass calculator */
 .tb-body .mm { margin: 0; }
 .tb-body .mm-form label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

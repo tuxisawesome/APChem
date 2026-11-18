@@ -1,7 +1,8 @@
 {#- Page shell shared by every page: header, sidebar nav, main area, footer, scripts.
     Everything the page needs is local (assets/vendor/), so it also works offline as an app. -#}
 <!doctype html>
-<html lang="en">
+{#- data-own-tool: this page IS that tool, so its toolbar button and panel stay hidden here -#}
+<html lang="en"{% if page is defined and page.url == 'focus/' %} data-own-tool="focus"{% elif page is defined and page.url == 'molar-mass/' %} data-own-tool="molar"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -32,7 +33,7 @@
       /* study tools panel (desktop only): the open tool stays open from page to page */
       try {
         var tool = JSON.parse(localStorage.getItem("apchem.toolbar"));
-        if (["focus", "molar", "saved"].indexOf(tool) > -1 && window.matchMedia("(min-width: 1024px)").matches) d.setAttribute("data-tool", tool);
+        if (["focus", "molar", "saved"].indexOf(tool) > -1 && tool !== d.getAttribute("data-own-tool") && window.matchMedia("(min-width: 1024px)").matches) d.setAttribute("data-tool", tool);
       } catch (e) {}
     })();
   </script>
