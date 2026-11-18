@@ -18,18 +18,8 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "assets" / "icons"
-C0, C1 = (0x8B, 0x5C, 0xF6), (0xC0, 0x26, 0xD3)   # gradient: violet → fuchsia (top-left → bottom-right)
+PURPLE = (0x7C, 0x3A, 0xED)                       # the site accent
 SS = 4                                            # supersampling for smooth edges
-
-
-def gradient(size: int) -> Image.Image:
-    g = Image.new("RGB", (64, 64))
-    px = g.load()
-    for y in range(64):
-        for x in range(64):
-            t = (x + y) / 126
-            px[x, y] = tuple(round(a + (b - a) * t) for a, b in zip(C0, C1))
-    return g.resize((size, size), Image.BICUBIC)
 
 
 def corner(p1, c, p2, n=10):
@@ -64,7 +54,7 @@ def icon(size: int, rounded: bool, glyph: float) -> Image.Image:
     """glyph = how much of the tile the 64-unit flask box fills (1.0 = like flask.svg)."""
     S = size * SS
     img = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-    tile = gradient(S).convert("RGBA")
+    tile = Image.new("RGBA", (S, S), PURPLE + (255,))
     if rounded:
         mask = Image.new("L", (S, S), 0)
         ImageDraw.Draw(mask).rounded_rectangle([0, 0, S - 1, S - 1], radius=S * 16 / 64, fill=255)

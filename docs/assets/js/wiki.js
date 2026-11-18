@@ -76,7 +76,7 @@
     // phone status bar / app title bar color follows the theme
     $$('meta[name="theme-color"]').forEach((m) => {
       const forDark = pref === "auto" ? (m.getAttribute("media") || "").includes("dark") : dark;
-      m.setAttribute("content", forDark ? "#0b0814" : "#f4f1fb");
+      m.setAttribute("content", forDark ? "#0f0f13" : "#ffffff");
     });
   }
   function setTheme(pref) { store.set("theme", pref); applyTheme(pref); }
@@ -396,8 +396,7 @@
       const bh = Math.max(2, (x.s / max) * h);
       return `<rect x="${i * (bw + gap)}" y="${h - bh}" width="${bw}" height="${bh}" rx="3" class="${i === 13 ? "spark-today" : "spark-bar"}"><title>${fmtDate(x.d)}: ${fmtDur(x.s)}</title></rect>`;
     }).join("");
-    const defs = '<defs><linearGradient id="spark-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d946ef"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>';
-    $("#st-spark").innerHTML = `<svg viewBox="0 0 ${14 * (bw + gap) - gap} ${h}" preserveAspectRatio="none">${defs}${bars}</svg><div class="spark-axis"><span>2 wks ago</span><span>today</span></div>`;
+    $("#st-spark").innerHTML = `<svg viewBox="0 0 ${14 * (bw + gap) - gap} ${h}" preserveAspectRatio="none">${bars}</svg><div class="spark-axis"><span>2 wks ago</span><span>today</span></div>`;
   }
 
   // ── schedule helpers ─────────────────────────────────────────────────────
@@ -1520,33 +1519,6 @@
     $("#set-reset").onclick = () => { if (confirm("Reset all tracked study time in this browser? This can't be undone.")) { store.del("study"); flash("#set-study-ok", "Study time reset."); } };
   }
 
-  // ── 3D tilt + sheen on [data-tilt] cards ─────────────────────────────────
-  function initTilt() {
-    if (reduceMotion() || window.matchMedia("(hover: none)").matches) return;
-    $$("[data-tilt]").forEach((el) => {
-      if (el.dataset.tiltReady) return;
-      el.dataset.tiltReady = "1";
-      const sheen = document.createElement("span");
-      sheen.className = "tilt-sheen";
-      el.appendChild(sheen);
-      el.addEventListener("pointermove", (e) => {
-        const r = el.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-        const k = Math.min(1, 320 / Math.max(r.width, r.height)); // big cards tilt less
-        el.style.setProperty("--ry", ((px - 0.5) * 9 * k).toFixed(2) + "deg");
-        el.style.setProperty("--rx", ((0.5 - py) * 8 * k).toFixed(2) + "deg");
-        el.style.setProperty("--mx", (px * 100).toFixed(1) + "%");
-        el.style.setProperty("--my", (py * 100).toFixed(1) + "%");
-        el.classList.add("is-tilting");
-      });
-      el.addEventListener("pointerleave", () => {
-        el.classList.remove("is-tilting");
-        el.style.setProperty("--rx", "0deg");
-        el.style.setProperty("--ry", "0deg");
-      });
-    });
-  }
-
   // ── 3D molecule (home hero): ammonia, glossy spheres, drag to spin ───────
   function initMolecule() {
     const host = $("#hero-molecule");
@@ -1661,7 +1633,6 @@
     initScrollSpy();
     initPreviews();
     initMolecule();
-    initTilt();
     initHome();
     initFormulaFilter();
     initPrint();

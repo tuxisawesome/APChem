@@ -25,9 +25,6 @@
       </form>
 
       <div class="hero-actions">
-        <button type="button" class="hero-search" data-open-search>
-          {{ icon('magnify') }}<span>Search all notes…</span><kbd>/</kbd>
-        </button>
         <a class="btn btn-primary" href="{{ rel('formulas/') }}">{{ icon('function-variant') }} Formulas</a>
         <a class="btn" href="{{ rel('memorize/') }}">{{ icon('brain') }} Memorize</a>
         <a class="btn" id="home-current-unit" href="{{ rel('units/') }}">{{ icon('book-open-page-variant-outline') }} <span>All units</span></a>
@@ -45,7 +42,7 @@
     </div>
   </section>
 
-  <section class="quote-card" id="quote-card" aria-live="polite" data-tilt>
+  <section class="quote-card" id="quote-card" aria-live="polite">
     <div class="qc-mark" aria-hidden="true">“</div>
     <div class="qc-kicker" id="quote-kicker">Quote of the day</div>
     <blockquote class="qc-text" id="quote-text">{{ (wiki.quotes[0].text if wiki.quotes else "") }}</blockquote>
@@ -60,7 +57,7 @@
 
   <h2 class="home-h2">{{ icon('chart-box-outline') }} Study stats</h2>
   <section class="stat-grid">
-    <article class="stat-card" id="study-card" data-tilt>
+    <article class="stat-card" id="study-card">
       <header>{{ icon('timer-outline') }} Study time <a class="sc-hint sc-focus" href="{{ rel('focus/') }}">Focus timer {{ icon('arrow-right') }}</a></header>
       <div class="sc-big"><span id="st-today">0m</span><small>today</small></div>
       <div class="sc-row">
@@ -71,14 +68,14 @@
       <div class="sc-spark" id="st-spark" aria-label="Study time, last 14 days"></div>
     </article>
 
-    <article class="stat-card" id="countdown-card" data-tilt>
+    <article class="stat-card" id="countdown-card">
       <header>{{ icon('calendar-clock-outline') }} Countdowns</header>
       <div class="cd-unit" id="cd-unit"></div>
       <div class="cd-progress"><div class="cd-bar" id="cd-bar"></div></div>
       <ul class="cd-list" id="cd-list"></ul>
     </article>
 
-    <article class="stat-card" id="notes-card" data-tilt>
+    <article class="stat-card" id="notes-card">
       <header>{{ icon('notebook-outline') }} My notes</header>
       <div class="sc-big"><span>{{ stats.topic_pages or 0 }}</span><small>topic pages</small></div>
       <div class="sc-grid">
@@ -91,22 +88,6 @@
       </div>
       <footer>~{{ stats.reading_minutes or 1 }} min to read everything{% if stats.last_updated %} · updated {{ stats.last_updated|nice_date }}{% endif %}</footer>
     </article>
-  </section>
-
-  <h2 class="home-h2">{{ icon('file-pdf-box') }} Reference sheets</h2>
-  <section class="resource-grid">
-    {% for r in wiki.resources %}
-    {% set href = rel('assets/resources/' ~ r.file) %}
-    <div class="resource-card" data-tilt>
-      <div class="rc-icon">{{ icon(r.icon or 'file-pdf-box') or icon('file-pdf-box') }}</div>
-      <div class="rc-title">{{ r.title }}</div>
-      <div class="rc-desc">{{ r.description }}</div>
-      <div class="rc-actions">
-        <button type="button" class="btn rc-preview" data-pdf="{{ href }}" data-title="{{ r.title }}">{{ icon('eye-outline') }} Preview</button>
-        <a class="btn btn-primary" href="{{ href }}" download>{{ icon('download') }} Download</a>
-      </div>
-    </div>
-    {% endfor %}
   </section>
 
   <div class="home-cols your-pages" id="your-pages" hidden>
@@ -148,6 +129,22 @@
       </div>
     </section>
   </div>
+
+  <h2 class="home-h2">{{ icon('file-pdf-box') }} Reference sheets</h2>
+  <section class="resource-grid">
+    {% for r in wiki.resources %}
+    {% set href = rel('assets/resources/' ~ r.file) %}
+    <div class="resource-card">
+      <div class="rc-icon">{{ icon(r.icon or 'file-pdf-box') or icon('file-pdf-box') }}</div>
+      <div class="rc-title">{{ r.title }}</div>
+      <div class="rc-desc">{{ r.description }}</div>
+      <div class="rc-actions">
+        <button type="button" class="btn rc-preview" data-pdf="{{ href }}" data-title="{{ r.title }}">{{ icon('eye-outline') }} Preview</button>
+        <a class="btn btn-primary" href="{{ href }}" download>{{ icon('download') }} Download</a>
+      </div>
+    </div>
+    {% endfor %}
+  </section>
 
   {% if content %}
   <div class="prose home-extra">{{ content }}</div>

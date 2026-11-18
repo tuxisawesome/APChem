@@ -256,7 +256,7 @@ def m_resources(site, page, args):
         href = relurl(page.url, f"assets/resources/{r['file']}")
         ic = icon(r.get("icon") or "file-pdf-box") or icon("file-pdf-box")
         cards.append(
-            f'<div class="resource-card" data-tilt><div class="rc-icon">{ic}</div><div class="rc-title">{esc(r["title"])}</div>'
+            f'<div class="resource-card"><div class="rc-icon">{ic}</div><div class="rc-title">{esc(r["title"])}</div>'
             f'<div class="rc-desc">{esc(r.get("description", ""))}</div><div class="rc-actions">'
             f'<button type="button" class="btn rc-preview" data-pdf="{esc(href)}" data-title="{esc(r["title"])}">{icon("eye-outline")} Preview</button>'
             f'<a class="btn btn-primary" href="{esc(href)}" download>{icon("download")} Download</a></div></div>')

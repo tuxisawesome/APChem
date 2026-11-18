@@ -16,8 +16,8 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="{{ config.short_name or config.site_name }}">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#f4f1fb" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0b0814" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f0f13" media="(prefers-color-scheme: dark)">
   <script>
     /* before paint (no flash): theme (auto | light | dark) and text size */
     (function () {
@@ -44,7 +44,7 @@
       <button type="button" class="icon-btn nav-toggle" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">{{ icon('menu') }}</button>
       <button type="button" class="icon-btn app-back" aria-label="Back" title="Back" hidden>{{ icon('arrow-left') }}</button>
       <a class="brand" href="{{ self.root() }}">
-        <img src="{{ self.root() }}assets/img/flask.svg" alt="" width="30" height="30">
+        <img src="{{ self.root() }}assets/img/flask.svg" alt="" width="26" height="26">
         <span>{{ config.site_name }}</span>
       </a>
       <button type="button" class="search-trigger" data-open-search aria-label="Search the wiki">

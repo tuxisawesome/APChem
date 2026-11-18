@@ -102,7 +102,7 @@ def _write_manifest(site, out: Path) -> None:
         "scope": "./",
         "display": "standalone",
         "orientation": "any",
-        "background_color": "#f4f1fb",
+        "background_color": "#ffffff",
         "theme_color": "#7c3aed",
         "lang": "en",
         "icons": [
