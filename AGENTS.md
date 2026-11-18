@@ -196,7 +196,7 @@ drawer, greeting (`data/greetings.yml`, name in localStorage via Settings), rand
 study-time tracker (localStorage `apchem.study`), countdowns (from `data/schedule.yml`), PDF preview
 modal (`.rc-preview[data-pdf]`), scan lightbox (`.source-chip` / `.scan-open` with `data-nb`,
 `data-pages`, `data-base`), Formulas filter (text + unit chips, `?unit=N`) and **Print** → a two-column
-formula sheet of the formulas showing (print CSS under `html.fx-page`), Settings page (`#wiki-settings`), 3D NH₃ on the home
+formula sheet of the formulas showing (`buildSheets` packs whole pages, styles under `.fx-sheets`), Settings page (`#wiki-settings`), 3D NH₃ on the home
 page, and the app features below. Also:
 
 - **Saved pages:** bookmark button by each page title (`apchem.bookmarks`), recently viewed

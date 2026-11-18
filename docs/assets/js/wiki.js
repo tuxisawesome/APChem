@@ -686,10 +686,13 @@
       if (url.href !== location.href) window.history.replaceState(window.history.state, "", url.href);
     }
 
+    // The printed page in CSS px: the smaller of Letter and A4 with 0.5in margins, less a little height
+    // to spare. Safari prints 1 CSS px as 0.8pt (other browsers 0.75pt), so its page holds fewer px.
+    const ua = navigator.userAgent, webkit = /AppleWebKit/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua);
+    const PAGE_W = webkit ? 654 : 698, PAGE_H = webkit ? 880 : 940;
     // Measure each formula's natural width once, so the printed sheet can keep it in a column,
-    // shrink it a little (--fx-fit), or let it span both columns (.fx-wide). Paper: the narrower of
-    // A4 / Letter with 0.5in margins ≈ 698 CSS px → 2 columns of ≈ 316 px of formula, 670 px full width.
-    const PRINT_PX = 12.67, COL = 316, FULL = 670, MIN_FIT = 0.72;   // 9.5pt formula text when printed
+    // shrink it a little (--fx-fit), or let it span both columns (.fx-wide).
+    const PRINT_PX = 12.67, COL = (PAGE_W - 16) / 2 - 25, FULL = PAGE_W - 28, MIN_FIT = 0.72;   // 9.5pt formula text when printed
     function measure() {
       const forms = $$(".formula-unit .admonition.formula").filter((f) => !f.closest("[hidden]"));
       if (!forms.length) return;
@@ -708,13 +711,108 @@
       });
     }
 
+    // Printing: pack the formulas showing into whole pages of two columns. Browsers split CSS columns
+    // across printed pages unreliably (Safari slices boxes and falls back to one column), so each page
+    // is built here.
+    const GAP = 8;
+    const sheets = document.createElement("div");
+    sheets.className = "fx-sheets";
+    sheets.setAttribute("aria-hidden", "true");
+    units[0].parentElement.append(sheets);
+    const box = (cls) => { const d = document.createElement("div"); d.className = cls; return d; };
+    function printCopy(el) {
+      const c = el.cloneNode(true);
+      [c, ...$$("[id]", c)].forEach((x) => x.removeAttribute("id"));
+      $$(".formula-src, .headerlink", c).forEach((x) => x.remove());
+      return c;
+    }
+    // Unit headings and .fx-wide formulas span the page; a topic heading stays with its first formula.
+    function sheetBlocks() {
+      const blocks = [];
+      units.filter((u) => !u.hidden).forEach((u) => {
+        blocks.push({ wide: true, heading: true, el: printCopy($("h2", u)) });
+        $$(".formula-group", u).filter((g) => !g.hidden).forEach((g) => {
+          let h3 = $("h3", g);
+          $$(".admonition.formula", g).filter((f) => !f.hidden).forEach((f) => {
+            const el = box("fx-atom");
+            if (h3) { el.append(printCopy(h3)); h3 = null; }
+            el.append(printCopy(f));
+            blocks.push({ wide: f.classList.contains("fx-wide"), el });
+          });
+        });
+      });
+      return blocks;
+    }
+    function buildSheets() {
+      measure();
+      const blocks = sheetBlocks(), head = printCopy($(".fx-sheet-head"));
+      // measure every block at its printed width
+      html.classList.add("fx-building");
+      sheets.style.width = PAGE_W + "px";
+      sheets.textContent = "";
+      const probe = box("fx-sheet"), probeCols = box("fx-cols"), probeCol = box("fx-col");
+      probeCols.append(probeCol, box("fx-col"));
+      probe.append(head, probeCols);
+      sheets.append(probe);
+      blocks.forEach((b) => (b.wide ? probe : probeCol).append(b.el));
+      const headH = head.getBoundingClientRect().height;
+      blocks.forEach((b) => { b.h = b.el.getBoundingClientRect().height; });
+      sheets.textContent = "";
+      sheets.style.width = "";
+      html.classList.remove("fx-building");
+
+      let sheet, room;
+      const newSheet = () => { sheet = box("fx-sheet"); sheets.append(sheet); room = PAGE_H; };
+      const add = (el, h) => { sheet.append(el); room -= h + GAP; };
+      const height = (list) => list.reduce((s, b) => s + b.h + GAP, -GAP);
+      const addCols = (left, right) => {
+        const cols = box("fx-cols");
+        [left, right].forEach((list) => { const c = box("fx-col"); c.append(...list.map((b) => b.el)); cols.append(c); });
+        add(cols, Math.max(height(left), height(right)));
+      };
+      newSheet();
+      add(head, headH);
+      let i = 0;
+      while (i < blocks.length) {
+        const b = blocks[i];
+        if (b.wide) {
+          const need = b.h + (b.heading && blocks[i + 1] ? GAP + blocks[i + 1].h : 0);
+          if (need > room && sheet.firstChild) newSheet();
+          add(b.el, b.h);
+          i++;
+          continue;
+        }
+        let end = i;
+        while (end < blocks.length && !blocks[end].wide) end++;
+        const run = blocks.slice(i, end);
+        // the rest of this section fits on the page: balance the two columns
+        let split = 1, best = Infinity;
+        for (let k = 1; k <= run.length; k++) {
+          const h = Math.max(height(run.slice(0, k)), height(run.slice(k)));
+          if (h < best) { best = h; split = k; }
+        }
+        if (best <= room) { addCols(run.slice(0, split), run.slice(split)); i = end; continue; }
+        // otherwise fill both columns to the bottom of the page and carry on overleaf
+        const fit = (from) => {
+          let k = from, h = 0;
+          while (k < run.length && h + run[k].h <= room) { h += run[k].h + GAP; k++; }
+          return k;
+        };
+        let left = fit(0);
+        if (!left && sheet.firstChild) { newSheet(); continue; }
+        left = left || 1;   // a box taller than a whole page still has to go somewhere
+        const right = fit(left);
+        addCols(run.slice(0, left), run.slice(left, right));
+        i += right;
+        if (i < blocks.length) newSheet();
+      }
+    }
+
     input.oninput = apply;
     chips.forEach((c) => c.addEventListener("click", () => { unit = c.dataset.unit; apply(); }));
-    if (printBtn) printBtn.addEventListener("click", () => { apply(); measure(); window.print(); });
-    window.addEventListener("beforeprint", () => { apply(); measure(); });
+    if (printBtn) printBtn.addEventListener("click", () => window.print());
+    window.addEventListener("beforeprint", () => { apply(); buildSheets(); });
     apply();
-    measure();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
   }
 
   // Printing always uses the light colors (dark text on white paper), whatever the theme.
