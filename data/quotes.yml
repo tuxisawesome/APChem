@@ -136,3 +136,13 @@ quotes:
     category: saying
     source: {nb: "1", page: 86}
     context: Heat flow calorimetry example
+
+  - text: "Are we clear?"
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "1", page: 95}
+
+  - text: "You feel like you're Gandhi."
+    who: Ms. Boppana
+    category: quote
+    source: {nb: "1", page: 95}

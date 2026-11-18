@@ -1,10 +1,11 @@
 ---
 title: Spontaneity and Entropy
 unit: 5
-description: Spontaneous vs. non-spontaneous processes, entropy (S) as molecular disorder, the second law (ΔSsys + ΔSsurr > 0), the third law (S = 0 for a perfect crystal at 0 K), and what makes entropy bigger.
+description: Spontaneous vs. non-spontaneous processes, entropy (S) as molecular disorder, the second law (ΔSuniverse > 0), the third law (S = 0 for a perfect crystal at 0 K), and what makes entropy bigger.
 sources:
+  - {nb: "1", pages: "94-97"}
   - {nb: "class-notes", pages: "105, 107-109, 114-115"}
-dates: ["11/16/26", "11/17/26"]
+dates: ["11/16/26", "11/17/26", "11/18/26"]
 tags: [entropy, spontaneous, non-spontaneous, second law, third law, ΔS, Boltzmann, disorder, molar entropy]
 ---
 
@@ -65,33 +66,43 @@ the pure and mixed states ($\Delta E = 0$ and $\Delta H = 0$), yet mixing of gas
 
 Mathematically, the second law is expressed as:
 
-!!! formula "Second law"
-    $$\Delta S_{sys} + \Delta S_{surr} > 0$$
+!!! formula "2nd law"
+    $$\Delta S_{universe} > 0 \qquad (\text{spontaneous})$$
 
-    $\Delta S_{sys} + \Delta S_{surr} = \Delta S_{universe}$: $> 0$ spontaneous, $= 0$ at
-    equilibrium, $< 0$ not spontaneous.
+    $\Delta S_{universe} = \Delta S^{\circ}_{RXN} + \Delta S_{surrounding}$.
 
-[Gibbs free energy](gibbs-free-energy.md#g-and-the-second-law) turns these same three cases into a
-test with $\Delta G$.
+    $\Delta S_{universe} = 0$ at equilibrium; $\Delta S_{universe} < 0$ is not spontaneous.
+
+[Gibbs free energy](gibbs-free-energy.md#grxn-and-the-2nd-law) turns these same three cases into a
+test with $\Delta G^{\circ}_{RXN}$.
 
 The entropy change of the **system** is the entropy of the reaction, from the standard entropies
 ($S^{\circ}$) in a table:
 
-!!! formula "Entropy of reaction (ΔS°rxn)"
-    $$\Delta S_{sys} = \Delta S^{\circ}_{rxn} = \Sigma\, n\,S^{\circ}\,(\text{products}) - \Sigma\, m\,S^{\circ}\,(\text{reactants})$$
+!!! formula "Entropy of reaction (ΔS°RXN)"
+    $$\Delta S^{\circ}_{RXN} = \Sigma S^{\circ}_{P} - \Sigma S^{\circ}_{R}$$
 
-    $n$, $m$ = the coefficients in the balanced equation. Units: $J\cdot K^{-1}\cdot mol^{-1}$ for $S^{\circ}$.
+    Multiply each $S^{\circ}$ by its coefficient in the balanced equation. Units:
+    $J\cdot K^{-1}\cdot mol^{-1}$ for $S^{\circ}$.
+
+Entropy is not zero for elements! That is enthalpy! {.star}
+
+An element in its stable standard state has
+[$\Delta H_f^{\circ} = 0$](enthalpy.md#method-2-standard-enthalpy-of-formation), but its $S^{\circ}$
+still has a value, so elements count in $\Sigma S^{\circ}$.
 
 The entropy change of the **surroundings** comes from the heat they gain or lose:
 
 !!! formula memorize "Entropy of the surroundings — Remember this!!!"
-    $$\Delta S_{surr} = \frac{q_{surr}}{T}$$
+    $$\Delta S_{surrounding} = \frac{q_{surrounding}}{T}$$
 
-At constant pressure, the surroundings gain the heat the system loses:
-$q_{surr} = -q_{sys} = -\Delta H^{\circ}_{rxn}$. So:
+At constant pressure, the surroundings gain the heat the reaction loses:
+$q_{surrounding} = -q_{RXN} = -\Delta H^{\circ}_{RXN}$. So:
 
-!!! formula "ΔSsurr from ΔH°rxn"
-    $$\Delta S_{surr} = \frac{-\Delta H^{\circ}_{rxn}}{T} \qquad (T \text{ in K})$$
+!!! formula "ΔSsurrounding from ΔH°RXN"
+    $$\Delta S_{surrounding} = \frac{-q_{RXN}}{T} = \frac{-\Delta H^{\circ}_{RXN}}{T} = \frac{-[\Sigma H^{\circ}_{P} - \Sigma H^{\circ}_{R}]}{T}$$
+
+    $T$ in K.
 
 An exothermic reaction ($\Delta H < 0$) heats the surroundings, so their entropy goes up.
 
@@ -181,6 +192,63 @@ As a substance is heated, its particles (atoms, molecules or ions) exhibit a lar
 energies, motions and positions. Hence, the particles of a substance can be arranged in a more
 diverse fashion when the temperature is increased (larger $W$). As a result, **the entropy of a pure
 substance always increases with increasing temperature.**
+
+The two graphs below heat the same substance. The heating curve from Honors Chemistry shows the
+temperature staying flat while a phase changes. Entropy does the opposite: it rises slowly within a
+phase and **jumps** at the melting and boiling temperatures, with the biggest jump at boiling.
+
+<div class="cols" markdown>
+<div markdown>
+
+```graph
+size: [260, 200]
+x: {label: heat, min: 0, max: 10}
+y: {label: "t (°C)", min: 0, max: 10}
+axes: arrows
+curves:
+  - {points: [[0, 0], [2.6, 3.6], [5, 3.6], [7, 7], [8.4, 7], [9.8, 9.6]], smooth: false, label_at: none, color: 1}
+  - {points: [[0, 3.6], [2.6, 3.6]], smooth: false, style: dashed, label_at: none, color: ink}
+  - {points: [[0, 7], [7, 7]], smooth: false, style: dashed, label_at: none, color: ink}
+annotations:
+  - {text: "t_{m}", at: [0.6, 4.3]}
+  - {text: "t_{b}", at: [0.6, 7.7]}
+  - {text: S, at: [1.9, 1.6]}
+  - {text: L, at: [5.2, 5.8]}
+  - {text: G, at: [8.2, 9]}
+caption: Heating curve
+```
+
+</div>
+<div markdown>
+
+```graph
+size: [260, 200]
+x: {label: T (K), min: 0, max: 10}
+y: {label: S (entropy), min: 0, max: 10}
+axes: arrows
+curves:
+  - {points: [[0, 0], [3, 2], [3, 4.4], [6.4, 5.6], [6.4, 9.2], [9.6, 9.8]], smooth: false, label_at: none, color: 1}
+  - {points: [[3, 0], [3, 2]], smooth: false, style: dashed, label_at: none, color: ink}
+  - {points: [[6.4, 0], [6.4, 5.6]], smooth: false, style: dashed, label_at: none, color: ink}
+annotations:
+  - {text: "t_{m}", at: [3.4, 0.7]}
+  - {text: "t_{b}", at: [6.8, 0.7]}
+  - {text: S, at: [1.1, 2.3]}
+  - {text: L, at: [4.5, 6]}
+  - {text: G, at: [8, 10]}
+  - callout: {at: [8.3, 7.2], to: [6.5, 7.2]}
+    text: big jump
+caption: Entropy and temperature
+```
+
+</div>
+</div>
+
+| Symbol | Means |
+|:-:|---|
+| S, L, G (on the curves) | solid, liquid, gas |
+| $t_m$ | melting temperature |
+| $t_b$ | boiling temperature |
 
 ### 3. Pressure
 

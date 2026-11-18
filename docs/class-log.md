@@ -8,6 +8,18 @@ notebook pages.
 
 ## November 2026
 
+### Wed, Nov 18 — Entropy, Gibbs free energy & the end of thermodynamics
+
+Covered
+:   [Entropy and temperature](units/05-thermodynamics/spontaneity-entropy.md#2-temperature) — the heating curve next to the entropy graph, with the big jump at boiling
+:   [Entropy of reaction and of the surroundings](units/05-thermodynamics/spontaneity-entropy.md#second-law-of-thermodynamics) — $\Delta S^{\circ}_{RXN} = \Sigma S^{\circ}_{P} - \Sigma S^{\circ}_{R}$ and $\Delta S_{surrounding} = \dfrac{-\Delta H^{\circ}_{RXN}}{T}$
+:   [Gibbs free energy](units/05-thermodynamics/gibbs-free-energy.md#gibbs-free-energy-g) — $\Delta G^{\circ}_{RXN} = \Delta H^{\circ}_{RXN} - T\cdot\Delta S^{\circ}_{RXN}$ and the [second law](units/05-thermodynamics/gibbs-free-energy.md#grxn-and-the-2nd-law)
+:   [Non-standard conditions](units/05-thermodynamics/gibbs-free-energy.md#grxn-for-non-standard-conditions) — $\Delta G_{RXN} = \Delta G^{\circ}_{RXN} + RT\cdot\ln(Q_p)$
+:   [ΔG°RXN and K](units/05-thermodynamics/gibbs-free-energy.md#grxn-and-k) — $\Delta G^{\circ}_{RXN} = -RT\cdot\ln(K)$
+
+Notebook
+:   [Notebook 1 pp. 94–98](scans/1.md#p94)
+
 ### Mon, Nov 16 – Tue, Nov 17 — Laws of thermodynamics
 
 Covered
