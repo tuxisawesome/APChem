@@ -29,6 +29,11 @@
       d.setAttribute("data-theme-pref", pref);
       if (scale !== 1) d.style.setProperty("--prose-scale", scale);
       if (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone) d.classList.add("standalone");
+      /* study tools panel (desktop only): the open tool stays open from page to page */
+      try {
+        var tool = JSON.parse(localStorage.getItem("apchem.toolbar"));
+        if (["focus", "molar", "saved"].indexOf(tool) > -1 && window.matchMedia("(min-width: 1024px)").matches) d.setAttribute("data-tool", tool);
+      } catch (e) {}
     })();
   </script>
   <link rel="stylesheet" href="{{ self.root() }}{{ v('assets/vendor/fonts/fonts.css') }}">
@@ -53,7 +58,9 @@
       <div class="top-actions">
         <a class="focus-pill" href="{{ self.root() }}focus/" title="Focus timer" hidden>{{ icon('timer-outline') }}<span class="fp-label"></span><span class="fp-time">25:00</span></a>
         <span class="offline-pill" role="status" title="You're offline. Saved pages still work." hidden>{{ icon('cloud-off-outline') }}<span>Offline</span></span>
-        <a class="icon-btn top-formulas" href="{{ self.root() }}formulas/" title="Formulas" aria-label="Formulas">{{ icon('function-variant') }}</a>
+        <button type="button" class="icon-btn tool-btn" data-tool-btn="focus" aria-controls="tb-panel" aria-expanded="false" title="Focus Timer" aria-label="Focus Timer">{{ icon('timer-outline') }}</button>
+        <button type="button" class="icon-btn tool-btn" data-tool-btn="molar" aria-controls="tb-panel" aria-expanded="false" title="Molar Mass Calculator" aria-label="Molar Mass Calculator">{{ icon('calculator') }}</button>
+        <button type="button" class="icon-btn tool-btn" data-tool-btn="saved" aria-controls="tb-panel" aria-expanded="false" title="Bookmarks" aria-label="Bookmarks">{{ icon('bookmark-outline') }}</button>
         <button type="button" class="icon-btn theme-toggle" title="Theme: automatic" aria-label="Change theme">
           <span class="ti ti-auto">{{ icon('brightness-auto') }}</span><span class="ti ti-light">{{ icon('weather-sunny') }}</span><span class="ti ti-dark">{{ icon('weather-night') }}</span>
         </button>
@@ -70,6 +77,31 @@
     <main id="content" class="main">{% block main %}{% endblock %}</main>
     {% block aside %}{% endblock %}
   </div>
+
+  {#- study tools panel, opened from the top bar (desktop only, see wiki.css); wiki.js fills it -#}
+  <aside class="tb-panel" id="tb-panel" aria-labelledby="tb-title">
+    <header class="tb-head">
+      <h2 class="tb-title" id="tb-title"></h2>
+      <button type="button" class="icon-btn tb-save" aria-pressed="false" title="Save this page" aria-label="Save this page" hidden><span class="bm-off">{{ icon('bookmark-outline') }}</span><span class="bm-on">{{ icon('bookmark') }}</span></button>
+      <a class="icon-btn tb-full" href="{{ self.root() }}" title="Open full page" aria-label="Open full page">{{ icon('arrow-top-right') }}</a>
+      <button type="button" class="icon-btn tb-collapse" title="Collapse panel" aria-label="Collapse panel">{{ icon('chevron-right') }}</button>
+    </header>
+    <div class="tb-body">
+      <div class="tb-tool focus" id="tb-focus"></div>
+      <div class="tb-tool mm" id="tb-molar"></div>
+      <div class="tb-tool" id="tb-saved"></div>
+      {#- this page's Contents: wiki.js copies the list here, and the Contents column hides while the panel is open -#}
+      <section class="tb-contents" hidden>
+        <h3 class="tb-sec-title">Contents</h3>
+        <div class="tb-contents-body"></div>
+      </section>
+    </div>
+    {#- stays at the bottom of the panel while the tool scrolls above it -#}
+    <section class="tb-recent" hidden>
+      <h3 class="tb-sec-title">Recently viewed</h3>
+      <div class="tb-recent-body"></div>
+    </section>
+  </aside>
 
   <footer class="site-footer">
     <div class="site-footer-inner">

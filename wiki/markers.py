@@ -12,13 +12,12 @@ Each function returns Markdown (or raw HTML blocks) that replaces the marker lin
   scans nb=ID              thumbnail gallery of one notebook
   tags                     every tag with the pages that use it
   glossary                 every definition-list term from the topic pages, A–Z (Glossary page)
-  molar-mass               the Molar Mass Calculator + element data (data/elements.yml)
+  molar-mass               the Molar Mass Calculator (element data: data/elements.yml, via wiki-data)
 """
 from __future__ import annotations
 
 import datetime as dt
 import html
-import json
 import re
 
 from .util import esc, fmt_pages, icon, nice_date, parse_date, parse_pages, relurl, slugify
@@ -360,10 +359,7 @@ def m_glossary(site, page, args):
 
 
 def m_molar_mass(site, page, args):
-    els = [[str(e["s"]), str(e.get("name", "")), str(e.get("m") or "")] for e in site.data.get("elements", [])]
-    data = json.dumps(els, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    return _block(f'<div class="mm" id="molar-mass"><p class="mm-loading">Loading the calculator…</p>'
-                  f'<script type="application/json" id="mm-elements">{data}</script></div>')
+    return _block('<div class="mm" id="molar-mass"><p class="mm-loading">Loading the calculator…</p></div>')
 
 
 MARKERS = {

@@ -207,9 +207,16 @@ page, and the app features below. Also:
   `apchem.focusDays`.
 - **Molar Mass Calculator** (`#molar-mass`): formula parser (brackets, hydrates, charges), breakdown,
   g ⇄ mol ⇄ particles with sig figs; recent formulas in `apchem.mmHistory`, `?f=` in the URL.
+- **Study tools panel** (`#tb-panel` in `base.html`, `initToolbar`): the top-bar `.tool-btn` buttons open the
+  focus timer, Molar Mass Calculator or bookmarks in a collapsible panel on the right, at ≥ 1024px only.
+  It slides in and out (`.tb-moving`, clicks only). While open it holds the page's Contents (the Contents column
+  closes up) with recently viewed pages pinned to its bottom. The timer is a liquid vessel (`createVessel`, a
+  canvas): it fills during focus, drains during a break, and the top-bar timer button shows the same level.
+  It stays the same from page to page: open tool in `apchem.toolbar` (`data-tool` on `<html>`, set before
+  paint), typed formula and amount in `apchem.toolbarMolar`, scroll position in `apchem.toolbarScroll`.
 - **Glossary filter** (`.glossary-filter`).
 - **Bottom tab bar** (`.tabbar` in `base.html`): only in the Home Screen app at ≤ 1023px
-  (`html.standalone`); replaces the top bar's menu, search and Formulas buttons.
+  (`html.standalone`); replaces the top bar's menu and search buttons.
 
 Settings → Export/Import carries study time, bookmarks, history and the focus log. Personal data
 never leaves the browser.

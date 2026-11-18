@@ -30,6 +30,8 @@ class Renderer:
                       for u in sched.get("units", [])],
             "events": sched.get("events", []), "default_name": site.config.get("default_name", ""),
             "build": self.build,
+            # the Molar Mass Calculator is on every page (tools panel): [symbol, name, atomic mass]
+            "elements": [[str(e["s"]), str(e.get("name", "")), str(e.get("m") or "")] for e in site.data.get("elements", [])],
         }
         self.public_json = Markup(json.dumps(public, ensure_ascii=False).replace("</", "<\\/"))
 

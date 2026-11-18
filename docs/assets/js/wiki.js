@@ -8,6 +8,7 @@
    • app: offline, updates, back/share, continue reading, text size, bottom tabs
    • saved pages + history              • focus timer (Pomodoro → study time)
    • Molar Mass Calculator              • Glossary filter
+   • study tools panel (desktop): timer, calculator, bookmarks; stays put from page to page
    Data comes from <script id="wiki-data"> (built from data/*.yml by wiki/).
    Everything personal is stored ONLY in this browser (localStorage "apchem.*").
    ────────────────────────────────────────────────────────────────────────── */
@@ -51,6 +52,7 @@
     share: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 8 5h3v9h2V5h3m2 18H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3v2H6v12h12V9h-3V7h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2"/></svg>',
     "cellphone-arrow-down": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 1H7a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2m0 18H7V5h10zm-1-6h-3V8h-2v5H8l4 4z"/></svg>',
     "bookmark-outline": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 18-5-2.18L7 18V5h10m0-2H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2"/></svg>',
+    bookmark: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2"/></svg>',
     history: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 8H12v5l4.28 2.54.72-1.21-3.5-2.08zM13 3a9 9 0 0 0-9 9H1l3.96 4.03L9 12H6a7 7 0 0 1 7-7 7 7 0 0 1 7 7 7 7 0 0 1-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 9-9 9 9 0 0 0-9-9"/></svg>',
     "chart-box-outline": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2zm2 2H5V5h14v14.1M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"/></svg>',
     "alert-outline": '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 1 21h22M12 6l7.53 13H4.47M11 10v4h2v-4m-2 6v2h2v-2"/></svg>',
@@ -122,7 +124,6 @@
     const byId = new Map();
     links.forEach((a) => { const id = decodeURIComponent(a.getAttribute("href").slice(1)); if (!byId.has(id)) byId.set(id, []); byId.get(id).push(a); });
     const heads = Array.from(byId.keys()).map((id) => document.getElementById(id)).filter(Boolean);
-    const aside = $(".toc");
     let current = null, queued = false;
     function update() {
       queued = false;
@@ -136,9 +137,10 @@
       if (!cur) return;
       (byId.get(cur.id) || []).forEach((a) => {
         a.classList.add("is-active");
-        if (aside && aside.contains(a) && aside.offsetParent) {
-          const r = a.getBoundingClientRect(), s = aside.getBoundingClientRect();
-          if (r.top < s.top + 30 || r.bottom > s.bottom - 30) aside.scrollTop += r.top - s.top - aside.clientHeight / 2;
+        const box = a.closest(".toc, .tb-contents-body"); // the Contents column, or its copy in the tools panel
+        if (box && box.offsetParent) {
+          const r = a.getBoundingClientRect(), s = box.getBoundingClientRect();
+          if (r.top < s.top + 30 || r.bottom > s.bottom - 30) box.scrollTop += r.top - s.top - box.clientHeight / 2;
         }
       });
     }
@@ -976,32 +978,38 @@
   }
   const pageRow = (p, meta) => `<a class="recent-row" href="${esc(ROOT + p.u)}"><span class="rr-title">${esc(p.t || p.u)}</span>` +
     `<span class="rr-meta">${esc(meta || "")}</span></a>`;
+  const canSave = () => document.body.classList.contains("page-article") && !!$(".article-head") && !NO_HISTORY.includes(pagePath());
+  function toggleBookmark() {
+    const path = pagePath();
+    let list = bookmarks();
+    if (list.some((b) => b.u === path)) {
+      list = list.filter((b) => b.u !== path);
+      toast("Removed from your saved pages.", null, null, 2500);
+    } else {
+      list.unshift({ u: path, t: pageTitle(), s: pageSection(), at: Date.now() });
+      toast("Saved to your pages.", "View", () => { location.href = ROOT + "saved/"; }, 4000);
+    }
+    store.set("bookmarks", list);
+    bookmarksChanged();
+  }
+  function syncBookmarkBtn() {
+    const btn = $(".bookmark-btn");
+    if (!btn || !canSave()) return;
+    const on = bookmarks().some((b) => b.u === pagePath());
+    btn.hidden = false;
+    btn.setAttribute("aria-pressed", String(on));
+    btn.title = on ? "Remove from saved pages" : "Save this page";
+    btn.setAttribute("aria-label", btn.title);
+  }
+  // everywhere bookmarks show up: title button, home page, Saved Pages, tools panel
+  let drawSavedPage = () => {};
+  function bookmarksChanged() { syncBookmarkBtn(); renderYourPages(); drawSavedPage(); renderToolbarSaved(); }
   function initSaved() {
     const path = pagePath();
-    const article = document.body.classList.contains("page-article") && $(".article-head") && !NO_HISTORY.includes(path);
+    const article = canSave();
     const btn = $(".bookmark-btn");
-    if (btn && article) {
-      btn.hidden = false;
-      const sync = () => {
-        const on = bookmarks().some((b) => b.u === path);
-        btn.setAttribute("aria-pressed", String(on));
-        btn.title = on ? "Remove from saved pages" : "Save this page";
-        btn.setAttribute("aria-label", btn.title);
-      };
-      sync();
-      btn.onclick = () => {
-        let list = bookmarks();
-        if (list.some((b) => b.u === path)) {
-          list = list.filter((b) => b.u !== path);
-          toast("Removed from your saved pages.", null, null, 2500);
-        } else {
-          list.unshift({ u: path, t: pageTitle(), s: pageSection(), at: Date.now() });
-          toast("Saved to your pages.", "View", () => { location.href = ROOT + "saved/"; }, 4000);
-        }
-        store.set("bookmarks", list);
-        sync();
-      };
-    }
+    if (btn && article) btn.onclick = toggleBookmark;
+    syncBookmarkBtn();
     if (article) {
       const entry = { u: path, t: pageTitle(), s: pageSection(), at: Date.now() };
       store.set("recent", [entry].concat(listOf("recent").filter((r) => r.u !== path)).slice(0, 12));
@@ -1037,10 +1045,11 @@
             <div class="set-row"><button type="button" class="btn" id="sp-clear">Clear history</button></div>`
             : `<p class="sp-empty">Pages you read show up here.</p>`}
         </section>`;
-      $$("[data-remove-bm]", root).forEach((b) => { b.onclick = () => { store.set("bookmarks", bookmarks().filter((x) => x.u !== b.dataset.removeBm)); draw(); }; });
+      $$("[data-remove-bm]", root).forEach((b) => { b.onclick = () => { store.set("bookmarks", bookmarks().filter((x) => x.u !== b.dataset.removeBm)); bookmarksChanged(); }; });
       const clear = $("#sp-clear", root);
       if (clear) clear.onclick = () => { store.del("recent"); draw(); };
     };
+    drawSavedPage = draw;
     draw();
     // refresh titles of saved pages that were renamed since (the search index is saved offline too)
     const pages = await loadIndex();
@@ -1134,45 +1143,218 @@
     const left = focusLeft(st), active = st.status !== "idle";
     const pill = $(".focus-pill");
     if (pill) {
-      pill.hidden = !active || pagePath() === "focus/";
+      pill.hidden = !active || pagePath() === "focus/" || (toolOpen() === "focus" && TOOLS_MQ.matches); // the panel shows the time
       pill.classList.toggle("is-break", st.mode === "break");
       pill.classList.toggle("is-paused", st.status === "paused");
       $(".fp-label", pill).textContent = st.mode === "break" ? "Break" : "";
       $(".fp-time", pill).textContent = mmss(left);
       pill.title = `${st.mode === "focus" ? "Focus" : "Break"}: ${mmss(left)} left${st.status === "paused" ? " (paused)" : ""}`;
     }
-    renderFocusPage(st, left);
+    const toolBtn = $('[data-tool-btn="focus"]');
+    if (toolBtn) {
+      toolBtn.style.setProperty("--fc-level", `${Math.round(focusLevel(st, left) * 100)}%`);
+      toolBtn.classList.toggle("is-running", active);
+      toolBtn.classList.toggle("is-break", st.mode === "break");
+      toolBtn.classList.toggle("is-paused", st.status === "paused");
+      toolBtn.title = active ? `Focus Timer: ${mmss(left)} left` : "Focus Timer";
+    }
+    const page = $("#focus-timer"), panel = $("#tb-focus");
+    if (page) renderFocus(page, st, left, false);
+    if (panel && toolOpen() === "focus") renderFocus(panel, st, left, true);
     clearInterval(focusTimer);
     if (st.status === "running") focusTimer = setInterval(focusTick, 1000);
   }
-  function renderFocusPage(st, left) {
-    const root = $("#focus-timer");
-    if (!root) return;
+  // how full the vessel is: focus time fills it, a break drains it
+  const focusLevel = (st, left) => { const p = left / phaseLen(st); return st.mode === "focus" ? 1 - p : p; };
+  // The timer's vessel: a burette drips into it while you focus, and it bubbles and drains during a break.
+  // The surface is a row of spring-linked columns that drops and bubbles disturb. It only animates while on screen.
+  function createVessel(box) {
+    const canvas = $(".fv-canvas", box), wet = $(".fv-wet", box), ctx = canvas.getContext("2d");
+    const N = 48, STEP = 1 / 60, TIP_Y = 11, TOP = 6;
+    const hs = new Float32Array(N), vs = new Float32Array(N);
+    const FOCUS = [[124, 58, 237], [91, 33, 182]], BREAK = [[4, 120, 87], [6, 95, 70]], PAUSED = [[110, 104, 130], [88, 83, 106]];
+    const lerp = (a, b, k) => a + (b - a) * k;
+    const mix = (a, b, k) => a.map((x, i) => lerp(x, b[i], k));
+    const rgb = (c, a = 1) => `rgba(${c.map(Math.round).join(",")},${a})`;
+    const rand = (a, b) => a + Math.random() * (b - a);
+    let W = 0, H = 0, dpr = 1, level = null, target = 0, state = { mode: "focus", status: "idle", minutes: 25 };
+    let breakMix = 0, pauseMix = 0, amp = 0, clock = 0, acc = 0, raf = 0, last = 0, dripIn = 0.9, bubbleIn = 0, pendant = 0;
+    let drops = [], bubbles = [], ink = {};
+    const readInk = () => { const c = getComputedStyle(box); ink = { line: c.getPropertyValue("--line-2").trim(), label: c.getPropertyValue("--fg-3").trim() }; };
+    const tipX = () => Math.round(W * 0.62);
+    const surfaceY = () => H - level * (H - TOP);
+    const colOf = (x) => Math.max(0, Math.min(N - 1, Math.round((x / W) * (N - 1))));
+    function yAt(i) {
+      const k = Math.min(1, level * 20); // an empty vessel has a flat, still floor
+      const meniscus = 2.6 * (Math.exp(-i / 2.2) + Math.exp(-(N - 1 - i) / 2.2));
+      const swell = (Math.sin(i * 0.34 + clock * 1.5) + 0.6 * Math.sin(i * 0.13 - clock * 0.9)) * amp;
+      return surfaceY() + (hs[i] + swell - meniscus) * k;
+    }
+    function poke(i, force) {
+      for (let j = -2; j <= 2; j++) { const c = i + j; if (c >= 0 && c < N) vs[c] += force * (1 - Math.abs(j) / 3); }
+    }
+    function step(dt) {
+      clock += dt;
+      const running = state.status === "running", calm = reduceMotion();
+      level += (target - level) * (1 - Math.exp(-dt * 2.5));
+      breakMix = lerp(breakMix, state.mode === "break" ? 1 : 0, 1 - Math.exp(-dt * 4));
+      pauseMix = lerp(pauseMix, state.status === "paused" ? 1 : 0, 1 - Math.exp(-dt * 4));
+      amp = lerp(amp, calm ? 0 : running ? 1 : 0.25, 1 - Math.exp(-dt * 3));
+      for (let i = 0; i < N; i++) { vs[i] += -0.03 * hs[i] - 0.035 * vs[i]; hs[i] = Math.max(-9, Math.min(9, hs[i] + vs[i])); }
+      for (let p = 0; p < 2; p++) for (let i = 1; i < N; i++) { const d = 0.12 * (hs[i] - hs[i - 1]); vs[i - 1] += d; vs[i] -= d; }
+      // a drop swells at the burette tip, lets go, and lands with a splash
+      pendant = 0;
+      if (running && state.mode === "focus" && !calm && level < 0.93) {
+        dripIn -= dt;
+        if (dripIn < 0.55) pendant = 1 - Math.max(0, dripIn) / 0.55;
+        if (dripIn <= 0) { drops.push({ x: tipX(), y: TIP_Y + 2, vx: 0, vy: 10, r: 2.4, main: true }); dripIn = rand(1.3, 2); }
+      }
+      const splash = [];
+      drops = drops.filter((d) => {
+        d.vy += 620 * dt; d.x += d.vx * dt; d.y += d.vy * dt;
+        const c = colOf(d.x);
+        if (d.y < yAt(c)) return d.x > 0 && d.x < W;
+        poke(c, d.main ? 1.9 : 0.25);
+        if (d.main) for (let n = 0; n < 4; n++) splash.push({ x: d.x, y: yAt(c) - 2, vx: rand(-48, 48), vy: rand(-125, -55), r: rand(0.8, 1.4), main: false });
+        return false;
+      }).concat(splash);
+      // bubbles rise through the liquid during a break
+      if (running && state.mode === "break" && !calm && level > 0.08) {
+        bubbleIn -= dt;
+        if (bubbleIn <= 0) { bubbles.push({ x: rand(14, W - 34), y: H - 2, r: rand(0.9, 2.1), vy: rand(14, 28), w: rand(0, 6) }); bubbleIn = rand(0.25, 0.7); }
+      }
+      bubbles = bubbles.filter((b) => {
+        b.y -= b.vy * dt; b.x += Math.sin(clock * 3 + b.w) * 0.14;
+        if (b.y > yAt(colOf(b.x)) + 2) return true;
+        poke(colOf(b.x), -0.22);
+        return false;
+      });
+    }
+    function trace(lift) {
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (let i = 0; i < N; i++) ctx.lineTo((i / (N - 1)) * W, yAt(i) + lift(i));
+      ctx.lineTo(W, H); ctx.closePath();
+    }
+    function ticks(line, label) {
+      const min = state.minutes, by = min <= 5 ? 1 : min <= 10 ? 2 : min <= 25 ? 5 : 10;
+      ctx.font = "500 9px Geist, system-ui, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (let m = by; m < min; m += by) {
+        const y = Math.round(H - (m / min) * (H - TOP));
+        ctx.fillStyle = line; ctx.fillRect(W - 9, y, 9, 1);
+        ctx.fillStyle = label; ctx.fillText(String(m), W - 12, y + 0.5);
+      }
+    }
+    function draw() {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ticks(ink.line, ink.label);
+      const tone = (n) => mix(mix(FOCUS[n], BREAK[n], breakMix), PAUSED[n], pauseMix);
+      const top = tone(0), wetNow = level > 0.002;
+      if (wetNow) {
+        trace((i) => -2.5 + Math.sin(i * 0.22 + clock * 1.1) * 1.2 * amp);
+        ctx.fillStyle = rgb(top, 0.35); ctx.fill();
+        trace(() => 0);
+        const fill = ctx.createLinearGradient(0, surfaceY(), 0, H);
+        fill.addColorStop(0, rgb(top)); fill.addColorStop(1, rgb(tone(1)));
+        ctx.fillStyle = fill; ctx.fill();
+        ctx.save(); ctx.clip();
+        ticks("rgba(255,255,255,.5)", "rgba(255,255,255,.75)");
+        ctx.fillStyle = "rgba(255,255,255,.4)";
+        bubbles.forEach((b) => { ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); });
+        ctx.restore();
+        ctx.beginPath();
+        for (let i = 0; i < N; i++) ctx.lineTo((i / (N - 1)) * W, yAt(i));
+        ctx.strokeStyle = "rgba(255,255,255,.42)"; ctx.lineWidth = 1; ctx.stroke();
+      }
+      ctx.fillStyle = rgb(top);
+      drops.forEach((d) => { ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
+      const x = tipX();
+      if (pendant > 0) { const r = 2.4 * pendant; ctx.beginPath(); ctx.arc(x, TIP_Y + r * 0.7, r, 0, Math.PI * 2); ctx.fill(); }
+      ctx.beginPath(); ctx.moveTo(x - 4, 0); ctx.lineTo(x + 4, 0); ctx.lineTo(x + 1.5, TIP_Y); ctx.lineTo(x - 1.5, TIP_Y); ctx.closePath();
+      ctx.fillStyle = ink.line; ctx.fill();
+      // the white copy of the time shows only where the liquid covers it
+      if (!wetNow) { wet.style.clipPath = "inset(100% 0 0 0)"; return; }
+      const pts = [];
+      for (let i = 0; i < N; i += 3) pts.push(`${((i / (N - 1)) * W).toFixed(1)}px ${yAt(i).toFixed(1)}px`);
+      pts.push(`${W}px ${yAt(N - 1).toFixed(1)}px`, `${W}px ${H}px`, `0px ${H}px`);
+      wet.style.clipPath = `polygon(${pts.join(",")})`;
+    }
+    const busy = () => state.status === "running" || drops.length || bubbles.length || Math.abs(target - level) > 0.002 ||
+      vs.some((v) => Math.abs(v) > 0.01) || Math.abs(breakMix - (state.mode === "break" ? 1 : 0)) > 0.01 || Math.abs(pauseMix - (state.status === "paused" ? 1 : 0)) > 0.01;
+    const onScreen = () => canvas.offsetParent && toolOpen() === "focus";
+    function frame(now) {
+      raf = 0;
+      if (!onScreen()) return;
+      acc += Math.min(0.1, (now - last) / 1000); last = now;
+      while (acc >= STEP) { step(STEP); acc -= STEP; }
+      draw();
+      if (busy() && !reduceMotion()) raf = requestAnimationFrame(frame);
+    }
+    const wake = () => { if (!raf && onScreen()) { last = performance.now(); raf = requestAnimationFrame(frame); } };
+    readInk();
+    new MutationObserver(() => { readInk(); wake(); }).observe(html, { attributes: true, attributeFilter: ["data-theme"] });
+    return {
+      set(s) {
+        state = s; target = s.level;
+        if (level === null || reduceMotion()) { // arriving on a page: already at the right level, no filling animation
+          level = target; breakMix = s.mode === "break" ? 1 : 0; pauseMix = s.status === "paused" ? 1 : 0;
+        }
+        if (canvas.clientWidth && canvas.clientWidth !== W) {
+          W = canvas.clientWidth; H = canvas.clientHeight; dpr = Math.min(2, window.devicePixelRatio || 1);
+          canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        }
+        wake();
+      },
+    };
+  }
+  const focusPanelHTML = () => `
+    <div class="fv">
+      <canvas class="fv-canvas" aria-hidden="true"></canvas>
+      <div class="fv-read"><span class="fc-time" role="timer">25:00</span><span class="fc-status"><span class="fc-phase">Focus</span><span class="fc-sub"></span></span></div>
+      <div class="fv-read fv-wet" aria-hidden="true"><span class="fc-time-wet">25:00</span><span class="fc-status"><span class="fc-phase-wet">Focus</span><span class="fc-sub-wet"></span></span></div>
+    </div>
+    <div class="focus-actions">
+      <button type="button" class="btn btn-primary fc-main">Start focus</button>
+      <button type="button" class="btn fc-skip">Skip</button>
+      <button type="button" class="btn fc-reset">Reset</button>
+    </div>
+    <div class="fc-opts">
+      <div class="focus-presets" role="group" aria-label="Focus and break length">
+        ${FOCUS_PRESETS.map((p, i) => `<button type="button" class="btn" data-preset="${i}" title="${p[0]} min focus, ${p[1]} min break" aria-label="${p[0]} minutes focus, ${p[1]} minutes break">${p[0]}/${p[1]}</button>`).join("")}
+      </div>
+      <label class="set-check"><input type="checkbox" class="fc-chime"> Chime</label>
+    </div>
+    <div class="fc-stats">
+      <span><b class="fc-n">0</b> sessions</span><span><b class="fc-today">0m</b> today</span><span><b class="fc-week">0m</b> this week</span>
+    </div>`;
+  // draws the timer on its page (#focus-timer) or in the tools panel (compact)
+  function renderFocus(root, st, left, compact) {
+    const q = (c) => $("." + c, root);
     if (!root.dataset.ready) {
       root.dataset.ready = "1";
-      root.innerHTML = `
+      root.innerHTML = compact ? focusPanelHTML() : `
         <section class="set-card focus-card">
           <div class="focus-presets" role="group" aria-label="Focus and break length">
             ${FOCUS_PRESETS.map((p, i) => `<button type="button" class="btn" data-preset="${i}">${p[0]} / ${p[1]} min</button>`).join("")}
           </div>
           <div class="focus-ring">
             <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fr-track" cx="60" cy="60" r="54"/><circle class="fr-bar" cx="60" cy="60" r="54"/></svg>
-            <div class="fr-center"><span class="fr-phase" id="fc-phase">Focus</span><span class="fr-time" id="fc-time" role="timer">25:00</span><span class="fr-sub" id="fc-sub"></span></div>
+            <div class="fr-center"><span class="fr-phase fc-phase">Focus</span><span class="fr-time fc-time" role="timer">25:00</span><span class="fr-sub fc-sub"></span></div>
           </div>
           <div class="set-row focus-actions">
-            <button type="button" class="btn btn-primary" id="fc-main">Start focus</button>
-            <button type="button" class="btn" id="fc-skip">Skip</button>
-            <button type="button" class="btn" id="fc-reset">Reset</button>
+            <button type="button" class="btn btn-primary fc-main">Start focus</button>
+            <button type="button" class="btn fc-skip">Skip</button>
+            <button type="button" class="btn fc-reset">Reset</button>
           </div>
-          <label class="set-check"><input type="checkbox" id="fc-chime"> Play a chime when a session ends</label>
+          <label class="set-check"><input type="checkbox" class="fc-chime"> Play a chime when a session ends</label>
           <p class="set-hint">On iPhone, the app can't ring while it's closed or the screen is locked. The timer keeps
             time anyway, and finished sessions show up when you open the app again.</p>
         </section>
         <section class="set-card"><h3>${icon("chart-box-outline")} Focus stats</h3>
           <div class="sc-row focus-stats">
-            <div><b id="fc-n">0</b><small>sessions today</small></div>
-            <div><b id="fc-today">0m</b><small>focus today</small></div>
-            <div><b id="fc-week">0m</b><small>focus this week</small></div>
+            <div><b class="fc-n">0</b><small>sessions today</small></div>
+            <div><b class="fc-today">0m</b><small>focus today</small></div>
+            <div><b class="fc-week">0m</b><small>focus this week</small></div>
           </div></section>`;
       $$("[data-preset]", root).forEach((b) => { b.onclick = () => {
         const s = focusState();
@@ -1180,35 +1362,42 @@
         store.set("focus", Object.assign(s, { preset: FOCUS_PRESETS[+b.dataset.preset] }));
         focusTick();
       }; });
-      $("#fc-main").onclick = () => { const s = focusState(); if (s.status === "running") focusPause(); else focusStart(); };
-      $("#fc-skip").onclick = () => { const s = focusState(); focusStop(s.mode === "focus" ? "break" : "focus"); focusStart(); };
-      $("#fc-reset").onclick = () => focusStop("focus");
-      $("#fc-chime").onchange = (e) => { store.set("focus", Object.assign(focusState(), { chime: e.target.checked })); if (e.target.checked) unlockAudio(); };
+      q("fc-main").onclick = () => { const s = focusState(); if (s.status === "running") focusPause(); else focusStart(); };
+      q("fc-skip").onclick = () => { const s = focusState(); focusStop(s.mode === "focus" ? "break" : "focus"); focusStart(); };
+      q("fc-reset").onclick = () => focusStop("focus");
+      q("fc-chime").onchange = (e) => { store.set("focus", Object.assign(focusState(), { chime: e.target.checked })); if (e.target.checked) unlockAudio(); };
     }
     const len = phaseLen(st), C = 2 * Math.PI * 54;
-    const bar = $(".fr-bar", root);
-    bar.style.strokeDasharray = C.toFixed(2);
-    bar.style.strokeDashoffset = (C * (left / len)).toFixed(2);
+    if (!compact) {
+      const bar = $(".fr-bar", root);
+      bar.style.strokeDasharray = C.toFixed(2);
+      bar.style.strokeDashoffset = (C * (left / len)).toFixed(2);
+    }
     root.classList.toggle("is-break", st.mode === "break");
-    $("#fc-phase").textContent = st.mode === "focus" ? "Focus" : "Break";
-    $("#fc-time").textContent = mmss(left);
-    $("#fc-sub").textContent = st.status === "paused" ? "Paused" : st.status === "running" ? `ends ${new Date(st.endsAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : "Ready";
-    $("#fc-main").textContent = st.status === "running" ? "Pause" : st.status === "paused" ? "Resume" : st.mode === "focus" ? "Start focus" : "Start break";
-    $("#fc-reset").disabled = st.status === "idle" && st.mode === "focus";
+    q("fc-phase").textContent = st.mode === "focus" ? "Focus" : "Break";
+    q("fc-time").textContent = mmss(left);
+    q("fc-sub").textContent = st.status === "paused" ? "Paused" : st.status === "running" ? `ends ${new Date(st.endsAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : "Ready";
+    q("fc-main").textContent = st.status === "running" ? "Pause" : st.status === "paused" ? "Resume" : st.mode === "focus" ? "Start focus" : "Start break";
+    q("fc-reset").disabled = st.status === "idle" && st.mode === "focus";
     $$("[data-preset]", root).forEach((b) => {
       const p = FOCUS_PRESETS[+b.dataset.preset];
       b.setAttribute("aria-pressed", String(p[0] === st.preset[0] && p[1] === st.preset[1]));
       b.disabled = st.status !== "idle";
     });
-    $("#fc-chime").checked = !!st.chime;
+    q("fc-chime").checked = !!st.chime;
     const f = focusDays(), today = f[dayKey()] || { n: 0, s: 0 };
     const monday = startOfDay(now()); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
     let week = 0;
     for (let d = new Date(monday); d <= now(); d.setDate(d.getDate() + 1)) week += (f[dayKey(d)] || {}).s || 0;
-    $("#fc-n").textContent = today.n;
-    $("#fc-today").textContent = fmtDur(today.s);
-    $("#fc-week").textContent = fmtDur(week);
-    document.title = st.status === "running" ? `${mmss(left)} · ${st.mode === "focus" ? "Focus" : "Break"}` : baseTitle;
+    q("fc-n").textContent = today.n;
+    q("fc-today").textContent = fmtDur(today.s);
+    q("fc-week").textContent = fmtDur(week);
+    if (!compact) document.title = st.status === "running" ? `${mmss(left)} · ${st.mode === "focus" ? "Focus" : "Break"}` : baseTitle;
+    if (compact) {
+      ["time", "phase", "sub"].forEach((k) => { q(`fc-${k}-wet`).textContent = q(`fc-${k}`).textContent; });
+      root._vessel = root._vessel || createVessel($(".fv", root));
+      root._vessel.set({ level: focusLevel(st, left), mode: st.mode, status: st.status, minutes: len / 60 });
+    }
   }
   function initFocus() {
     focusTick();
@@ -1281,33 +1470,43 @@
     if (window.katex) { try { window.katex.render(tex, el, { throwOnError: false }); return; } catch (e) { /* fall through */ } }
     el.textContent = tex;
   }
+  const MM_FIELDS = ["mm-g", "mm-mol", "mm-n"];
   function initMolarMass() {
     const root = $("#molar-mass");
-    if (!root) return;
+    if (root) mountMolarMass(root, false);
+  }
+  // the calculator on its page, or compact in the tools panel (which remembers what's typed, from page to page)
+  function mountMolarMass(root, compact) {
+    const q = (c) => $("." + c, root);
     const EL = {};
-    try { JSON.parse($("#mm-elements").textContent).forEach(([s, name, m]) => { EL[s] = { name, m, v: m ? parseFloat(m) : null }; }); } catch (e) { /* no data */ }
+    (DATA.elements || []).forEach(([s, name, m]) => { EL[s] = { name, m, v: m ? parseFloat(m) : null }; });
     const EXAMPLES = ["H2O", "C6H12O6", "Ca(NO3)2", "CuSO4·5H2O", "(NH4)3PO4", "Fe2(SO4)3"];
+    const inputId = compact ? "tb-mm-input" : "mm-input";
     root.innerHTML = `
-      <form class="mm-form" id="mm-form" autocomplete="off">
-        <label for="mm-input">Formula</label>
-        <div class="mm-row"><input id="mm-input" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="e.g. Ca(NO3)2 or CuSO4·5H2O">
-          <button class="btn btn-primary" type="submit">Calculate</button></div>
-        <div class="mm-chips" id="mm-chips"></div>
+      <form class="mm-form" autocomplete="off">
+        <label for="${inputId}">Formula</label>
+        <div class="mm-row"><input id="${inputId}" class="mm-input" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" placeholder="${compact ? "Type a formula, e.g. Ca(NO3)2" : "e.g. Ca(NO3)2 or CuSO4·5H2O"}">
+          ${compact ? "" : `<button class="btn btn-primary" type="submit">Calculate</button>`}</div>
+        <div class="mm-chips"></div>
       </form>
-      <div class="mm-out" id="mm-out" aria-live="polite"></div>`;
-    const input = $("#mm-input"), out = $("#mm-out");
-    let cur = null, curF = "";
+      <div class="mm-out" aria-live="polite"></div>`;
+    const input = q("mm-input"), out = q("mm-out");
+    let cur = null, curF = "", conv = { from: "", val: "" };
+    const saveDraft = () => { if (compact) store.set("toolbarMolar", { f: input.value, from: conv.from, val: conv.val }); };
     const recentFormulas = () => listOf("mmHistory").map((x) => x.u);
     const chips = () => {
       const h = recentFormulas();
-      $("#mm-chips").innerHTML = (h.length ? `<span class="mm-chip-label">Recent</span>${h.map((f) => `<button type="button" class="chip" data-f="${esc(f)}">${esc(f)}</button>`).join("")}` : "") +
-        `<span class="mm-chip-label">Try</span>${EXAMPLES.filter((f) => !h.includes(f)).map((f) => `<button type="button" class="chip" data-f="${esc(f)}">${esc(f)}</button>`).join("")}`;
+      const tries = compact && h.length ? [] : EXAMPLES.filter((f) => !h.includes(f));
+      const label = (t) => (compact ? "" : `<span class="mm-chip-label">${t}</span>`);
+      q("mm-chips").innerHTML = (h.length ? `${label("Recent")}${h.map((f) => `<button type="button" class="chip" data-f="${esc(f)}">${esc(f)}</button>`).join("")}` : "") +
+        (tries.length ? `${label("Try")}${tries.map((f) => `<button type="button" class="chip" data-f="${esc(f)}">${esc(f)}</button>`).join("")}` : "");
       $$("[data-f]", root).forEach((b) => { b.onclick = () => { input.value = b.dataset.f; calc(true); }; });
     };
     const remember = (f) => { store.set("mmHistory", [{ u: f }].concat(listOf("mmHistory").filter((x) => x.u !== f)).slice(0, 6)); chips(); };
     function calc(save) {
       const f = input.value.trim();
-      try { window.history.replaceState(null, "", f ? "?f=" + encodeURIComponent(f) : location.pathname); } catch (e) { /* file:// */ }
+      saveDraft();
+      if (!compact) { try { window.history.replaceState(null, "", f ? "?f=" + encodeURIComponent(f) : location.pathname); } catch (e) { /* file:// */ } }
       if (!f) { out.innerHTML = ""; cur = null; return; }
       let r;
       try { r = parseFormula(f, EL); } catch (e) { out.innerHTML = `<p class="mm-error">${icon("alert-outline")} ${esc(e.message)}</p>`; cur = null; return; }
@@ -1316,9 +1515,9 @@
       const total = r.total.toFixed(2);
       out.innerHTML = `
         <div class="mm-result">
-          <div class="mm-formula" id="mm-formula"></div>
+          <div class="mm-formula"></div>
           <div class="mm-total"><span>Molar mass</span><b>${total}</b> g/mol</div>
-          <div class="mm-work" id="mm-work"></div>
+          <div class="mm-work"></div>
           ${r.notes.map((n) => `<p class="set-hint">${esc(n)}</p>`).join("")}
         </div>
         <div class="table-wrap"><table class="mm-table"><thead><tr><th>Element</th><th>Count</th><th>Atomic mass</th><th>Subtotal</th><th>Mass %</th></tr></thead>
@@ -1327,16 +1526,17 @@
         <section class="mm-conv">
           <h3>Convert</h3>
           <div class="mm-conv-row">
-            <label>Grams <input type="text" inputmode="decimal" id="mm-g" placeholder="g"></label>
-            <label>Moles <input type="text" inputmode="decimal" id="mm-mol" placeholder="mol"></label>
-            <label>Particles <input type="text" inputmode="decimal" id="mm-n" placeholder="e.g. 3.01e23"></label>
+            <label>Grams <input type="text" inputmode="decimal" class="mm-g" placeholder="g"></label>
+            <label>Moles <input type="text" inputmode="decimal" class="mm-mol" placeholder="mol"></label>
+            <label>Particles <input type="text" inputmode="decimal" class="mm-n" placeholder="${compact ? "3.01e23" : "e.g. 3.01e23"}"></label>
           </div>
-          <div class="mm-chain" id="mm-chain"></div>
-          <p class="set-hint" id="mm-sf"></p>
+          <div class="mm-chain"></div>
+          <p class="set-hint mm-sf"></p>
         </section>`;
-      texInto($("#mm-formula"), `\\ce{${r.display.replace(/[^A-Za-z0-9()[\]*^+\-]/g, "")}}`);
-      texInto($("#mm-work"), r.rows.map((x) => (x.n === 1 ? x.m : `${x.n}(${x.m})`)).join(" + ") + ` = ${total}\\ \\text{g/mol}`);
-      ["mm-g", "mm-mol", "mm-n"].forEach((id) => { $("#" + id).oninput = () => convert(id); });
+      texInto(q("mm-formula"), `\\ce{${r.display.replace(/[^A-Za-z0-9()[\]*^+\-]/g, "")}}`);
+      texInto(q("mm-work"), r.rows.map((x) => (x.n === 1 ? x.m : `${x.n}(${x.m})`)).join(" + ") + ` = ${total}\\ \\text{g/mol}`);
+      MM_FIELDS.forEach((id) => { q(id).oninput = () => { conv = { from: id, val: q(id).value }; saveDraft(); convert(id); }; });
+      if (compact && conv.val) { q(conv.from).value = conv.val; convert(conv.from); } // keep the amount you typed
       if (save) remember(f);
     }
     // significant figures in a typed number ("50.0" → 3, "0.25" → 2, "3.01x10^23" → 3, "50" → 1)
@@ -1354,15 +1554,15 @@
     function convert(from) {
       if (!cur) return;
       const M = +cur.total.toFixed(2), NA = 6.022e23;
-      const raw = $("#" + from).value, val = parseNum(raw);
+      const raw = q(from).value, val = parseNum(raw);
       const typed = sigOf(raw), sf = Math.min(4, Math.max(3, typed)); // like the number you typed, 3–4 sig figs
-      const chain = $("#mm-chain");
-      if (!(val > 0)) { chain.innerHTML = ""; $("#mm-sf").textContent = ""; return; }
+      const chain = q("mm-chain");
+      if (!(val > 0)) { chain.innerHTML = ""; q("mm-sf").textContent = ""; return; }
       const mol = from === "mm-g" ? val / M : from === "mm-mol" ? val : val / NA;
       const g = mol * M, n = mol * NA;
-      if (from !== "mm-g") $("#mm-g").value = sigText(g, sf);
-      if (from !== "mm-mol") $("#mm-mol").value = sigText(mol, sf);
-      if (from !== "mm-n") $("#mm-n").value = sigText(n, sf);
+      if (from !== "mm-g") q("mm-g").value = sigText(g, sf);
+      if (from !== "mm-mol") q("mm-mol").value = sigText(mol, sf);
+      if (from !== "mm-n") q("mm-n").value = sigText(n, sf);
       const Mt = `${M.toFixed(2)}\\ \\text{g}`, NAt = "6.022\\cdot10^{23}";
       const tex = from === "mm-g"
         ? `${sigTex(val, sf)}\\ \\text{g}\\cdot\\dfrac{1\\ \\text{mol}}{${Mt}} = ${sigTex(mol, sf)}\\ \\text{mol}\\cdot\\dfrac{${NAt}}{1\\ \\text{mol}} = ${sigTex(n, sf)}\\ \\text{particles}`
@@ -1370,15 +1570,25 @@
           ? `${sigTex(val, sf)}\\ \\text{mol}\\cdot\\dfrac{${Mt}}{1\\ \\text{mol}} = ${sigTex(g, sf)}\\ \\text{g} \\qquad ${sigTex(val, sf)}\\ \\text{mol}\\cdot\\dfrac{${NAt}}{1\\ \\text{mol}} = ${sigTex(n, sf)}\\ \\text{particles}`
           : `${sigTex(val, sf)}\\ \\text{particles}\\cdot\\dfrac{1\\ \\text{mol}}{${NAt}} = ${sigTex(mol, sf)}\\ \\text{mol}\\cdot\\dfrac{${Mt}}{1\\ \\text{mol}} = ${sigTex(g, sf)}\\ \\text{g}`;
       texInto(chain, tex);
-      $("#mm-sf").textContent = `Rounded to ${sf} significant figures${typed === sf ? ", like the number you typed" : ""}.`;
+      q("mm-sf").textContent = `Rounded to ${sf} significant figures${typed === sf ? ", like the number you typed" : ""}.`;
     }
     let t = 0;
-    input.oninput = () => { clearTimeout(t); t = setTimeout(() => calc(false), 250); };
+    input.oninput = () => { saveDraft(); clearTimeout(t); t = setTimeout(() => calc(false), 250); };
     input.onblur = () => { if (cur && curF === input.value.trim()) remember(curF); };
-    $("#mm-form").onsubmit = (e) => { e.preventDefault(); calc(true); input.blur(); };
+    q("mm-form").onsubmit = (e) => { e.preventDefault(); calc(true); input.blur(); };
     chips();
-    const q = new URLSearchParams(location.search).get("f");
-    if (q) { input.value = q; calc(false); }
+    if (compact) {
+      root._restore = () => {
+        const s = store.get("toolbarMolar", null) || {};
+        input.value = String(s.f || "");
+        conv = MM_FIELDS.includes(s.from) ? { from: s.from, val: String(s.val || "") } : { from: "", val: "" };
+        calc(false);
+      };
+      root._restore();
+      return;
+    }
+    const fromUrl = new URLSearchParams(location.search).get("f");
+    if (fromUrl) { input.value = fromUrl; calc(false); }
   }
 
   // ── Glossary filter ──────────────────────────────────────────────────────
@@ -1399,6 +1609,106 @@
       const empty = $(".gl-empty"); if (empty) empty.hidden = shown > 0;
       if (count) count.textContent = q ? `${shown} of ${count.dataset.total} terms` : label;
     };
+  }
+
+  // ── study tools panel: opened from the top bar, desktop only (see wiki.css) ──
+  // What's open, what's typed and the scroll position are saved, so the panel looks the same on the next page.
+  const TOOLS = {
+    focus: { title: "Focus Timer", url: "focus/" },
+    molar: { title: "Molar Mass Calculator", url: "molar-mass/" },
+    saved: { title: "Bookmarks", url: "saved/" },
+  };
+  const TOOLS_MQ = window.matchMedia("(min-width: 1024px)");
+  const toolOpen = () => html.getAttribute("data-tool") || "";
+  // one line per page: title, then the short section name ("Unit 5")
+  const tbItem = (p, meta, extra) => `<div class="tb-item${p.u === pagePath() ? " is-here" : ""}"><a class="tb-link" href="${esc(ROOT + p.u)}" title="${esc(p.t || p.u)}"><span class="tb-link-t">${esc(p.t || p.u)}</span><span class="tb-link-m">${esc(meta || "")}</span></a>${extra || ""}</div>`;
+  const shortSection = (s) => String(s || "").split(" · ")[0];
+  function renderToolbarSaved() {
+    const root = $("#tb-saved"), save = $(".tb-save");
+    if (!root) return;
+    const bm = bookmarks(), on = bm.some((b) => b.u === pagePath());
+    save.hidden = $("#tb-panel").dataset.showing !== "saved" || !canSave();
+    save.setAttribute("aria-pressed", String(on));
+    save.title = on ? "Remove this page" : "Save this page";
+    save.setAttribute("aria-label", save.title);
+    if (toolOpen() !== "saved") return;
+    root.innerHTML = bm.length
+      ? `<div class="tb-list">${bm.map((p) => tbItem(p, shortSection(p.s), `<button type="button" class="icon-btn sp-remove" data-remove-bm="${esc(p.u)}" aria-label="Remove ${esc(p.t)} from saved pages" title="Remove">${ICON.close}</button>`)).join("")}</div>`
+      : `<p class="sp-empty">Nothing saved yet. Use the bookmark above to save this page.</p>`;
+  }
+  // copies this page's Contents into the panel (before initScrollSpy, so the current section is highlighted there too)
+  function mountPanelContents() {
+    const list = $(".toc .toc-list"), box = $(".tb-contents");
+    if (!list || !box) return;
+    $(".tb-contents-body", box).appendChild(list.cloneNode(true));
+    box.hidden = false;
+  }
+  // pinned to the bottom of the panel, whichever tool is open
+  function renderPanelRecent() {
+    const box = $(".tb-recent");
+    if (!box) return;
+    const rec = listOf("recent").filter((r) => r.u !== pagePath()).slice(0, 5);
+    box.hidden = !rec.length;
+    $(".tb-recent-body", box).innerHTML = `<div class="tb-list">${rec.map((p) => tbItem(p, shortSection(p.s))).join("")}</div>`;
+  }
+  function showTool(tool) {
+    if (tool) html.setAttribute("data-tool", tool); else html.removeAttribute("data-tool");
+    $$("[data-tool-btn]").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.toolBtn === tool)));
+    if (tool) {
+      $("#tb-panel").dataset.showing = tool; // kept after closing, so the tool stays visible while the panel slides out
+      $(".tb-title").textContent = TOOLS[tool].title;
+      $(".tb-full").href = ROOT + TOOLS[tool].url;
+    }
+    if (tool === "molar") {
+      const r = $("#tb-molar");
+      if (!r.dataset.ready) { r.dataset.ready = "1"; mountMolarMass(r, true); }
+    }
+    renderToolbarSaved();
+    focusTick();
+  }
+  // only clicks animate: arriving on a page or resizing the window never slides the panel
+  let tbMoving = 0;
+  function pickTool(tool) {
+    html.classList.add("tb-moving");
+    clearTimeout(tbMoving);
+    tbMoving = setTimeout(() => html.classList.remove("tb-moving"), 340);
+    showTool(tool);
+    store.set("toolbar", tool);
+  }
+  function initToolbar() {
+    const panel = $("#tb-panel");
+    if (!panel) return;
+    const body = $(".tb-body", panel);
+    $$("[data-tool-btn]").forEach((b) => { b.onclick = () => {
+      const tool = b.dataset.toolBtn, opening = toolOpen() !== tool;
+      pickTool(opening ? tool : "");
+      body.scrollTop = 0;
+      if (opening && tool === "molar") $("#tb-molar .mm-input").focus({ preventScroll: true });
+    }; });
+    const collapse = () => { const b = $(`[data-tool-btn="${toolOpen()}"]`); pickTool(""); if (b) b.focus(); };
+    $(".tb-collapse", panel).onclick = collapse;
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && toolOpen() && panel.contains(document.activeElement)) collapse(); });
+    $(".tb-save", panel).onclick = toggleBookmark;
+    $("#tb-saved").addEventListener("click", (e) => {
+      const rm = e.target.closest("[data-remove-bm]");
+      if (rm) { store.set("bookmarks", bookmarks().filter((x) => x.u !== rm.dataset.removeBm)); bookmarksChanged(); }
+    });
+    renderPanelRecent();
+    window.addEventListener("storage", (e) => { if (e.key === "apchem.bookmarks") bookmarksChanged(); });
+    showTool(toolOpen());
+    const pos = store.get("toolbarScroll", null);
+    if (pos && pos.tool === toolOpen()) body.scrollTop = pos.top;
+    window.addEventListener("pagehide", () => store.set("toolbarScroll", { tool: toolOpen(), top: body.scrollTop }));
+    // coming back with the Back button can show a frozen copy of the page: bring it up to date
+    window.addEventListener("pageshow", (e) => {
+      if (!e.persisted) return;
+      const t = store.get("toolbar", "");
+      showTool(TOOLS[t] && TOOLS_MQ.matches ? t : "");
+      const m = $("#tb-molar");
+      if (m._restore) m._restore();
+      renderPanelRecent();
+      bookmarksChanged();
+    });
   }
 
   // ── bottom tab bar (Home Screen app on a phone) ──────────────────────────
@@ -1630,6 +1940,7 @@
     renderMath($(".main"));
     revealActiveNav();
     openTarget();
+    mountPanelContents();
     initScrollSpy();
     initPreviews();
     initMolecule();
@@ -1644,6 +1955,7 @@
     initMolarMass();
     initGlossaryFilter();
     initTabbar();
+    initToolbar();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
   window.__apchemRefreshHome = initHome; // handy for testing
