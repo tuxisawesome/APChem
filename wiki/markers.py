@@ -72,15 +72,14 @@ def m_formulas(site, page, args):
             letter = first
         idx.append(f'<a href="#{anchor}">{esc(title)}</a>')
     idx.append("</div></div>")
-    # unit chips + print button (wiki.js → initFormulaFilter); the sheet head only shows when printed
+    # unit chips + print button (wiki.js → initFormulaFilter)
     total = len(all_items)
     chips = [f'<button type="button" class="qt-chip fx-unit" data-unit="all" aria-pressed="true">All units <span>{total}</span></button>']
     for u, pages in groups:
         n, count = int(u["number"]), sum(len(site.formulas[p.src]) for p in pages)
         chips.append(f'<button type="button" class="qt-chip fx-unit" data-unit="{n}" aria-pressed="false" '
                      f'title="Unit {n} · {esc(u["title"])}">Unit {n} · {esc(u.get("short") or u["title"])} <span>{count}</span></button>')
-    head = ('<div class="fx-sheet-head"><p class="fx-sh-title">Formula sheet</p><p class="fx-sh-sub"></p></div>'
-            '<div class="formula-tools"><input type="search" class="formula-filter" '
+    head = ('<div class="formula-tools"><input type="search" class="formula-filter" '
             'placeholder="Filter formulas… (e.g. Kp, molarity, q)" aria-label="Filter formulas"></div>'
             f'<div class="fx-bar"><div class="fx-units" role="group" aria-label="Show the formulas from one unit">{"".join(chips)}</div>'
             f'<button type="button" class="btn btn-primary fx-print">{icon("printer")}<span class="fx-print-label">Print all {total} formulas</span></button></div>'

@@ -8,8 +8,8 @@ Everything I need to have memorized or ready to use, in one place. The formula l
 The official sheet for the exam is the [AP Chemistry Equations Sheet](reference.md).
 
 Under [All Formulas by Unit](#all-formulas-by-unit), pick a unit to see only its formulas, then
-**Print** them as a two-column formula sheet (it prints exactly the formulas showing, so the text
-filter works too).
+**Print** them as a two-column formula sheet. Each unit fits on one sheet of paper printed
+double-sided, and only the formulas showing are printed, so the text filter works too.
 
 ## Strong Acids & Strong Bases
 

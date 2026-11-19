@@ -626,8 +626,8 @@
   });
 
   // ── Formulas page filter ─────────────────────────────────────────────────
-  // Formulas page: text filter + unit chips (?unit=N in the URL) + "Print" → a two-column formula
-  // sheet of exactly the formulas on screen (print styles: html.fx-page in wiki.css § 24).
+  // Formulas page: text filter + unit chips (?unit=N in the URL) + "Print" → two-column formula
+  // sheets of exactly the formulas on screen, at most two pages per unit (styles: wiki.css § 24).
   function initFormulaFilter() {
     const input = $(".formula-filter");
     if (!input) return;
@@ -671,50 +671,24 @@
       });
       $$(".az-group").forEach((g) => { g.hidden = !$$("a", g).some((a) => !a.hidden); });
       ($(".fx-empty") || {}).hidden = shown > 0;
-      // print button + the heading printed on the sheet
-      const uEl = units.find((u) => u.dataset.unit === unit);
-      const what = unit === "all" ? "all units" : (uEl ? uEl.dataset.title : "Unit " + unit);
       const label = q ? `Print these ${shown} formula${shown === 1 ? "" : "s"}`
         : unit === "all" ? `Print all ${shown} formulas` : `Print Unit ${unit} formulas (${shown})`;
       if (printBtn) { $(".fx-print-label", printBtn).textContent = label; printBtn.disabled = !shown; }
-      $(".fx-sh-title").textContent = "Formula sheet · " + (unit === "all" ? "All units" : what);
-      const site = (($(".brand span") || {}).textContent || "").trim();
-      $(".fx-sh-sub").textContent = [site, `${shown} formula${shown === 1 ? "" : "s"}` + (q ? ` matching “${raw}”` : ""),
-        new Date().toLocaleDateString()].filter(Boolean).join(" · ");
       const url = new URL(location.href);
       if (unit === "all") url.searchParams.delete("unit"); else url.searchParams.set("unit", unit);
       if (url.href !== location.href) window.history.replaceState(window.history.state, "", url.href);
     }
 
+    // Printing: each unit becomes its own formula sheet of at most two pages (one sheet of paper,
+    // double-sided), in two columns. Browsers split CSS columns across printed pages unreliably (Safari
+    // slices boxes and falls back to one column), so every page is built here, and a unit too long for
+    // two pages is scaled down (--fx-s) until it fits.
     // The printed page in CSS px: the smaller of Letter and A4 with 0.5in margins, less a little height
     // to spare. Safari prints 1 CSS px as 0.8pt (other browsers 0.75pt), so its page holds fewer px.
     const ua = navigator.userAgent, webkit = /AppleWebKit/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua);
     const PAGE_W = webkit ? 654 : 698, PAGE_H = webkit ? 880 : 940;
-    // Measure each formula's natural width once, so the printed sheet can keep it in a column,
-    // shrink it a little (--fx-fit), or let it span both columns (.fx-wide).
+    const MAX_PAGES = 2, SCALE_STEP = 0.02, MIN_SCALE = 0.1, GAP = 8;
     const PRINT_PX = 12.67, COL = (PAGE_W - 16) / 2 - 25, FULL = PAGE_W - 28, MIN_FIT = 0.72;   // 9.5pt formula text when printed
-    function measure() {
-      const forms = $$(".formula-unit .admonition.formula").filter((f) => !f.closest("[hidden]"));
-      if (!forms.length) return;
-      html.classList.add("fx-measuring");
-      const sizes = forms.map((f) => {
-        let w = 0;
-        $$(".katex-display, table", f).forEach((el) => { w = Math.max(w, el.getBoundingClientRect().width); });
-        return [f, w * PRINT_PX / (parseFloat(getComputedStyle(f).fontSize) || 16)];
-      });
-      html.classList.remove("fx-measuring");
-      sizes.forEach(([f, w]) => {
-        const wide = w > COL / MIN_FIT;
-        const fit = Math.min(1, (wide ? FULL : COL) / Math.max(w, 1));
-        f.classList.toggle("fx-wide", wide);
-        if (fit < 1) f.style.setProperty("--fx-fit", fit.toFixed(3)); else f.style.removeProperty("--fx-fit");
-      });
-    }
-
-    // Printing: pack the formulas showing into whole pages of two columns. Browsers split CSS columns
-    // across printed pages unreliably (Safari slices boxes and falls back to one column), so each page
-    // is built here.
-    const GAP = 8;
     const sheets = document.createElement("div");
     sheets.className = "fx-sheets";
     sheets.setAttribute("aria-hidden", "true");
@@ -726,86 +700,157 @@
       $$(".formula-src, .headerlink", c).forEach((x) => x.remove());
       return c;
     }
-    // Unit headings and .fx-wide formulas span the page; a topic heading stays with its first formula.
-    function sheetBlocks() {
+    // Each formula's natural width at full print size, so it can stay in a column, shrink a little
+    // (--fx-fit), or span both columns.
+    function naturalWidths(forms) {
+      html.classList.add("fx-measuring");
+      const widths = new Map(forms.map((f) => {
+        let w = 0;
+        $$(".katex-display, table", f).forEach((el) => { w = Math.max(w, el.getBoundingClientRect().width); });
+        return [f, w * PRINT_PX / (parseFloat(getComputedStyle(f).fontSize) || 16)];
+      }));
+      html.classList.remove("fx-measuring");
+      return widths;
+    }
+    // One block per formula showing; a topic heading stays with its first formula.
+    function unitBlocks(u) {
       const blocks = [];
-      units.filter((u) => !u.hidden).forEach((u) => {
-        blocks.push({ wide: true, heading: true, el: printCopy($("h2", u)) });
-        $$(".formula-group", u).filter((g) => !g.hidden).forEach((g) => {
-          let h3 = $("h3", g);
-          $$(".admonition.formula", g).filter((f) => !f.hidden).forEach((f) => {
-            const el = box("fx-atom");
-            if (h3) { el.append(printCopy(h3)); h3 = null; }
-            el.append(printCopy(f));
-            blocks.push({ wide: f.classList.contains("fx-wide"), el });
-          });
+      $$(".formula-group", u).filter((g) => !g.hidden).forEach((g) => {
+        let h3 = $("h3", g);
+        $$(".admonition.formula", g).filter((f) => !f.hidden).forEach((f) => {
+          const el = box("fx-atom"), form = printCopy(f);
+          if (h3) { el.append(printCopy(h3)); h3 = null; }
+          el.append(form);
+          blocks.push({ el, form, source: f });
         });
       });
+      const widths = naturalWidths(blocks.map((b) => b.source));
+      blocks.forEach((b) => { b.natural = widths.get(b.source); });
       return blocks;
     }
-    function buildSheets() {
-      measure();
-      const blocks = sheetBlocks(), head = printCopy($(".fx-sheet-head"));
-      // measure every block at its printed width
-      html.classList.add("fx-building");
-      sheets.style.width = PAGE_W + "px";
-      sheets.textContent = "";
-      const probe = box("fx-sheet"), probeCols = box("fx-cols"), probeCol = box("fx-col");
-      probeCols.append(probeCol, box("fx-col"));
-      probe.append(head, probeCols);
-      sheets.append(probe);
-      blocks.forEach((b) => (b.wide ? probe : probeCol).append(b.el));
-      const headH = head.getBoundingClientRect().height;
-      blocks.forEach((b) => { b.h = b.el.getBoundingClientRect().height; });
-      sheets.textContent = "";
-      sheets.style.width = "";
-      html.classList.remove("fx-building");
-
-      let sheet, room;
-      const newSheet = () => { sheet = box("fx-sheet"); sheets.append(sheet); room = PAGE_H; };
-      const add = (el, h) => { sheet.append(el); room -= h + GAP; };
-      const height = (list) => list.reduce((s, b) => s + b.h + GAP, -GAP);
-      const addCols = (left, right) => {
-        const cols = box("fx-cols");
-        [left, right].forEach((list) => { const c = box("fx-col"); c.append(...list.map((b) => b.el)); cols.append(c); });
-        add(cols, Math.max(height(left), height(right)));
+    function sheetHead(u, count) {
+      const head = box("fx-sheet-head"), title = document.createElement("p"), sub = document.createElement("p");
+      const raw = input.value.trim(), site = (($(".brand span") || {}).textContent || "").trim();
+      title.className = "fx-sh-title";
+      title.textContent = u.dataset.title;
+      sub.className = "fx-sh-sub";
+      sub.textContent = ["Formula sheet", site, `${count} formula${count === 1 ? "" : "s"}` + (raw ? ` matching “${raw}”` : ""),
+        new Date().toLocaleDateString()].filter(Boolean).join(" · ");
+      head.append(title, sub);
+      return head;
+    }
+    // Sort blocks onto two-column pages. Needs each block's height (.h) and whether it spans the page (.wide).
+    function packPages(head, blocks, gap) {
+      const pages = [[head]];
+      let room = PAGE_H - head.h - gap;
+      const newPage = () => { pages.push([]); room = PAGE_H; };
+      const page = () => pages[pages.length - 1];
+      const height = (list) => list.reduce((s, b) => s + b.h + gap, -gap);
+      const addCols = (parts) => {
+        page().push({ cols: parts });
+        room -= Math.max(...parts.map(height)) + gap;
       };
-      newSheet();
-      add(head, headH);
       let i = 0;
       while (i < blocks.length) {
         const b = blocks[i];
         if (b.wide) {
-          const need = b.h + (b.heading && blocks[i + 1] ? GAP + blocks[i + 1].h : 0);
-          if (need > room && sheet.firstChild) newSheet();
-          add(b.el, b.h);
+          if (b.h > room && page().length) newPage();
+          page().push(b);
+          room -= b.h + gap;
           i++;
           continue;
         }
         let end = i;
         while (end < blocks.length && !blocks[end].wide) end++;
         const run = blocks.slice(i, end);
-        // the rest of this section fits on the page: balance the two columns
-        let split = 1, best = Infinity;
-        for (let k = 1; k <= run.length; k++) {
-          const h = Math.max(height(run.slice(0, k)), height(run.slice(k)));
-          if (h < best) { best = h; split = k; }
-        }
-        if (best <= room) { addCols(run.slice(0, split), run.slice(split)); i = end; continue; }
-        // otherwise fill both columns to the bottom of the page and carry on overleaf
-        const fit = (from) => {
-          let k = from, h = 0;
-          while (k < run.length && h + run[k].h <= room) { h += run[k].h + GAP; k++; }
-          return k;
+        // fill the columns in order, each up to a height limit; returns how many blocks were placed
+        const spread = (limit) => {
+          const parts = [];
+          let k = 0;
+          for (let c = 0; c < 2; c++) {
+            const from = k;
+            let h = 0;
+            while (k < run.length && h + run[k].h <= limit) { h += run[k].h + gap; k++; }
+            parts.push(run.slice(from, k));
+          }
+          return { parts, placed: k };
         };
-        let left = fit(0);
-        if (!left && sheet.firstChild) { newSheet(); continue; }
-        left = left || 1;   // a box taller than a whole page still has to go somewhere
-        const right = fit(left);
-        addCols(run.slice(0, left), run.slice(left, right));
-        i += right;
-        if (i < blocks.length) newSheet();
+        // the rest of this run fits on the page: use the shortest columns that hold it all
+        let lo = Math.max(...run.map((r) => r.h)), hi = Math.max(lo, height(run));
+        for (let step = 0; step < 14; step++) {
+          const mid = (lo + hi) / 2;
+          if (spread(mid).placed === run.length) hi = mid; else lo = mid;
+        }
+        if (hi <= room) { addCols(spread(hi).parts); i = end; continue; }
+        // otherwise fill the columns to the bottom of the page and carry on overleaf
+        const { parts, placed } = spread(room);
+        if (!placed && page().length) { newPage(); continue; }
+        if (!placed) parts[0] = [run[0]];   // a box taller than a whole page still has to go somewhere
+        addCols(parts);
+        i += placed || 1;
+        if (i < blocks.length) newPage();
       }
+      return pages;
+    }
+    // The largest scale at which this unit fits on MAX_PAGES pages.
+    function fitUnit(u) {
+      const blocks = unitBlocks(u), head = { el: sheetHead(u, blocks.length) };
+      const probe = box("fx-sheet"), cols = box("fx-cols"), col = box("fx-col");
+      probe.append(head.el, cols);
+      sheets.append(probe);
+      cols.append(col, box("fx-col"));
+      const attempt = (s) => {
+        probe.style.setProperty("--fx-s", s);
+        blocks.forEach((b) => {
+          const w = b.natural * s;
+          b.wide = w > COL / MIN_FIT;
+          const fit = Math.min(1, (b.wide ? FULL : COL) / Math.max(w, 1));
+          if (fit < 1) b.form.style.setProperty("--fx-fit", fit.toFixed(3)); else b.form.style.removeProperty("--fx-fit");
+          (b.wide ? probe : col).append(b.el);
+        });
+        head.h = head.el.getBoundingClientRect().height;
+        blocks.forEach((b) => { b.h = b.el.getBoundingClientRect().height; });
+        return packPages(head, blocks, GAP * s * s);
+      };
+      let s = 1;
+      if (attempt(1).length > MAX_PAGES) {
+        let lo = MIN_SCALE, hi = 1;
+        while (hi - lo > SCALE_STEP) {
+          const mid = Math.round((lo + hi) * 50) / 100;
+          if (attempt(mid).length <= MAX_PAGES) lo = mid; else hi = mid;
+        }
+        s = lo;
+      }
+      const pages = attempt(s);   // leaves every block sized for the scale chosen
+      probe.remove();
+      return { s, pages };
+    }
+    function buildSheets() {
+      html.classList.add("fx-building");
+      sheets.style.width = PAGE_W + "px";
+      sheets.textContent = "";
+      const fitted = units.filter((u) => !u.hidden).map(fitUnit);
+      sheets.style.width = "";
+      html.classList.remove("fx-building");
+      fitted.forEach(({ s, pages }, n) => {
+        pages.forEach((items) => {
+          const sheet = box("fx-sheet");
+          sheet.style.setProperty("--fx-s", s);
+          items.forEach((item) => {
+            if (!item.cols) { sheet.append(item.el); return; }
+            const cols = box("fx-cols");
+            item.cols.forEach((list) => { const c = box("fx-col"); c.append(...list.map((b) => b.el)); cols.append(c); });
+            sheet.append(cols);
+          });
+          sheets.append(sheet);
+        });
+        // a one-page unit gets a blank back, so the next unit starts on its own sheet of paper
+        if (pages.length === 1 && n < fitted.length - 1) {
+          const blank = box("fx-sheet");
+          blank.textContent = " ";
+          sheets.append(blank);
+        }
+      });
     }
 
     input.oninput = apply;

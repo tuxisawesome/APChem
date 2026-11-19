@@ -824,13 +824,12 @@ html.wm-open { overflow: hidden; }
 .az-letter { font-weight: 650; color: var(--accent); }
 .formula-group > h3 { margin-top: 1.3em; }
 .prose a.formula-src { display: inline-flex; align-items: center; gap: .25em; font-size: .8125rem; font-weight: 500; }
-/* unit chips + print button; the sheet heading only appears on paper */
+/* unit chips + print button */
 .fx-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 0 0 1.1em; }
 .fx-units { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 340px; min-width: 0; }
 .fx-units .qt-chip { white-space: nowrap; }
 .fx-print { flex: none; margin-left: auto; }
 .fx-print:disabled { opacity: .5; cursor: default; }
-.fx-sheet-head { display: none; }
 .prose .fx-empty { color: var(--fg-3); font-style: italic; }
 /* measuring for the printed sheet: equations can't wrap (natural width); tables can (narrowest width) */
 html.fx-measuring .admonition.formula .katex-display { width: max-content !important; max-width: none !important; }
@@ -913,36 +912,42 @@ a.uh-chip:hover { color: var(--fg); border-color: var(--accent-line); }
 
 /* ── 24. print ──────────────────────────────────────────────────────────── */
 @page { margin: 0.5in; }
-/* Formulas page → the printed formula sheet. wiki.js (buildSheets) packs the formulas showing into
-   .fx-sheet pages of two .fx-col columns, so no box splits across pages in any browser. These styles
+/* Formulas page → the printed formula sheets. wiki.js (buildSheets) packs each unit into at most two
+   .fx-sheet pages of .fx-col columns, so no box splits across pages in any browser. These styles
    aren't inside @media print because wiki.js measures the boxes on screen (hidden) to pack them.
-   .fx-wide formulas span both columns; --fx-fit shrinks a formula to fit. */
-.fx-sheets { display: none; font-size: 9.5pt; line-height: 1.4; color: #000; }
+   --fx-s scales a whole unit: text by --fx-u, and spacing faster by --fx-g, so the text stays as large
+   as it can. --fx-fit shrinks one wide formula. */
+.fx-sheets { display: none; color: #000; }
 html.fx-building .fx-sheets { display: block; position: absolute; top: 0; left: 0; visibility: hidden; }
-.fx-sheet { break-after: page; page-break-after: always; }
+.fx-sheet {
+  --fx-u: calc(var(--fx-s, 1) * 1pt); --fx-g: calc(var(--fx-s, 1) * var(--fx-s, 1) * 1pt);
+  font-size: calc(var(--fx-u) * 9.5); line-height: calc(1.4 - (1 - var(--fx-s, 1)) * .6); break-after: page; page-break-after: always;
+}
 .fx-sheet:last-child { break-after: auto; page-break-after: auto; }
-.fx-sheet > * + *, .fx-col > * + * { margin-top: 8px; }
+.fx-sheet > * + *, .fx-col > * + * { margin-top: calc(var(--fx-g) * 6); }
 .fx-cols { display: flex; align-items: flex-start; gap: 16px; }
 .fx-col { flex: 1 1 0; min-width: 0; }
 .fx-atom { display: flow-root; break-inside: avoid; page-break-inside: avoid; }
-.fx-sheets .fx-sheet-head { display: block; margin: 0; padding: 0 0 5pt; border-bottom: 1.5pt solid #000; }
-.prose .fx-sheets .fx-sh-title { margin: 0; font-size: 16pt; font-weight: 750; line-height: 1.2; }
-.prose .fx-sheets .fx-sh-sub { margin: 2pt 0 0; font-size: 8.5pt; color: #444; }
-.prose .fx-sheets h2 { margin: 0; padding: 6pt 0 2pt; font-size: 13pt; color: #000; border-bottom: .75pt solid #777; }
-.prose .fx-sheets h3 { margin: 0 0 3pt; font-size: 10.5pt; color: #000; }
+.fx-sheets .fx-sheet-head { margin: 0; padding: 0 0 calc(var(--fx-g) * 5); border-bottom: 1.5pt solid #000; }
+.prose .fx-sheets .fx-sh-title { margin: 0; font-size: calc(var(--fx-u) * 16); font-weight: 750; line-height: 1.2; }
+.prose .fx-sheets .fx-sh-sub { margin: calc(var(--fx-g) * 2) 0 0; font-size: calc(var(--fx-u) * 8.5); color: #444; }
+.prose .fx-sheets h3 { margin: 0 0 calc(var(--fx-g) * 3); font-size: calc(var(--fx-u) * 10.5); color: #000; }
 .prose .fx-sheets h3 a { color: #000; }
 .prose .fx-sheets .admonition.formula {
-  margin: 0; padding: 0 8px 2px; font-size: 9.5pt; color: #000; background: none;
+  margin: 0; padding: 0 calc(var(--fx-u) * 6) calc(var(--fx-g) * 1.5); font-size: 1em; color: #000; background: none;
   border: .75pt solid #999; border-radius: 4pt; box-shadow: none; break-inside: avoid; page-break-inside: avoid;
 }
-.prose .fx-sheets .admonition.formula > .admonition-title { margin: 0 -8px; padding: 3pt 8px 1pt; font-size: 9.5pt; color: #000; background: none; }
+.prose .fx-sheets .admonition.formula > .admonition-title {
+  margin: 0 calc(var(--fx-u) * -6); padding: calc(var(--fx-g) * 3) calc(var(--fx-u) * 6) calc(var(--fx-g) * 1); font-size: 1em; color: #000; background: none;
+}
 .prose .fx-sheets .admonition.formula > .admonition-title::before { display: none; }
 .prose .fx-sheets .admonition.formula.memorize { border: 1.25pt solid #000; }
-.prose .fx-sheets .admonition.formula.memorize > .admonition-title::after { color: #000; background: none; border: .75pt solid #000; box-shadow: none; padding: 0 4pt; }
-.prose .fx-sheets .admonition.formula > :last-child, .prose .fx-sheets .admonition.formula p { margin-top: 2pt; margin-bottom: 2pt; }
+.prose .fx-sheets .admonition.formula.memorize > .admonition-title::after { color: #000; background: none; border: .75pt solid #000; box-shadow: none; padding: 0 calc(var(--fx-u) * 4); }
+.prose .fx-sheets .admonition.formula > :last-child, .prose .fx-sheets .admonition.formula p { margin-top: calc(var(--fx-g) * 2); margin-bottom: calc(var(--fx-g) * 2); }
 .prose .fx-sheets .admonition.formula :is(.katex-display, div.arithmatex, .table-wrap) { overflow: visible !important; }
-.prose .fx-sheets .admonition.formula .katex-display { margin: 3pt 0; padding: 0; font-size: calc(var(--fx-fit, 1) * 1em); }
-.prose .fx-sheets .admonition.formula table { margin: 3pt 0; font-size: calc(var(--fx-fit, 1) * 1em); }
+.prose .fx-sheets .admonition.formula .katex-display { margin: calc(var(--fx-g) * 3) 0; padding: 0; font-size: calc(var(--fx-fit, 1) * 1em); }
+.prose .fx-sheets .admonition.formula table { margin: calc(var(--fx-g) * 3) 0; font-size: calc(var(--fx-fit, 1) * 1em); line-height: inherit; }
+.prose .fx-sheets .admonition.formula :is(th, td) { padding: calc(var(--fx-g) * 4) calc(var(--fx-u) * 7); }
 @media print {
   .topbar, .site-nav, .toc, .toc-mobile, .site-footer, .article-foot, .nav-scrim, .headerlink, .tabbar, .toast { display: none !important; }
   body { background: #fff; color: #000; }
@@ -952,7 +957,9 @@ html.fx-building .fx-sheets { display: block; position: absolute; top: 0; left: 
   .prose .admonition, .prose details, .prose figure.diagram { break-inside: avoid; }
   .prose a { color: inherit; text-decoration: none; }
 
-  /* Formulas page: only the packed sheets print (styles above) */
+  /* Formulas page: only the packed sheets print (styles above). Firefox ignores page breaks inside a flex body. */
+  html.fx-page body { display: block; }
+  html.fx-page .article { container-type: normal; }
   html.fx-page .crumbs, html.fx-page .article-head, html.fx-page .af-block, html.fx-page .prevnext, html.fx-page .af-updated,
   html.fx-page .prose > :not(.fx-sheets) { display: none !important; }
   .fx-sheets { display: block; }
